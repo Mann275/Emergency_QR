@@ -1,199 +1,71 @@
-import { useParams, useLocation, Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useLocation, Link } from 'react-router-dom';
+import { Download, Smartphone, ArrowRight, ExternalLink, QrCode } from 'lucide-react';
 
 const Success = () => {
-  const { id } = useParams();
   const location = useLocation();
   const { qrCode, profileUrl } = location.state || {};
-  const [downloadComplete, setDownloadComplete] = useState(false);
 
-  const handleDownload = () => {
-    if (!qrCode) return;
-
-    // Create download link for QR code
-    const link = document.createElement('a');
-    link.href = qrCode;
-    link.download = `emergency-qr-${id}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setDownloadComplete(true);
-  };
-
-  const handleShare = async () => {
-    if (navigator.share && profileUrl) {
-      try {
-        await navigator.share({
-          title: 'Emergency QR Profile',
-          text: 'My Emergency QR Profile - Scan for emergency contact and medical information',
-          url: profileUrl
-        });
-      } catch (error) {
-        console.log('Error sharing:', error);
-      }
-    } else {
-      // Fallback - copy to clipboard
-      if (profileUrl) {
-        navigator.clipboard.writeText(profileUrl);
-        alert('Profile URL copied to clipboard!');
-      }
-    }
-  };
-
-  if (!qrCode || !profileUrl) {
-    return (
-      <div className="min-h-screen py-12 bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Profile Not Found
-          </h1>
-          <p className="text-gray-600 mb-6">
-            Unable to load your emergency profile information.
-          </p>
-          <Link to="/create" className="btn-primary">
-            Create New Profile
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  if (!qrCode) return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
+      <Link to="/" className="inline-flex items-center gap-2 px-8 py-3 text-xs font-semibold rounded-full transition-base" style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}>
+        Return Home
+      </Link>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen py-12 bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Success Header */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-3xl">✅</span>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Emergency Profile Created Successfully!
-          </h1>
-          <p className="text-gray-600">
-            Your QR code is ready. Follow the steps below to set it up.
-          </p>
-        </div>
+    <div>
+      <section className="pt-32 pb-20 md:pt-36 md:pb-28">
+        <div className="main-wrap max-w-4xl">
+          <div className="grid md:grid-cols-2 gap-24 items-center">
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* QR Code Display */}
-          <div className="emergency-card text-center">
-            <h2 className="text-xl font-semibold mb-4">Your Emergency QR Code</h2>
-            
-            {qrCode && (
-              <div className="mb-6">
-                <img 
-                  src={qrCode} 
-                  alt="Emergency QR Code" 
-                  className="mx-auto border-2 border-gray-200 rounded-lg"
-                  style={{ width: '250px', height: '250px' }}
-                />
+            <div className="animate-slide">
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-6" style={{ fontFamily: 'var(--font-heading)' }}>Profile Active.</h1>
+              <p className="text-sm leading-relaxed mb-12 opacity-60">
+                Your emergency pass is live. This QR code leads directly to your medical data.
+              </p>
+
+              <div className="space-y-8">
+                <div className="flex gap-4 items-start">
+                  <Download size={16} className="flex-shrink-0 mt-0.5 opacity-50" />
+                  <p className="text-sm leading-relaxed">
+                    <span className="font-semibold block mb-1">Save the card</span>
+                    Long press or right-click the QR code image to download it to your device.
+                  </p>
+                </div>
+                <div className="flex gap-4 items-start">
+                  <Smartphone size={16} className="flex-shrink-0 mt-0.5 opacity-50" />
+                  <p className="text-sm leading-relaxed">
+                    <span className="font-semibold block mb-1">Lock screen</span>
+                    Set this as your lock screen wallpaper for instant reachability by responders.
+                  </p>
+                </div>
               </div>
-            )}
-            
-            <div className="space-y-3">
-              <button
-                onClick={handleDownload}
-                className="btn-primary w-full"
-              >
-                📥 Download QR Code
-              </button>
-              
-              <button
-                onClick={handleShare}
-                className="btn-secondary w-full"
-              >
-                📤 Share Profile URL
-              </button>
+
+              <div className="mt-12 flex flex-wrap gap-4">
+                <Link to="/" className="inline-flex items-center gap-2 px-8 py-3 text-xs font-semibold rounded-full transition-base" style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}>
+                  Finish <ArrowRight size={14} />
+                </Link>
+                <a href={profileUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-8 py-3 text-xs font-semibold rounded-full border transition-base" style={{ borderColor: 'var(--line)', color: 'var(--ink)' }}>
+                  View Profile <ExternalLink size={14} />
+                </a>
+              </div>
             </div>
-            
-            {downloadComplete && (
-              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
-                ✓ QR code downloaded successfully!
-              </div>
-            )}
-          </div>
 
-          {/* Instructions */}
-          <div className="emergency-card">
-            <h2 className="text-xl font-semibold mb-4">Setup Instructions</h2>
-            
-            <div className="space-y-6">
-              <div className="flex items-start space-x-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-emergency-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                  1
-                </span>
-                <div>
-                  <h3 className="font-medium text-gray-900">Print the QR Code</h3>
-                  <p className="text-sm text-gray-600">
-                    Print it as a small sticker (1-2 inches) for best results.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-emergency-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                  2
-                </span>
-                <div>
-                  <h3 className="font-medium text-gray-900">Place on Your Phone</h3>
-                  <p className="text-sm text-gray-600">
-                    Stick it on the back of your phone case or inside your phone case.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-emergency-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                  3
-                </span>
-                <div>
-                  <h3 className="font-medium text-gray-900">Test the QR Code</h3>
-                  <p className="text-sm text-gray-600">
-                    Scan it with any QR code reader to make sure it works.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-emergency-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                  4
-                </span>
-                <div>
-                  <h3 className="font-medium text-gray-900">Keep Information Updated</h3>
-                  <p className="text-sm text-gray-600">
-                    Remember to update your profile if your medical information changes.
-                  </p>
+            <div className="animate-slide flex justify-center" style={{ animationDelay: '0.1s' }}>
+              <div className="bg-white p-12 rounded-[3rem] shadow-2xl transition-base hover:scale-[1.02]">
+                <img src={qrCode} alt="Emergency QR" className="w-64 h-64 md:w-80 md:h-80" />
+                <div className="mt-8 text-center text-black flex flex-col items-center">
+                  <QrCode size={16} className="mb-2 opacity-40" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.5em] mb-1">Emergency QR</p>
+                  <p className="text-[8px] font-medium opacity-40 uppercase tracking-widest">Digital Identification Pass</p>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
-
-        {/* Profile Preview */}
-        <div className="mt-8 text-center">
-          <h3 className="text-lg font-semibold mb-4">Preview Your Emergency Profile</h3>
-          <Link 
-            to={`/emergency/${id}`}
-            className="btn-secondary"
-            target="_blank"
-          >
-            👁️ View Emergency Profile
-          </Link>
-        </div>
-
-        {/* Important Notes */}
-        <div className="mt-12 emergency-highlight">
-          <h3 className="font-semibold text-emergency-700 mb-3">
-            🚨 Important Notes
-          </h3>
-          <ul className="text-sm text-emergency-600 space-y-1">
-            <li>• This QR code provides access to your emergency information without login</li>
-            <li>• Only share with trusted contacts or for emergency use</li>
-            <li>• Keep your contact information up to date</li>
-            <li>• Consider having multiple copies (wallet, car, etc.)</li>
-          </ul>
-        </div>
-      </div>
+      </section>
     </div>
   );
 };

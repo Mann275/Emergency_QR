@@ -1,43 +1,250 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --font-body: 'Inter', sans-serif;
+  --font-heading: 'Outfit', sans-serif;
+
+  /* Dark Theme Tokens (Default) */
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --surface-raised: #111111;
+  --line: #222222;
+  --ink: #ffffff;
+  --muted: #888888;
+  --subtle: #444444;
+
+  --accent: #ffffff;
+  --accent-ink: #000000;
+
+  --danger: #ff3b30;
+  --glass-bg: rgba(0, 0, 0, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  color-scheme: dark;
+}
+
+/* Light Theme Tokens */
+.light-theme {
+  --bg: #ffffff;
+  --surface: #f7f7f7;
+  --surface-raised: #efefef;
+  --line: #e0e0e0;
+  --ink: #000000;
+  --muted: #666666;
+  --subtle: #999999;
+
+  --accent: #000000;
+  --accent-ink: #ffffff;
+
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(0, 0, 0, 0.15);
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  font-size: 17px;
+  color: var(--ink);
+  background: var(--bg);
+  letter-spacing: -0.01em;
+  transition: background 0.5s ease, color 0.5s ease;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.transition-base {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @layer components {
-  .btn-primary {
-    @apply bg-emergency-600 hover:bg-emergency-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  .app-shell {
+    @apply min-h-screen flex flex-col;
   }
-  
-  .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+
+  .main-wrap {
+    @apply mx-auto w-full max-w-5xl px-6 lg:px-8;
   }
-  
+
+  /* Glassmorphic Navbar */
+  .glass-nav {
+    @apply fixed top-6 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-5xl z-50 rounded-full px-8 py-4 border transition-base;
+    background: var(--glass-bg);
+    border-color: var(--glass-border);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+  }
+
+  /* Typography */
+  .h-xl {
+    @apply text-5xl md:text-7xl font-bold tracking-tight;
+    font-family: var(--font-heading);
+    line-height: 0.9;
+  }
+
+  .h-lg {
+    @apply text-3xl md:text-5xl font-semibold tracking-tight;
+    font-family: var(--font-heading);
+    line-height: 1.1;
+  }
+
+  .h-md {
+    @apply text-xl md:text-2xl font-medium;
+    font-family: var(--font-heading);
+  }
+
+  .body-copy {
+    @apply text-lg leading-relaxed;
+    color: var(--muted);
+  }
+
+  /* Buttons */
+  .stark-btn {
+    @apply inline-flex items-center justify-center rounded-none px-8 py-4 text-sm font-bold uppercase tracking-widest transition-base;
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .stark-btn:hover {
+    @apply opacity-90;
+    transform: translateY(-1px);
+  }
+
+  .ghost-btn {
+    @apply inline-flex items-center justify-center rounded-none px-8 py-4 text-sm font-bold uppercase tracking-widest border transition-base;
+    border-color: var(--ink);
+    background: transparent;
+    color: var(--ink);
+  }
+
+  .ghost-btn:hover {
+    @apply bg-white/5;
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  /* Cards */
+  .glass-card {
+    @apply p-8 md:p-12;
+    background: var(--surface);
+  }
+
+  .emergency-row {
+    @apply py-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b;
+    border-color: var(--line);
+  }
+
+  /* Forms */
+  .minimal-input {
+    @apply w-full bg-transparent border-b py-4 text-lg focus:outline-none transition-base rounded-none;
+    border-color: var(--line);
+    color: var(--ink);
+  }
+
+  .minimal-input:focus {
+    border-color: var(--ink);
+  }
+
+  .minimal-input::placeholder {
+    color: var(--subtle);
+  }
+
+  .minimal-label {
+    @apply block text-xs uppercase tracking-widest font-bold mb-1;
+    color: var(--muted);
+  }
+
+  /* Mapping for compat */
+  .primary-btn {
+    @apply stark-btn;
+  }
+
+  .secondary-btn {
+    @apply ghost-btn;
+  }
+
+  .danger-btn {
+    @apply inline-flex items-center justify-center px-6 py-3 text-sm font-bold uppercase tracking-widest text-white transition-base;
+    background: var(--danger);
+  }
+
+  .surface-panel {
+    @apply glass-card;
+  }
+
   .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emergency-500 focus:border-emergency-500 transition-colors duration-200;
+    @apply minimal-input;
   }
-  
-  .emergency-card {
-    @apply bg-white rounded-lg shadow-lg border border-gray-200 p-6;
-  }
-  
+
   .emergency-header {
-    @apply text-2xl font-bold text-gray-900 mb-4;
+    @apply h-lg;
   }
-  
-  .emergency-label {
-    @apply block text-sm font-medium text-gray-700 mb-2;
+
+  .card-title {
+    @apply h-md mb-4;
   }
-  
-  .emergency-highlight {
-    @apply bg-emergency-50 border-l-4 border-emergency-500 p-4 rounded-r-lg;
+
+  .section-space {
+    @apply py-20 md:py-32;
   }
-  
-  .blood-group-highlight {
-    @apply text-emergency-700 font-bold text-xl;
+
+  /* Grid */
+  .profile-grid {
+    @apply grid grid-cols-1 md:grid-cols-12 gap-px border;
+    background-color: var(--line);
+    border-color: var(--line);
   }
+
+  .profile-cell {
+    @apply bg-black p-8 md:col-span-6;
+    background: var(--bg);
+  }
+
+  .profile-cell-full {
+    @apply bg-black p-8 md:col-span-12;
+    background: var(--bg);
+  }
+
+  .blood-group-hero {
+    @apply text-8xl md:text-9xl font-black;
+    font-family: var(--font-heading);
+    line-height: 1;
+  }
+
+  /* Utility Fallbacks */
+  .text-muted {
+    color: var(--muted);
+  }
+
+  .text-ink {
+    color: var(--ink);
+  }
+}
+
+/* Animations */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide {
+  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

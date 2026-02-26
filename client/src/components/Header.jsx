@@ -1,40 +1,44 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Sun, Moon, PlusCircle } from 'lucide-react';
 
 const Header = () => {
-  return (
-    <header className="bg-white shadow-sm border-b">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-emergency-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">⚕</span>
-            </div>
-            <span className="text-xl font-bold text-gray-900">Emergency QR</span>
-          </Link>
-          
-          <nav className="hidden md:flex space-x-8">
-            <Link 
-              to="/" 
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
-            >
-              Home
-            </Link>
-            <Link 
-              to="/create" 
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
-            >
-              Create Profile
-            </Link>
-          </nav>
+  const [isLight, setIsLight] = useState(() => {
+    return localStorage.getItem('theme') === 'light';
+  });
 
-          <Link 
-            to="/create"
-            className="btn-primary"
-          >
-            Get Started
+  useEffect(() => {
+    if (isLight) {
+      document.body.classList.add('light-theme');
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.body.classList.remove('light-theme');
+      localStorage.setItem('theme', 'dark');
+    }
+  }, [isLight]);
+
+  return (
+    <header className="glass-nav">
+      <nav className="flex items-center justify-between">
+        <Link to="/" className="text-base font-semibold tracking-tight transition-base hover:opacity-50">
+          Emergency QR
+        </Link>
+
+        <div className="flex items-center gap-6">
+          <Link to="/create" className="flex items-center gap-2 text-sm font-medium tracking-tight hover:opacity-50 transition-base">
+            <PlusCircle size={18} />
+            Create Profile
           </Link>
+
+          <button
+            onClick={() => setIsLight(!isLight)}
+            className="hover:opacity-50 transition-base p-1"
+            aria-label="Toggle theme"
+          >
+            {isLight ? <Moon size={18} /> : <Sun size={18} />}
+          </button>
         </div>
-      </div>
+      </nav>
     </header>
   );
 };

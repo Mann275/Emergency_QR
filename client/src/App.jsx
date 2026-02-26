@@ -8,8 +8,8 @@ import Success from './pages/Success';
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <div className="app-shell">
         <Header />
         <main className="flex-1">
           <Routes>

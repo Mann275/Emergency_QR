@@ -15,12 +15,12 @@ class ApiService {
 
       if (!response.ok) {
         let errorMessage = data.error || 'Failed to create emergency profile';
-        
+
         // Include detailed validation errors if available
         if (data.details && Array.isArray(data.details)) {
           errorMessage += ': ' + data.details.join(', ');
         }
-        
+
         console.error('API Error Details:', data);
         throw new Error(errorMessage);
       }

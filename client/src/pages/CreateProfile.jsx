@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ApiService from '../utils/api';
+import { User, Droplets, Calendar, Phone, UserCheck, Pill, AlertTriangle, FileText, Loader2, ClipboardList, ShieldAlert } from 'lucide-react';
+
+const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+const genderOptions = ['Male', 'Female', 'Other', 'Prefer not to say'];
 
 const CreateProfile = () => {
   const navigate = useNavigate();
@@ -8,356 +12,217 @@ const CreateProfile = () => {
   const [error, setError] = useState('');
 
   const [formData, setFormData] = useState({
-    // Personal Information
     name: '',
     dateOfBirth: '',
     bloodGroup: '',
     gender: '',
-    
-    // Contact Information
     phone: '',
     alternatePhone: '',
-    emergencyContact: {
-      name: '',
-      phone: ''
-    },
-    
-    // Medical Information
+    emergencyContact: { name: '', phone: '' },
     disease: false,
     diseaseDetails: '',
     allergies: '',
     medications: '',
-    
-    // Other Information
     address: '',
-    notes: ''
+    notes: '',
   });
-
-  const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
-  const genderOptions = ['Male', 'Female', 'Other', 'Prefer not to say'];
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
     if (name.startsWith('emergencyContact.')) {
       const field = name.split('.')[1];
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        emergencyContact: {
-          ...prev.emergencyContact,
-          [field]: value
-        }
+        emergencyContact: { ...prev.emergencyContact, [field]: value },
       }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value
-      }));
+      return;
     }
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
-      // Validate required fields
-      if (!formData.name || !formData.bloodGroup || !formData.phone || 
-          !formData.emergencyContact.name || !formData.emergencyContact.phone) {
-        throw new Error('Please fill in all required fields');
+      if (!formData.name || !formData.bloodGroup || !formData.phone || !formData.emergencyContact.name || !formData.emergencyContact.phone) {
+        throw new Error('Please fill in all required fields.');
       }
-
-      // Log the data being sent for debugging
-      console.log('Form data being sent:', formData);
-
       const response = await ApiService.createUser(formData);
-      
       if (response.success) {
         navigate(`/success/${response.data.uniqueId}`, {
-          state: { qrCode: response.data.qrCode, profileUrl: response.data.profileUrl }
+          state: { qrCode: response.data.qrCode, profileUrl: response.data.profileUrl },
         });
       }
     } catch (err) {
-      console.error('Form submission error:', err);
-      setError(err.message || 'Failed to create emergency profile');
+      setError(err.message || 'Something went wrong.');
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="min-h-screen py-12 bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8">
-          <h1 className="emergency-header">Create Your Emergency Profile</h1>
-          <p className="text-gray-600">
-            Fill in your details to create a QR code for emergency situations
-          </p>
-        </div>
+  const inputStyle = {
+    border: '1.5px solid var(--line)',
+    color: 'var(--ink)',
+    borderRadius: '4px',
+    padding: '16px 18px',
+    fontSize: '16px',
+    fontWeight: '600',
+    background: 'rgba(255, 255, 255, 0.02)',
+    width: '100%',
+    outline: 'none',
+    transition: 'all 0.2s ease',
+  };
 
-        <div className="emergency-card">
-          <form onSubmit={handleSubmit} className="space-y-8">
+  const labelStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontSize: '12px',
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: '0.1em',
+    marginBottom: '10px',
+    color: 'var(--ink)',
+    opacity: 0.6
+  };
+
+  return (
+    <div className="min-h-screen">
+      <section className="pt-32 pb-20 md:pt-36 md:pb-28">
+        <div className="main-wrap max-w-2xl">
+
+          <div className="animate-slide mb-14 border-b pb-8" style={{ borderColor: 'var(--line)' }}>
+            <div className="flex items-center gap-4 mb-4">
+              <ClipboardList size={20} className="opacity-30" />
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] opacity-30">Registry Module / New Entry</span>
+            </div>
+            <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase" style={{ color: 'var(--ink)' }}>
+              Medical Enrollment
+            </h1>
+          </div>
+
+          <form onSubmit={handleSubmit} className="animate-slide" style={{ animationDelay: '0.08s' }}>
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
-                {error}
+              <div className="mb-8 p-6 rounded-sm border-l-4 font-bold flex items-center gap-4" style={{ background: 'rgba(255, 59, 48, 0.1)', borderColor: 'var(--danger)', color: 'var(--danger)', fontSize: '14px' }}>
+                <ShieldAlert size={20} /> {error}
               </div>
             )}
 
-            {/* Personal Information */}
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                👤 Personal Information
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="emergency-label">
-                    Full Name *
+            {/* Personal Data Block */}
+            <div className="mb-16">
+              <div className="flex items-center gap-3 mb-8 opacity-20">
+                <span className="h-px bg-current flex-grow"></span>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Block 01 / Identity</span>
+                <span className="h-px bg-current flex-grow"></span>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="md:col-span-2">
+                  <label style={labelStyle}>
+                    Subject Full identity <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="input-field"
-                    required
-                    placeholder="Enter your full name"
-                  />
+                  <input type="text" name="name" value={formData.name} onChange={handleChange} style={inputStyle} placeholder="LEGAL NAME AS PER ID" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
                 </div>
-                
                 <div>
-                  <label className="emergency-label">
-                    Blood Group *
+                  <label style={labelStyle}>
+                    Blood group <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    name="bloodGroup"
-                    value={formData.bloodGroup}
-                    onChange={handleChange}
-                    className="input-field"
-                    required
-                  >
-                    <option value="">Select blood group</option>
-                    {bloodGroups.map(group => (
-                      <option key={group} value={group}>{group}</option>
-                    ))}
+                  <select name="bloodGroup" value={formData.bloodGroup} onChange={handleChange} style={{ ...inputStyle, background: 'rgba(255,255,255,0.03)' }} required>
+                    <option value="" style={{ background: 'var(--bg)', color: 'var(--ink)' }}>SELECT TYPE</option>
+                    {bloodGroups.map(g => <option key={g} value={g} style={{ background: 'var(--bg)', color: 'var(--ink)' }}>{g}</option>)}
                   </select>
                 </div>
-                
                 <div>
-                  <label className="emergency-label">
-                    Date of Birth
+                  <label style={labelStyle}>
+                    Biological gender
                   </label>
-                  <input
-                    type="date"
-                    name="dateOfBirth"
-                    value={formData.dateOfBirth}
-                    onChange={handleChange}
-                    className="input-field"
-                  />
-                </div>
-                
-                <div>
-                  <label className="emergency-label">
-                    Gender
-                  </label>
-                  <select
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleChange}
-                    className="input-field"
-                  >
-                    <option value="">Select gender</option>
-                    {genderOptions.map(option => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
+                  <select name="gender" value={formData.gender} onChange={handleChange} style={{ ...inputStyle, background: 'rgba(255,255,255,0.03)' }}>
+                    <option value="" style={{ background: 'var(--bg)', color: 'var(--ink)' }}>NOT SPECIFIED</option>
+                    {genderOptions.map(o => <option key={o} value={o} style={{ background: 'var(--bg)', color: 'var(--ink)' }}>{o.toUpperCase()}</option>)}
                   </select>
                 </div>
               </div>
             </div>
 
-            {/* Contact Information */}
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                📞 Contact Information
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Communication Block */}
+            <div className="mb-16">
+              <div className="flex items-center gap-3 mb-8 opacity-20">
+                <span className="h-px bg-current flex-grow"></span>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Block 02 / Protocols</span>
+                <span className="h-px bg-current flex-grow"></span>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8">
                 <div>
-                  <label className="emergency-label">
-                    Primary Phone Number *
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="input-field"
-                    required
-                    placeholder="+1 (555) 123-4567"
-                  />
+                  <label style={labelStyle}>Primary Contact</label>
+                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} style={inputStyle} placeholder="+X XXX XXX XXXX" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
                 </div>
-                
                 <div>
-                  <label className="emergency-label">
-                    Alternate Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    name="alternatePhone"
-                    value={formData.alternatePhone}
-                    onChange={handleChange}
-                    className="input-field"
-                    placeholder="+1 (555) 987-6543"
-                  />
+                  <label style={labelStyle}>Alternate Contact</label>
+                  <input type="tel" name="alternatePhone" value={formData.alternatePhone} onChange={handleChange} style={inputStyle} placeholder="OPTIONAL" onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
                 </div>
-                
                 <div>
-                  <label className="emergency-label">
-                    Emergency Contact Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="emergencyContact.name"
-                    value={formData.emergencyContact.name}
-                    onChange={handleChange}
-                    className="input-field"
-                    required
-                    placeholder="Contact person name"
-                  />
+                  <label style={labelStyle}>Emergency kin name <span className="text-red-500">*</span></label>
+                  <input type="text" name="emergencyContact.name" value={formData.emergencyContact.name} onChange={handleChange} style={inputStyle} placeholder="PRIMARY RESPONDER NAME" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
                 </div>
-                
                 <div>
-                  <label className="emergency-label">
-                    Emergency Contact Phone *
-                  </label>
-                  <input
-                    type="tel"
-                    name="emergencyContact.phone"
-                    value={formData.emergencyContact.phone}
-                    onChange={handleChange}
-                    className="input-field"
-                    required
-                    placeholder="+1 (555) 111-2222"
-                  />
+                  <label style={labelStyle}>Emergency kin phone <span className="text-red-500">*</span></label>
+                  <input type="tel" name="emergencyContact.phone" value={formData.emergencyContact.phone} onChange={handleChange} style={inputStyle} placeholder="+X XXX XXX XXXX" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
                 </div>
               </div>
             </div>
 
-            {/* Medical Information */}
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                🏥 Medical Information
-              </h2>
-              
-              <div className="space-y-4">
+            {/* Clinical Data Block */}
+            <div className="mb-16">
+              <div className="flex items-center gap-3 mb-8 opacity-20">
+                <span className="h-px bg-current flex-grow"></span>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Block 03 / Clinical Data</span>
+                <span className="h-px bg-current flex-grow"></span>
+              </div>
+
+              <div className="space-y-8">
                 <div>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      name="disease"
-                      checked={formData.disease}
-                      onChange={handleChange}
-                      className="rounded border-gray-300 text-emergency-600 focus:ring-emergency-500"
-                    />
-                    <span className="emergency-label mb-0">I have existing medical conditions</span>
-                  </label>
+                  <label style={labelStyle}>Chronic diagnoses</label>
+                  <textarea name="diseaseDetails" value={formData.diseaseDetails} onChange={handleChange} style={{ ...inputStyle, minHeight: '100px' }} placeholder="SPECIFY KNOWN CONDITIONS" onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
                 </div>
-                
-                {formData.disease && (
+                <div className="grid md:grid-cols-2 gap-8">
                   <div>
-                    <label className="emergency-label">
-                      Disease/Condition Details
-                    </label>
-                    <textarea
-                      name="diseaseDetails"
-                      value={formData.diseaseDetails}
-                      onChange={handleChange}
-                      className="input-field"
-                      rows="3"
-                      placeholder="Describe your medical conditions..."
-                    />
+                    <label style={labelStyle}>Documented allergies</label>
+                    <input type="text" name="allergies" value={formData.allergies} onChange={handleChange} style={inputStyle} placeholder="e.g. PEANUTS, PENICILLIN" onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
                   </div>
-                )}
-                
-                <div>
-                  <label className="emergency-label">
-                    Allergies
-                  </label>
-                  <input
-                    type="text"
-                    name="allergies"
-                    value={formData.allergies}
-                    onChange={handleChange}
-                    className="input-field"
-                    placeholder="Food, drug, or other allergies..."
-                  />
+                  <div>
+                    <label style={labelStyle}>Active pharmacotherapy</label>
+                    <input type="text" name="medications" value={formData.medications} onChange={handleChange} style={inputStyle} placeholder="CURRENT MEDICATIONS" onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                  </div>
                 </div>
-                
                 <div>
-                  <label className="emergency-label">
-                    Current Medications
-                  </label>
-                  <input
-                    type="text"
-                    name="medications"
-                    value={formData.medications}
-                    onChange={handleChange}
-                    className="input-field"
-                    placeholder="List current medications..."
-                  />
+                  <label style={labelStyle}>Protocol Instructions</label>
+                  <textarea name="notes" value={formData.notes} onChange={handleChange} style={{ ...inputStyle, minHeight: '80px' }} placeholder="CRITICAL NOTES FOR RESPONDERS" onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
                 </div>
               </div>
             </div>
 
-            {/* Other Information */}
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                📍 Additional Information
-              </h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="emergency-label">
-                    Address
-                  </label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    className="input-field"
-                    placeholder="Your address (optional)"
-                  />
-                </div>
-                
-                <div>
-                  <label className="emergency-label">
-                    Notes for Emergency Responders
-                  </label>
-                  <textarea
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleChange}
-                    className="input-field"
-                    rows="3"
-                    placeholder="Any additional information for emergency responders..."
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <div className="text-center">
+            {/* Submission Block */}
+            <div className="pt-12 border-t flex flex-col sm:flex-row items-center justify-between gap-8" style={{ borderColor: 'var(--line)' }}>
+              <p className="text-[10px] font-bold uppercase tracking-widest opacity-20 max-w-xs text-center sm:text-left leading-relaxed">
+                By generating this QR, you authorize the public display of this sensitive medical data for emergency retrieval.
+              </p>
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-primary text-lg px-8 py-3 disabled:opacity-50"
+                className="w-full sm:w-auto px-12 py-5 text-sm font-black uppercase tracking-[0.2em] rounded transition-base flex items-center justify-center gap-3 active:scale-95"
+                style={{ background: 'var(--accent)', color: 'var(--accent-ink)', border: 'none', cursor: 'pointer' }}
               >
-                {loading ? 'Creating Profile...' : 'Create Emergency Profile'}
+                {loading ? <><Loader2 size={16} className="animate-spin" /> Verifying...</> : 'Initialize Registry'}
               </button>
             </div>
           </form>
         </div>
-      </div>
+      </section>
     </div>
   );
 };
