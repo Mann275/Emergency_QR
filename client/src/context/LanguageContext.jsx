@@ -74,7 +74,7 @@ const translations = {
     hi: {
         // Header
         createProfile: 'प्रोफ़ाइल बनाएं',
-        home: 'मुख्य पृष्ठ',
+        home: 'होम',
         // Home
         heroTitle: 'महत्वपूर्ण विवरण। इससे पहले कि आप उन्हें समझा सकें।',
         heroCta: 'अपनी प्रोफ़ाइल बनाएं',
@@ -144,7 +144,7 @@ const translations = {
     gu: {
         // Header
         createProfile: 'પ્રોફાઇલ બનાવો',
-        home: 'મુખ્ય પૃષ્ઠ',
+        home: 'હોમ',
         // Home
         heroTitle: 'નિર્ણાયક વિગતો. તમે તેને સમજાવી શકો તે પહેલાં.',
         heroCta: 'તમારી પ્રોફાઇલ બનાવો',

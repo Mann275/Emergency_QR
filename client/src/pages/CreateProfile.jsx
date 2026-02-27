@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ApiService from '../utils/api';
-import { User, Droplets, Calendar, Phone, UserCheck, Pill, AlertTriangle, FileText, Loader2, ArrowRight } from 'lucide-react';
+import { User, Droplets, Calendar, Phone, UserCheck, Pill, AlertTriangle, FileText, Loader2, ArrowRight, ChevronDown } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { IN, US, GB, AU } from 'country-flag-icons/react/3x2';
 
@@ -49,9 +49,7 @@ const CreateProfile = () => {
   };
 
   const handlePhoneChange = (e, fieldPath) => {
-    // Only allow numbers, up to 10 digits
     const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 10);
-
     if (fieldPath === 'phone') {
       setFormData(prev => ({ ...prev, phone: digitsOnly }));
     } else {
@@ -115,6 +113,7 @@ const CreateProfile = () => {
     width: '100%',
     outline: 'none',
     transition: 'all 0.3s ease',
+    resize: 'none',
   };
 
   const labelStyle = {
@@ -141,11 +140,83 @@ const CreateProfile = () => {
     gap: '12px'
   };
 
+  const CustomPhoneSelector = ({ value, onChange }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
+    const options = [
+      { code: '+91', icon: <IN title="India" /> },
+      { code: '+1', icon: <US title="USA" /> },
+      { code: '+44', icon: <GB title="UK" /> },
+      { code: '+61', icon: <AU title="Australia" /> },
+    ];
+
+    useEffect(() => {
+      const handleClickOutside = (event) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+          setIsOpen(false);
+        }
+      };
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const selected = options.find(o => o.code === value) || options[0];
+
+    return (
+      <div className="relative min-w-[120px]" ref={dropdownRef}>
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center gap-2 w-full transition-all duration-300 active:scale-95"
+          style={{
+            ...inputStyle,
+            padding: '16px 14px',
+            background: 'var(--surface)',
+            borderColor: 'var(--line)'
+          }}
+        >
+          <div className="w-5 h-[13px] flex items-center justify-center border border-black/10 dark:border-white/10 overflow-hidden">
+            {selected.icon}
+          </div>
+          <span className="font-bold text-sm tracking-tight">{selected.code}</span>
+          <ChevronDown size={14} className={`ml-auto opacity-40 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {isOpen && (
+          <div className="absolute top-full left-0 mt-2 w-full py-2 rounded-2xl border shadow-2xl z-[150] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+            style={{
+              background: 'var(--surfaceRaised)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              borderColor: 'var(--line)'
+            }}>
+            {options.map((opt) => (
+              <button
+                key={opt.code}
+                type="button"
+                onClick={() => {
+                  onChange(opt.code);
+                  setIsOpen(false);
+                }}
+                className="flex items-center gap-3 w-full px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                style={{ color: 'var(--ink)' }}
+              >
+                <div className="w-5 h-[13px] flex items-center justify-center border border-black/10 dark:border-white/10 overflow-hidden">
+                  {opt.icon}
+                </div>
+                <span className="font-bold text-sm">{opt.code}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pb-32">
       <section className="pt-32 pb-20 md:pt-40 md:pb-28">
         <div className="main-wrap max-w-2xl">
-
           <div className="animate-slide mb-16">
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-heading)', color: 'var(--ink)' }}>
               {t.createTitle}
@@ -162,136 +233,105 @@ const CreateProfile = () => {
               </div>
             )}
 
-            {/* Personal Data */}
             <div className="mb-20">
               <div style={sectionHeadingStyle}>
                 {t.personalInfo} <span className="h-px bg-current flex-grow"></span>
               </div>
-
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="md:col-span-2">
-                  <label style={labelStyle}>
-                    <User size={16} /> {t.fullName} <span className="opacity-40 ml-1">*</span>
-                  </label>
-                  <input type="text" name="name" value={formData.name} onChange={handleChange} style={inputStyle} placeholder="E.g. John Doe" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                  <label style={labelStyle}><User size={16} /> {t.fullName} <span className="opacity-40 ml-1">*</span></label>
+                  <input type="text" name="name" value={formData.name} onChange={handleChange} style={inputStyle} placeholder="E.g. John Doe" required />
                 </div>
+
                 <div>
-                  <label style={labelStyle}>
-                    <Droplets size={16} /> {t.bloodGroup} <span className="opacity-40 ml-1">*</span>
-                  </label>
-                  <select name="bloodGroup" value={formData.bloodGroup} onChange={handleChange} style={{ ...inputStyle, appearance: 'none' }} required>
-                    <option value="" style={{ background: 'var(--bg)', color: 'var(--ink)' }}>Select group</option>
-                    {bloodGroups.map(g => <option key={g} value={g} style={{ background: 'var(--bg)', color: 'var(--ink)' }}>{g}</option>)}
-                  </select>
-                </div>
-                <div className="grid md:grid-cols-2 gap-8 mt-8">
-                  <div>
-                    <label style={labelStyle}>
-                      <User size={16} /> {t.gender} <span className="opacity-40 ml-1">*</span>
-                    </label>
-                    <select name="gender" value={formData.gender} onChange={handleChange} style={{ ...inputStyle, appearance: 'none' }} required>
-                      <option value="" style={{ background: 'var(--bg)', color: 'var(--ink)' }}>Select gender</option>
-                      {genderOptions.map(g => <option key={g} value={g} style={{ background: 'var(--bg)', color: 'var(--ink)' }}>{g}</option>)}
+                  <label style={labelStyle}><Droplets size={16} /> {t.bloodGroup} <span className="opacity-40 ml-1">*</span></label>
+                  <div className="relative flex items-center">
+                    <select name="bloodGroup" value={formData.bloodGroup} onChange={handleChange}
+                      className="cursor-pointer"
+                      style={{ ...inputStyle, appearance: 'none', paddingRight: '40px', background: 'var(--surface)' }} required>
+                      <option value="" style={{ background: 'var(--surfaceRaised)', color: 'var(--ink)' }}>Select group</option>
+                      {bloodGroups.map(g => <option key={g} value={g} style={{ background: 'var(--surfaceRaised)', color: 'var(--ink)' }}>{g}</option>)}
                     </select>
+                    <ChevronDown size={16} className="absolute right-4 pointer-events-none opacity-40" />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-8 mt-8 md:col-span-2">
+                  <div>
+                    <label style={labelStyle}><User size={16} /> {t.gender} <span className="opacity-40 ml-1">*</span></label>
+                    <div className="relative flex items-center">
+                      <select name="gender" value={formData.gender} onChange={handleChange}
+                        className="cursor-pointer"
+                        style={{ ...inputStyle, appearance: 'none', paddingRight: '40px', background: 'var(--surface)' }} required>
+                        <option value="" style={{ background: 'var(--surfaceRaised)', color: 'var(--ink)' }}>Select gender</option>
+                        {genderOptions.map(g => <option key={g} value={g} style={{ background: 'var(--surfaceRaised)', color: 'var(--ink)' }}>{g}</option>)}
+                      </select>
+                      <ChevronDown size={16} className="absolute right-4 pointer-events-none opacity-40" />
+                    </div>
                   </div>
                   <div>
-                    <label style={labelStyle}>
-                      <Calendar size={16} /> {t.dob} <span className="opacity-40 ml-1">*</span>
-                    </label>
-                    <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required style={inputStyle} onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                    <label style={labelStyle}><Calendar size={16} /> {t.dob} <span className="opacity-40 ml-1">*</span></label>
+                    <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required style={inputStyle} />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Contacts */}
             <div className="mb-20">
               <div style={sectionHeadingStyle}>
                 {t.emergencyContacts} <span className="h-px bg-current flex-grow"></span>
               </div>
-
               <div className="grid md:grid-cols-2 gap-8">
-                <div>
+                <div className="md:col-span-2">
                   <label style={labelStyle}><Phone size={16} /> {t.yourPhone} <span className="opacity-40 ml-1">*</span></label>
-                  <div className="flex gap-2">
-                    <div className="relative flex items-center">
-                      <div className="absolute left-3 w-6 h-[16px] pointer-events-none rounded-[2px] overflow-hidden shadow-sm flex items-center justify-center [&>svg]:w-full [&>svg]:h-full border border-black/10 dark:border-white/10">
-                        {phoneCode === '+91' && <IN title="India" />}
-                        {phoneCode === '+1' && <US title="United States" />}
-                        {phoneCode === '+44' && <GB title="United Kingdom" />}
-                        {phoneCode === '+61' && <AU title="Australia" />}
-                      </div>
-                      <select value={phoneCode} onChange={(e) => setPhoneCode(e.target.value)} style={{ ...inputStyle, width: '100px', padding: '16px 10px 16px 40px', appearance: 'none', background: 'var(--bg)', color: 'var(--ink)' }}>
-                        <option value="+91">+91</option>
-                        <option value="+1">+1</option>
-                        <option value="+44">+44</option>
-                        <option value="+61">+61</option>
-                      </select>
-                    </div>
-                    <input type="tel" name="phone" value={formData.phone} onChange={(e) => handlePhoneChange(e, 'phone')} style={inputStyle} placeholder="1234567890" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                  <div className="flex gap-4">
+                    <CustomPhoneSelector value={phoneCode} onChange={setPhoneCode} />
+                    <input type="tel" name="phone" value={formData.phone} onChange={(e) => handlePhoneChange(e, 'phone')} style={inputStyle} placeholder="1234567890" required />
                   </div>
                 </div>
-                <div className="hidden md:block"></div> {/* Spacer */}
-
-
+                <div className="md:col-span-2 pt-4">
+                  <div style={sectionHeadingStyle} className="!mb-8 opacity-20 text-[10px]">Primary Contact Details</div>
+                </div>
                 <div>
                   <label style={labelStyle}><Phone size={16} /> Emergency No. <span className="opacity-40 ml-1">*</span></label>
-                  <div className="flex gap-2">
-                    <div className="relative flex items-center">
-                      <div className="absolute left-3 w-6 h-[16px] pointer-events-none rounded-[2px] overflow-hidden shadow-sm flex items-center justify-center [&>svg]:w-full [&>svg]:h-full border border-black/10 dark:border-white/10">
-                        {emergencyCode === '+91' && <IN title="India" />}
-                        {emergencyCode === '+1' && <US title="United States" />}
-                        {emergencyCode === '+44' && <GB title="United Kingdom" />}
-                        {emergencyCode === '+61' && <AU title="Australia" />}
-                      </div>
-                      <select value={emergencyCode} onChange={(e) => setEmergencyCode(e.target.value)} style={{ ...inputStyle, width: '100px', padding: '16px 10px 16px 40px', appearance: 'none', background: 'var(--bg)', color: 'var(--ink)' }}>
-                        <option value="+91">+91</option>
-                        <option value="+1">+1</option>
-                        <option value="+44">+44</option>
-                        <option value="+61">+61</option>
-                      </select>
-                    </div>
-                    <input type="tel" name="emergencyContact.phone" value={formData.emergencyContact.phone} onChange={(e) => handlePhoneChange(e, 'emergencyContact.phone')} style={inputStyle} placeholder="1234567890" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
-
+                  <div className="flex gap-4">
+                    <CustomPhoneSelector value={emergencyCode} onChange={setEmergencyCode} />
+                    <input type="tel" name="emergencyContact.phone" value={formData.emergencyContact.phone} onChange={(e) => handlePhoneChange(e, 'emergencyContact.phone')} style={inputStyle} placeholder="1234567890" required />
                   </div>
-
                 </div>
                 <div>
                   <label style={labelStyle}><UserCheck size={16} /> Contact Name <span className="opacity-40 ml-1">*</span></label>
-                  <input type="text" name="emergencyContact.name" value={formData.emergencyContact.name} onChange={handleChange} style={inputStyle} placeholder="Someone you trust" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                  <input type="text" name="emergencyContact.name" value={formData.emergencyContact.name} onChange={handleChange} style={inputStyle} placeholder="Someone you trust" required />
                 </div>
               </div>
             </div>
 
-            {/* Medical Context */}
             <div className="mb-20">
               <div style={sectionHeadingStyle}>
                 {t.medicalHistory} <span className="h-px bg-current flex-grow"></span>
               </div>
-
               <div className="space-y-8">
                 <div>
                   <label style={labelStyle}><AlertTriangle size={16} /> {t.chronicConditions}</label>
-                  <textarea name="diseaseDetails" value={formData.diseaseDetails} onChange={handleChange} style={{ ...inputStyle, minHeight: '100px' }} placeholder="Asthma, Diabetes, etc." onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                  <textarea name="diseaseDetails" value={formData.diseaseDetails} onChange={handleChange} style={{ ...inputStyle, minHeight: '100px' }} placeholder="Asthma, Diabetes, etc." />
                 </div>
                 <div className="grid md:grid-cols-2 gap-8">
                   <div>
                     <label style={labelStyle}><Droplets size={16} /> {t.knownAllergies}</label>
-                    <input type="text" name="allergies" value={formData.allergies} onChange={handleChange} style={inputStyle} placeholder="Peanuts, Penicillin..." onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                    <input type="text" name="allergies" value={formData.allergies} onChange={handleChange} style={inputStyle} placeholder="Peanuts, Penicillin..." />
                   </div>
                   <div>
                     <label style={labelStyle}><Pill size={16} /> {t.medications}</label>
-                    <input type="text" name="medications" value={formData.medications} onChange={handleChange} style={inputStyle} placeholder="Current meds..." onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                    <input type="text" name="medications" value={formData.medications} onChange={handleChange} style={inputStyle} placeholder="Current meds..." />
                   </div>
                 </div>
                 <div>
                   <label style={labelStyle}><FileText size={16} /> {t.responderNotes}</label>
-                  <textarea name="notes" value={formData.notes} onChange={handleChange} style={{ ...inputStyle, minHeight: '80px' }} placeholder="Notes for first responders" onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                  <textarea name="notes" value={formData.notes} onChange={handleChange} style={{ ...inputStyle, minHeight: '80px' }} placeholder="Notes for first responders" />
                 </div>
               </div>
             </div>
 
-            {/* Footer / Submit */}
             <div className="pt-12 border-t flex flex-col sm:flex-row items-center justify-between gap-10" style={{ borderColor: 'var(--line)' }}>
               <p className="text-sm opacity-30 max-w-xs text-center sm:text-left leading-relaxed">
                 {t.disclaimer}
