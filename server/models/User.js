@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
   dateOfBirth: {
     type: Date,
     validate: {
-      validator: function(value) {
+      validator: function (value) {
         if (!value) return true; // Optional field
         return value <= new Date();
       },
@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Primary phone number is required'],
     validate: {
-      validator: function(phone) {
+      validator: function (phone) {
         // More flexible phone validation - allow various formats
         const phoneRegex = /^[\+]?[1-9][\d\s\-\(\)]{7,15}$/;
         return phoneRegex.test(phone.replace(/\s/g, ''));
@@ -49,7 +49,7 @@ const userSchema = new mongoose.Schema({
   alternatePhone: {
     type: String,
     validate: {
-      validator: function(phone) {
+      validator: function (phone) {
         if (!phone) return true; // Optional field
         const phoneRegex = /^[\+]?[1-9][\d\s\-\(\)]{7,15}$/;
         return phoneRegex.test(phone.replace(/\s/g, ''));
@@ -60,7 +60,6 @@ const userSchema = new mongoose.Schema({
   emergencyContact: {
     name: {
       type: String,
-      required: [true, 'Emergency contact name is required'],
       trim: true,
       maxlength: [100, 'Emergency contact name cannot be more than 100 characters']
     },
@@ -68,7 +67,7 @@ const userSchema = new mongoose.Schema({
       type: String,
       required: [true, 'Emergency contact phone is required'],
       validate: {
-        validator: function(phone) {
+        validator: function (phone) {
           const phoneRegex = /^[\+]?[1-9][\d\s\-\(\)]{7,15}$/;
           return phoneRegex.test(phone.replace(/\s/g, ''));
         },
@@ -126,7 +125,7 @@ const userSchema = new mongoose.Schema({
 });
 
 // Generate unique ID before saving
-userSchema.pre('save', function(next) {
+userSchema.pre('save', function (next) {
   if (!this.uniqueId) {
     this.uniqueId = this._id.toString();
   }
@@ -139,13 +138,13 @@ userSchema.index({ phone: 1 });
 userSchema.index({ createdAt: -1 });
 
 // Virtual for age calculation
-userSchema.virtual('age').get(function() {
+userSchema.virtual('age').get(function () {
   if (this.dateOfBirth) {
     const today = new Date();
     const birthDate = new Date(this.dateOfBirth);
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    
+
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
       age--;
     }
@@ -155,7 +154,7 @@ userSchema.virtual('age').get(function() {
 });
 
 // Method to get public emergency data (excludes sensitive info)
-userSchema.methods.getEmergencyData = function() {
+userSchema.methods.getEmergencyData = function () {
   return {
     uniqueId: this.uniqueId,
     name: this.name,

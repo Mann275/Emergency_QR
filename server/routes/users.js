@@ -10,7 +10,7 @@ const router = express.Router();
 router.post('/create', async (req, res) => {
   try {
     console.log('Received request body:', JSON.stringify(req.body, null, 2));
-    
+
     const {
       name,
       dateOfBirth,
@@ -35,19 +35,17 @@ router.post('/create', async (req, res) => {
       disease
     });
 
-    // Validate required fields
-    if (!name || !bloodGroup || !phone || !emergencyContact?.name || !emergencyContact?.phone) {
+    if (!name || !bloodGroup || !phone || !emergencyContact?.phone) {
       console.error('Missing required fields:', {
         name: !!name,
         bloodGroup: !!bloodGroup,
         phone: !!phone,
-        emergencyContactName: !!emergencyContact?.name,
         emergencyContactPhone: !!emergencyContact?.phone
       });
-      
+
       return res.status(400).json({
         error: 'Missing required fields',
-        required: ['name', 'bloodGroup', 'phone', 'emergencyContact.name', 'emergencyContact.phone']
+        required: ['name', 'bloodGroup', 'phone', 'emergencyContact.phone']
       });
     }
 
@@ -76,7 +74,7 @@ router.post('/create', async (req, res) => {
     // Generate QR code URL
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const profileUrl = `${frontendUrl}/emergency/${user.uniqueId}`;
-    
+
     // Generate QR code as base64 image
     const qrCodeDataUrl = await QRCode.toDataURL(profileUrl, {
       errorCorrectionLevel: 'M',
@@ -107,7 +105,7 @@ router.post('/create', async (req, res) => {
 
   } catch (error) {
     console.error('Error creating user:', error);
-    
+
     if (error.name === 'ValidationError') {
       const validationErrors = Object.values(error.errors).map(err => err.message);
       console.error('Validation errors:', validationErrors);
@@ -142,9 +140,9 @@ router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const user = await User.findOne({ 
-      uniqueId: id, 
-      isActive: true 
+    const user = await User.findOne({
+      uniqueId: id,
+      isActive: true
     });
 
     if (!user) {
@@ -182,9 +180,9 @@ router.put('/update/:id', async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
-    const user = await User.findOne({ 
-      uniqueId: id, 
-      isActive: true 
+    const user = await User.findOne({
+      uniqueId: id,
+      isActive: true
     });
 
     if (!user) {
@@ -197,7 +195,7 @@ router.put('/update/:id', async (req, res) => {
     // List of fields that can be updated
     const allowedUpdates = [
       'name', 'dateOfBirth', 'bloodGroup', 'gender', 'phone', 'alternatePhone',
-      'emergencyContact', 'disease', 'diseaseDetails', 'allergies', 
+      'emergencyContact', 'disease', 'diseaseDetails', 'allergies',
       'medications', 'address', 'notes'
     ];
 
@@ -224,7 +222,7 @@ router.put('/update/:id', async (req, res) => {
 
   } catch (error) {
     console.error('Error updating user:', error);
-    
+
     if (error.name === 'ValidationError') {
       const validationErrors = Object.values(error.errors).map(err => err.message);
       return res.status(400).json({

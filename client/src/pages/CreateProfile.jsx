@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import ApiService from '../utils/api';
 import { User, Droplets, Calendar, Phone, UserCheck, Pill, AlertTriangle, FileText, Loader2, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { IN, US, GB, AU } from 'country-flag-icons/react/3x2';
 
 const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 const genderOptions = ['Male', 'Female', 'Other', 'Prefer not to say'];
@@ -12,6 +13,8 @@ const CreateProfile = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [phoneCode, setPhoneCode] = useState('+91');
+  const [emergencyCode, setEmergencyCode] = useState('+91');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -45,6 +48,20 @@ const CreateProfile = () => {
     }));
   };
 
+  const handlePhoneChange = (e, fieldPath) => {
+    // Only allow numbers, up to 10 digits
+    const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 10);
+
+    if (fieldPath === 'phone') {
+      setFormData(prev => ({ ...prev, phone: digitsOnly }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        emergencyContact: { ...prev.emergencyContact, phone: digitsOnly }
+      }));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -53,8 +70,29 @@ const CreateProfile = () => {
       if (!formData.name || !formData.bloodGroup || !formData.phone || !formData.emergencyContact.name || !formData.emergencyContact.phone) {
         throw new Error('Please fill in all required fields.');
       }
-      const response = await ApiService.createUser(formData);
+
+      const payload = {
+        ...formData,
+        phone: `${phoneCode} ${formData.phone}`,
+        emergencyContact: {
+          ...formData.emergencyContact,
+          phone: `${emergencyCode} ${formData.emergencyContact.phone}`
+        }
+      };
+
+      const response = await ApiService.createUser(payload);
       if (response.success) {
+        import('react-hot-toast').then(({ toast }) => {
+          toast.success('Profile created successfully!', {
+            icon: '🚀',
+            style: {
+              borderRadius: '20px',
+              background: 'var(--surfaceRaised)',
+              color: 'var(--ink)',
+              padding: '16px',
+            },
+          });
+        });
         navigate(`/success/${response.data.uniqueId}`, {
           state: { qrCode: response.data.qrCode, profileUrl: response.data.profileUrl },
         });
@@ -146,11 +184,22 @@ const CreateProfile = () => {
                     {bloodGroups.map(g => <option key={g} value={g} style={{ background: 'var(--bg)', color: 'var(--ink)' }}>{g}</option>)}
                   </select>
                 </div>
-                <div>
-                  <label style={labelStyle}>
-                    <Calendar size={16} /> {t.dob}
-                  </label>
-                  <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} style={inputStyle} onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                <div className="grid md:grid-cols-2 gap-8 mt-8">
+                  <div>
+                    <label style={labelStyle}>
+                      <User size={16} /> {t.gender} <span className="opacity-40 ml-1">*</span>
+                    </label>
+                    <select name="gender" value={formData.gender} onChange={handleChange} style={{ ...inputStyle, appearance: 'none' }} required>
+                      <option value="" style={{ background: 'var(--bg)', color: 'var(--ink)' }}>Select gender</option>
+                      {genderOptions.map(g => <option key={g} value={g} style={{ background: 'var(--bg)', color: 'var(--ink)' }}>{g}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={labelStyle}>
+                      <Calendar size={16} /> {t.dob} <span className="opacity-40 ml-1">*</span>
+                    </label>
+                    <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required style={inputStyle} onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -164,15 +213,52 @@ const CreateProfile = () => {
               <div className="grid md:grid-cols-2 gap-8">
                 <div>
                   <label style={labelStyle}><Phone size={16} /> {t.yourPhone} <span className="opacity-40 ml-1">*</span></label>
-                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} style={inputStyle} placeholder="+1 234 567 890" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                  <div className="flex gap-2">
+                    <div className="relative flex items-center">
+                      <div className="absolute left-3 w-6 h-[16px] pointer-events-none rounded-[2px] overflow-hidden shadow-sm flex items-center justify-center [&>svg]:w-full [&>svg]:h-full border border-black/10 dark:border-white/10">
+                        {phoneCode === '+91' && <IN title="India" />}
+                        {phoneCode === '+1' && <US title="United States" />}
+                        {phoneCode === '+44' && <GB title="United Kingdom" />}
+                        {phoneCode === '+61' && <AU title="Australia" />}
+                      </div>
+                      <select value={phoneCode} onChange={(e) => setPhoneCode(e.target.value)} style={{ ...inputStyle, width: '100px', padding: '16px 10px 16px 40px', appearance: 'none', background: 'var(--bg)', color: 'var(--ink)' }}>
+                        <option value="+91">+91</option>
+                        <option value="+1">+1</option>
+                        <option value="+44">+44</option>
+                        <option value="+61">+61</option>
+                      </select>
+                    </div>
+                    <input type="tel" name="phone" value={formData.phone} onChange={(e) => handlePhoneChange(e, 'phone')} style={inputStyle} placeholder="1234567890" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                  </div>
+                </div>
+                <div className="hidden md:block"></div> {/* Spacer */}
+
+
+                <div>
+                  <label style={labelStyle}><Phone size={16} /> Emergency No. <span className="opacity-40 ml-1">*</span></label>
+                  <div className="flex gap-2">
+                    <div className="relative flex items-center">
+                      <div className="absolute left-3 w-6 h-[16px] pointer-events-none rounded-[2px] overflow-hidden shadow-sm flex items-center justify-center [&>svg]:w-full [&>svg]:h-full border border-black/10 dark:border-white/10">
+                        {emergencyCode === '+91' && <IN title="India" />}
+                        {emergencyCode === '+1' && <US title="United States" />}
+                        {emergencyCode === '+44' && <GB title="United Kingdom" />}
+                        {emergencyCode === '+61' && <AU title="Australia" />}
+                      </div>
+                      <select value={emergencyCode} onChange={(e) => setEmergencyCode(e.target.value)} style={{ ...inputStyle, width: '100px', padding: '16px 10px 16px 40px', appearance: 'none', background: 'var(--bg)', color: 'var(--ink)' }}>
+                        <option value="+91">+91</option>
+                        <option value="+1">+1</option>
+                        <option value="+44">+44</option>
+                        <option value="+61">+61</option>
+                      </select>
+                    </div>
+                    <input type="tel" name="emergencyContact.phone" value={formData.emergencyContact.phone} onChange={(e) => handlePhoneChange(e, 'emergencyContact.phone')} style={inputStyle} placeholder="1234567890" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+
+                  </div>
+
                 </div>
                 <div>
-                  <label style={labelStyle}><UserCheck size={16} /> {t.contactName} <span className="opacity-40 ml-1">*</span></label>
+                  <label style={labelStyle}><UserCheck size={16} /> Contact Name <span className="opacity-40 ml-1">*</span></label>
                   <input type="text" name="emergencyContact.name" value={formData.emergencyContact.name} onChange={handleChange} style={inputStyle} placeholder="Someone you trust" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
-                </div>
-                <div className="md:col-span-2">
-                  <label style={labelStyle}><Phone size={16} /> {t.emergencyPhone} <span className="opacity-40 ml-1">*</span></label>
-                  <input type="tel" name="emergencyContact.phone" value={formData.emergencyContact.phone} onChange={handleChange} style={inputStyle} placeholder="+1 234 567 890" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
                 </div>
               </div>
             </div>
