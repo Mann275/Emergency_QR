@@ -43,27 +43,16 @@ node_modules/
 
 # dotenv environment variables file
 .env
-.env.local
-.env.production
-
-# Next.js build output
-.next
-
-# Nuxt.js build output
-.nuxt
 
 # Vite build output
 dist/
-
+ 
 # IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# OS files
-.DS_Store
-Thumbs.db
 
 # Backup files
 *.bak
