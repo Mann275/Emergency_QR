@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ApiService from '../utils/api';
-import { User, Droplets, Calendar, Phone, UserCheck, Pill, AlertTriangle, FileText, Loader2, ClipboardList, ShieldAlert } from 'lucide-react';
+import { User, Droplets, Calendar, Phone, UserCheck, Pill, AlertTriangle, FileText, Loader2, ArrowRight } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 const genderOptions = ['Male', 'Female', 'Other', 'Prefer not to say'];
 
 const CreateProfile = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -67,157 +69,154 @@ const CreateProfile = () => {
   const inputStyle = {
     border: '1.5px solid var(--line)',
     color: 'var(--ink)',
-    borderRadius: '4px',
-    padding: '16px 18px',
+    borderRadius: '16px',
+    padding: '16px 20px',
     fontSize: '16px',
-    fontWeight: '600',
-    background: 'rgba(255, 255, 255, 0.02)',
+    fontWeight: '500',
+    background: 'transparent',
     width: '100%',
     outline: 'none',
-    transition: 'all 0.2s ease',
+    transition: 'all 0.3s ease',
   };
 
   const labelStyle = {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    fontSize: '12px',
-    fontWeight: '800',
-    textTransform: 'uppercase',
-    letterSpacing: '0.1em',
+    fontSize: '14px',
+    fontWeight: '600',
     marginBottom: '10px',
     color: 'var(--ink)',
-    opacity: 0.6
+    opacity: 0.8
+  };
+
+  const sectionHeadingStyle = {
+    fontSize: '13px',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: '0.15em',
+    color: 'var(--ink)',
+    opacity: 0.3,
+    marginBottom: '32px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px'
   };
 
   return (
     <div className="min-h-screen">
-      <section className="pt-32 pb-20 md:pt-36 md:pb-28">
+      <section className="pt-32 pb-20 md:pt-40 md:pb-28">
         <div className="main-wrap max-w-2xl">
 
-          <div className="animate-slide mb-14 border-b pb-8" style={{ borderColor: 'var(--line)' }}>
-            <div className="flex items-center gap-4 mb-4">
-              <ClipboardList size={20} className="opacity-30" />
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] opacity-30">Registry Module / New Entry</span>
-            </div>
-            <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase" style={{ color: 'var(--ink)' }}>
-              Medical Enrollment
+          <div className="animate-slide mb-16">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-heading)', color: 'var(--ink)' }}>
+              {t.createTitle}
             </h1>
+            <p className="text-base opacity-50 mt-4 leading-relaxed max-w-lg">
+              {t.createDesc}
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="animate-slide" style={{ animationDelay: '0.08s' }}>
             {error && (
-              <div className="mb-8 p-6 rounded-sm border-l-4 font-bold flex items-center gap-4" style={{ background: 'rgba(255, 59, 48, 0.1)', borderColor: 'var(--danger)', color: 'var(--danger)', fontSize: '14px' }}>
-                <ShieldAlert size={20} /> {error}
+              <div className="mb-8 p-5 rounded-2xl font-semibold flex items-center gap-3" style={{ background: 'var(--danger)', color: '#fff', fontSize: '15px' }}>
+                <AlertTriangle size={20} /> {error}
               </div>
             )}
 
-            {/* Personal Data Block */}
-            <div className="mb-16">
-              <div className="flex items-center gap-3 mb-8 opacity-20">
-                <span className="h-px bg-current flex-grow"></span>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Block 01 / Identity</span>
-                <span className="h-px bg-current flex-grow"></span>
+            {/* Personal Data */}
+            <div className="mb-20">
+              <div style={sectionHeadingStyle}>
+                {t.personalInfo} <span className="h-px bg-current flex-grow"></span>
               </div>
 
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="md:col-span-2">
                   <label style={labelStyle}>
-                    Subject Full identity <span className="text-red-500">*</span>
+                    <User size={16} /> {t.fullName} <span className="opacity-40 ml-1">*</span>
                   </label>
-                  <input type="text" name="name" value={formData.name} onChange={handleChange} style={inputStyle} placeholder="LEGAL NAME AS PER ID" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                  <input type="text" name="name" value={formData.name} onChange={handleChange} style={inputStyle} placeholder="E.g. John Doe" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
                 </div>
                 <div>
                   <label style={labelStyle}>
-                    Blood group <span className="text-red-500">*</span>
+                    <Droplets size={16} /> {t.bloodGroup} <span className="opacity-40 ml-1">*</span>
                   </label>
-                  <select name="bloodGroup" value={formData.bloodGroup} onChange={handleChange} style={{ ...inputStyle, background: 'rgba(255,255,255,0.03)' }} required>
-                    <option value="" style={{ background: 'var(--bg)', color: 'var(--ink)' }}>SELECT TYPE</option>
+                  <select name="bloodGroup" value={formData.bloodGroup} onChange={handleChange} style={{ ...inputStyle, appearance: 'none' }} required>
+                    <option value="" style={{ background: 'var(--bg)', color: 'var(--ink)' }}>Select group</option>
                     {bloodGroups.map(g => <option key={g} value={g} style={{ background: 'var(--bg)', color: 'var(--ink)' }}>{g}</option>)}
                   </select>
                 </div>
                 <div>
                   <label style={labelStyle}>
-                    Biological gender
+                    <Calendar size={16} /> {t.dob}
                   </label>
-                  <select name="gender" value={formData.gender} onChange={handleChange} style={{ ...inputStyle, background: 'rgba(255,255,255,0.03)' }}>
-                    <option value="" style={{ background: 'var(--bg)', color: 'var(--ink)' }}>NOT SPECIFIED</option>
-                    {genderOptions.map(o => <option key={o} value={o} style={{ background: 'var(--bg)', color: 'var(--ink)' }}>{o.toUpperCase()}</option>)}
-                  </select>
+                  <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} style={inputStyle} onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
                 </div>
               </div>
             </div>
 
-            {/* Communication Block */}
-            <div className="mb-16">
-              <div className="flex items-center gap-3 mb-8 opacity-20">
-                <span className="h-px bg-current flex-grow"></span>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Block 02 / Protocols</span>
-                <span className="h-px bg-current flex-grow"></span>
+            {/* Contacts */}
+            <div className="mb-20">
+              <div style={sectionHeadingStyle}>
+                {t.emergencyContacts} <span className="h-px bg-current flex-grow"></span>
               </div>
 
               <div className="grid md:grid-cols-2 gap-8">
                 <div>
-                  <label style={labelStyle}>Primary Contact</label>
-                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} style={inputStyle} placeholder="+X XXX XXX XXXX" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                  <label style={labelStyle}><Phone size={16} /> {t.yourPhone} <span className="opacity-40 ml-1">*</span></label>
+                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} style={inputStyle} placeholder="+1 234 567 890" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
                 </div>
                 <div>
-                  <label style={labelStyle}>Alternate Contact</label>
-                  <input type="tel" name="alternatePhone" value={formData.alternatePhone} onChange={handleChange} style={inputStyle} placeholder="OPTIONAL" onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                  <label style={labelStyle}><UserCheck size={16} /> {t.contactName} <span className="opacity-40 ml-1">*</span></label>
+                  <input type="text" name="emergencyContact.name" value={formData.emergencyContact.name} onChange={handleChange} style={inputStyle} placeholder="Someone you trust" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
                 </div>
-                <div>
-                  <label style={labelStyle}>Emergency kin name <span className="text-red-500">*</span></label>
-                  <input type="text" name="emergencyContact.name" value={formData.emergencyContact.name} onChange={handleChange} style={inputStyle} placeholder="PRIMARY RESPONDER NAME" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
-                </div>
-                <div>
-                  <label style={labelStyle}>Emergency kin phone <span className="text-red-500">*</span></label>
-                  <input type="tel" name="emergencyContact.phone" value={formData.emergencyContact.phone} onChange={handleChange} style={inputStyle} placeholder="+X XXX XXX XXXX" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                <div className="md:col-span-2">
+                  <label style={labelStyle}><Phone size={16} /> {t.emergencyPhone} <span className="opacity-40 ml-1">*</span></label>
+                  <input type="tel" name="emergencyContact.phone" value={formData.emergencyContact.phone} onChange={handleChange} style={inputStyle} placeholder="+1 234 567 890" required onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
                 </div>
               </div>
             </div>
 
-            {/* Clinical Data Block */}
-            <div className="mb-16">
-              <div className="flex items-center gap-3 mb-8 opacity-20">
-                <span className="h-px bg-current flex-grow"></span>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Block 03 / Clinical Data</span>
-                <span className="h-px bg-current flex-grow"></span>
+            {/* Medical Context */}
+            <div className="mb-20">
+              <div style={sectionHeadingStyle}>
+                {t.medicalHistory} <span className="h-px bg-current flex-grow"></span>
               </div>
 
               <div className="space-y-8">
                 <div>
-                  <label style={labelStyle}>Chronic diagnoses</label>
-                  <textarea name="diseaseDetails" value={formData.diseaseDetails} onChange={handleChange} style={{ ...inputStyle, minHeight: '100px' }} placeholder="SPECIFY KNOWN CONDITIONS" onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                  <label style={labelStyle}><AlertTriangle size={16} /> {t.chronicConditions}</label>
+                  <textarea name="diseaseDetails" value={formData.diseaseDetails} onChange={handleChange} style={{ ...inputStyle, minHeight: '100px' }} placeholder="Asthma, Diabetes, etc." onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
                 </div>
                 <div className="grid md:grid-cols-2 gap-8">
                   <div>
-                    <label style={labelStyle}>Documented allergies</label>
-                    <input type="text" name="allergies" value={formData.allergies} onChange={handleChange} style={inputStyle} placeholder="e.g. PEANUTS, PENICILLIN" onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                    <label style={labelStyle}><Droplets size={16} /> {t.knownAllergies}</label>
+                    <input type="text" name="allergies" value={formData.allergies} onChange={handleChange} style={inputStyle} placeholder="Peanuts, Penicillin..." onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
                   </div>
                   <div>
-                    <label style={labelStyle}>Active pharmacotherapy</label>
-                    <input type="text" name="medications" value={formData.medications} onChange={handleChange} style={inputStyle} placeholder="CURRENT MEDICATIONS" onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                    <label style={labelStyle}><Pill size={16} /> {t.medications}</label>
+                    <input type="text" name="medications" value={formData.medications} onChange={handleChange} style={inputStyle} placeholder="Current meds..." onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
                   </div>
                 </div>
                 <div>
-                  <label style={labelStyle}>Protocol Instructions</label>
-                  <textarea name="notes" value={formData.notes} onChange={handleChange} style={{ ...inputStyle, minHeight: '80px' }} placeholder="CRITICAL NOTES FOR RESPONDERS" onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
+                  <label style={labelStyle}><FileText size={16} /> {t.responderNotes}</label>
+                  <textarea name="notes" value={formData.notes} onChange={handleChange} style={{ ...inputStyle, minHeight: '80px' }} placeholder="Notes for first responders" onFocus={e => e.target.style.borderColor = 'var(--ink)'} onBlur={e => e.target.style.borderColor = 'var(--line)'} />
                 </div>
               </div>
             </div>
 
-            {/* Submission Block */}
-            <div className="pt-12 border-t flex flex-col sm:flex-row items-center justify-between gap-8" style={{ borderColor: 'var(--line)' }}>
-              <p className="text-[10px] font-bold uppercase tracking-widest opacity-20 max-w-xs text-center sm:text-left leading-relaxed">
-                By generating this QR, you authorize the public display of this sensitive medical data for emergency retrieval.
+            {/* Footer / Submit */}
+            <div className="pt-12 border-t flex flex-col sm:flex-row items-center justify-between gap-10" style={{ borderColor: 'var(--line)' }}>
+              <p className="text-sm opacity-30 max-w-xs text-center sm:text-left leading-relaxed">
+                {t.disclaimer}
               </p>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full sm:w-auto px-12 py-5 text-sm font-black uppercase tracking-[0.2em] rounded transition-base flex items-center justify-center gap-3 active:scale-95"
+                className="w-full sm:w-auto px-12 py-4 text-xs font-bold rounded-full transition-base flex items-center justify-center gap-3 active:scale-95 shadow-lg shadow-black/5"
                 style={{ background: 'var(--accent)', color: 'var(--accent-ink)', border: 'none', cursor: 'pointer' }}
               >
-                {loading ? <><Loader2 size={16} className="animate-spin" /> Verifying...</> : 'Initialize Registry'}
+                {loading ? <><Loader2 size={16} className="animate-spin" /> {t.working}</> : <>{t.generateQr} <ArrowRight size={14} /></>}
               </button>
             </div>
           </form>

@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom';
 import { ScanLine, QrCode, Smartphone, ArrowRight } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 const Home = () => {
+  const { t } = useLanguage();
+
   return (
     <div>
       {/* Hero */}
@@ -9,15 +12,15 @@ const Home = () => {
         <div className="main-wrap">
           <div className="animate-slide max-w-3xl">
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-10" style={{ fontFamily: 'var(--font-heading)', lineHeight: 1 }}>
-              Critical details.<br />
-              Before you can explain them.
+              {t.heroTitle.split('. ')[0]}.<br />
+              {t.heroTitle.split('. ')[1]}
             </h1>
             <div className="flex flex-wrap gap-4">
               <Link to="/create" className="inline-flex items-center gap-2 px-8 py-3 text-xs font-semibold rounded-full transition-base" style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}>
-                Create your profile <ArrowRight size={14} />
+                {t.heroCta} <ArrowRight size={14} />
               </Link>
               <a href="#how" className="inline-flex items-center gap-2 px-8 py-3 text-xs font-semibold rounded-full border transition-base" style={{ borderColor: 'var(--line)', color: 'var(--ink)' }}>
-                How it works
+                {t.howItWorks}
               </a>
             </div>
           </div>
@@ -30,18 +33,18 @@ const Home = () => {
           <div className="grid md:grid-cols-3 gap-12 md:gap-16">
             <div className="animate-slide" style={{ animationDelay: '0.05s' }}>
               <ScanLine size={28} className="mb-6 opacity-60" />
-              <h3 className="text-xl font-semibold mb-4 tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>Fill your profile</h3>
-              <p className="text-base leading-relaxed opacity-80">Blood group, allergies, medications, and emergency contacts. Nothing else.</p>
+              <h3 className="text-xl font-semibold mb-4 tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>{t.step1Title}</h3>
+              <p className="text-base leading-relaxed opacity-80">{t.step1Desc}</p>
             </div>
             <div className="animate-slide" style={{ animationDelay: '0.1s' }}>
               <QrCode size={28} className="mb-6 opacity-60" />
-              <h3 className="text-xl font-semibold mb-4 tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>Get your QR</h3>
-              <p className="text-base leading-relaxed opacity-80">A clean, high-contrast QR code. Put it on your lock screen or your ID card.</p>
+              <h3 className="text-xl font-semibold mb-4 tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>{t.step2Title}</h3>
+              <p className="text-base leading-relaxed opacity-80">{t.step2Desc}</p>
             </div>
             <div className="animate-slide" style={{ animationDelay: '0.15s' }}>
               <Smartphone size={28} className="mb-6 opacity-60" />
-              <h3 className="text-xl font-semibold mb-4 tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>Anyone can scan</h3>
-              <p className="text-base leading-relaxed opacity-80">No app needed. Any phone camera opens your critical data in one glance.</p>
+              <h3 className="text-xl font-semibold mb-4 tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>{t.step3Title}</h3>
+              <p className="text-base leading-relaxed opacity-80">{t.step3Desc}</p>
             </div>
           </div>
         </div>
@@ -52,10 +55,10 @@ const Home = () => {
         <div className="main-wrap">
           <div className="animate-slide" style={{ animationDelay: '0.2s' }}>
             <h2 className="text-2xl md:text-4xl font-semibold tracking-tight mb-8" style={{ fontFamily: 'var(--font-heading)' }}>
-              Ready in under two minutes.
+              {t.readyTitle}
             </h2>
             <Link to="/create" className="inline-flex items-center gap-2 px-10 py-3.5 text-xs font-semibold rounded-full transition-base" style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}>
-              Get started <ArrowRight size={14} />
+              {t.getStarted} <ArrowRight size={14} />
             </Link>
           </div>
         </div>
