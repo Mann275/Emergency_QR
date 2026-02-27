@@ -1,34 +1,22 @@
-import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Sun, Moon, User, Languages } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 
 const Header = () => {
   const { lang, setLang, t } = useLanguage();
-  const [isLight, setIsLight] = useState(() => {
-    return localStorage.getItem('theme') === 'light';
-  });
-
-  useEffect(() => {
-    if (isLight) {
-      document.body.classList.add('light-theme');
-      localStorage.setItem('theme', 'light');
-    } else {
-      document.body.classList.remove('light-theme');
-      localStorage.setItem('theme', 'dark');
-    }
-  }, [isLight]);
+  const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="glass-nav">
-      <nav className="flex items-center justify-between px-4 sm:px-6">
+    <header className="glass-nav !px-4 !py-3 md:!px-8 md:!py-4">
+      <nav className="flex items-center justify-between">
         <Link to="/" className="text-lg font-bold tracking-tight transition-base hover:opacity-50" style={{ fontFamily: 'var(--font-heading)' }}>
           Emergency QR
         </Link>
 
-        <div className="flex items-center gap-4 sm:gap-8 overflow-visible">
+        <div className="flex items-center gap-2 md:gap-4 sm:gap-8 overflow-visible">
           {/* Language Selector */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300"
+          <div className="flex items-center gap-1.5 md:gap-2 px-2 py-1 md:px-3 md:py-1.5 rounded-full border transition-all duration-300"
             style={{
               borderColor: 'var(--line)',
               background: 'var(--surface)',
@@ -52,19 +40,19 @@ const Header = () => {
           </div>
 
           <div className="flex items-center gap-3 sm:gap-6">
-            <Link to="/create" className="flex items-center gap-2 text-sm font-bold opacity-80 hover:opacity-100 transition-all duration-300 group" aria-label="Create Profile">
+            <Link to="/create" className="hidden md:flex items-center gap-2 text-sm font-bold opacity-80 hover:opacity-100 transition-all duration-300 group" aria-label="Create Profile">
               <div className="p-1.5 rounded-full bg-black/5 dark:bg-white/5 transition-colors group-hover:bg-accent group-hover:text-accent-ink">
                 <User size={18} />
               </div>
-              <span className="hidden sm:inline-block">{t.createProfile}</span>
+              <span>{t.createProfile}</span>
             </Link>
 
             <button
-              onClick={() => setIsLight(!isLight)}
-              className="hover:opacity-50 transition-all duration-300 p-1.5 opacity-60"
+              onClick={toggleTheme}
+              className="hover:opacity-50 transition-all duration-300 p-1.5 opacity-60 ml-2"
               aria-label="Toggle theme"
             >
-              {isLight ? <Moon size={20} /> : <Sun size={20} />}
+              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
             </button>
           </div>
         </div>

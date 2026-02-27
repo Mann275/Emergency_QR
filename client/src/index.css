@@ -12,7 +12,8 @@
   --bg: #000000;
   --surface: #0a0a0a;
   --surface-raised: #111111;
-  --line: #222222;
+  --line: #333333;
+  /* slightly lighter for more contrast */
   --ink: #ffffff;
   --muted: #888888;
   --subtle: #444444;
@@ -22,7 +23,8 @@
 
   --danger: #ff3b30;
   --glass-bg: rgba(0, 0, 0, 0.4);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  /* up from 0.1 to 0.15 */
   color-scheme: dark;
 }
 
@@ -31,7 +33,8 @@
   --bg: #ffffff;
   --surface: #f7f7f7;
   --surface-raised: #efefef;
-  --line: #e0e0e0;
+  --line: #cccccc;
+  /* darker for more contrast in light mode */
   --ink: #000000;
   --muted: #666666;
   --subtle: #999999;
@@ -40,7 +43,8 @@
   --accent-ink: #ffffff;
 
   --glass-bg: rgba(255, 255, 255, 0.6);
-  --glass-border: rgba(0, 0, 0, 0.15);
+  --glass-border: rgba(0, 0, 0, 0.25);
+  /* up from 0.15 */
   color-scheme: light;
 }
 
@@ -229,6 +233,14 @@ body {
 
   .text-ink {
     color: var(--ink);
+  }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .h-safe {
+    height: env(safe-area-inset-bottom);
   }
 }
 
