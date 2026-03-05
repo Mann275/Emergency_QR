@@ -48,7 +48,7 @@ const Home = () => {
             {/* Box 1: Setup */}
             <div className="lg:col-span-8 bg-surface p-8 flex flex-col justify-between overflow-hidden relative min-h-[350px]">
               <div className="space-y-3 relative z-10">
-                <div className="text-[10px] font-black mb-1" style={{ color: 'var(--ink)' }}>01. Integration</div>
+                <div className="text-[12px] font-black mb-1" style={{ color: 'var(--ink)' }}>01. Integration</div>
                 <h2 className="text-3xl md:text-4xl font-black tracking-tight" style={{ fontFamily: 'var(--font-heading)', color: 'var(--ink)' }}>{t.step1Title}</h2>
                 <p className="text-sm font-bold max-w-sm" style={{ color: 'var(--ink)' }}>{t.step1Desc}</p>
               </div>
@@ -81,7 +81,7 @@ const Home = () => {
                   <QrCode size={120} strokeWidth={1} className="text-accent" />
                 </div>
                 <div className="text-center space-y-1">
-                  <div className="text-[10px] font-black mb-1">02. Generation</div>
+                  <div className="text-[12px] font-black mb-1">02. Generation</div>
                   <div className="text-2xl font-black tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>Unique QR</div>
                 </div>
               </div>
@@ -124,16 +124,16 @@ const Home = () => {
             {/* Box 4: Performance */}
             <div className="lg:col-span-8 p-10 grid md:grid-cols-2 gap-12 bg-surface">
               <div className="space-y-6 flex flex-col justify-center">
-                <div className="text-[10px] font-black" style={{ color: 'var(--ink)' }}>03. Performance</div>
+                <div className="text-[12px] font-black" style={{ color: 'var(--ink)' }}>03. Performance</div>
                 <h3 className="text-3xl md:text-3xl font-black tracking-tight leading-none" style={{ fontFamily: 'var(--font-heading)', color: 'var(--ink)' }}>{t.step3Title}</h3>
                 <p className="text-base font-bold leading-relaxed" style={{ color: 'var(--ink)' }}>{t.step3Desc}</p>
               </div>
               <div className="grid grid-cols-2 gap-px bg-line border border-line">
                 {[
-                  { icon: <Clock size={20} />, label: 'Instant' },
-                  { icon: <Globe size={20} />, label: 'Standard' },
-                  { icon: <MapPin size={20} />, label: 'Location' },
-                  { icon: <ShieldCheck size={20} />, label: 'Secure' }
+                  { icon: <Clock size={29} />, label: 'Instant' },
+                  { icon: <Globe size={29} />, label: 'Standard' },
+                  { icon: <MapPin size={29} />, label: 'Location' },
+                  { icon: <ShieldCheck size={29} />, label: 'Secure' }
                 ].map((item, idx) => (
                   <div key={idx} className="p-6 bg-bg flex flex-col justify-between items-start h-32" style={{ color: 'var(--ink)' }}>
                     <div className="text-red-600">{item.icon}</div>
