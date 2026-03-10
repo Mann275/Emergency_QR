@@ -126,12 +126,12 @@ const EmergencyProfile = () => {
     { label: t.fullName, value: user.name || t.notSpecified, icon: User },
     { label: t.gender, value: gender, icon: BadgeAlert },
     { label: t.dob, value: dob, icon: Calendar },
-    { label: 'Age', value: age, icon: Activity },
+    { label: t.age, value: age, icon: Activity },
   ];
 
-  const personalNumberLabel = 'Your Number';
-  const callEmergencyContactLabel = 'Call Emergency Contact';
-  const callPersonalNumberLabel = 'Call Your Number';
+  const personalNumberLabel = t.yourNumber;
+  const callEmergencyContactLabel = t.callEmergencyContact;
+  const callPersonalNumberLabel = t.callYourNumber;
 
   return (
     <div className="min-h-screen pb-10 sm:pb-16">
@@ -153,7 +153,7 @@ const EmergencyProfile = () => {
             <GlassCard className="p-3 sm:p-7 lg:p-8 overflow-hidden">
               <div className="grid gap-4 sm:gap-6 lg:grid-cols-[0.82fr,1.18fr] items-start">
                 <div className="rounded-[22px] sm:rounded-[28px] border border-white/75 bg-white/80 p-3 sm:p-6 text-center">
-                  <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.03em] text-[var(--muted)]">Blood group</div>
+                  <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.03em] text-[var(--muted)]">{t.bloodGroupLabel}</div>
                   <div className="mt-3 sm:mt-4 text-4xl min-[220px]:text-5xl sm:text-7xl font-black text-rose-600 break-words" style={{ fontFamily: 'var(--font-heading)', lineHeight: '0.95' }}>
                     {bloodGroup}
                   </div>
@@ -166,7 +166,7 @@ const EmergencyProfile = () => {
                 <div>
                   <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/60 px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-[13px] font-semibold tracking-[0.03em] text-[var(--muted)]">
                     <AlertTriangle size={14} className="text-rose-600" />
-                    Scanner-first view
+                    {t.scannerFirstView}
                   </div>
 
                   <h1 className="mt-3 sm:mt-5 text-2xl min-[220px]:text-3xl sm:text-5xl font-bold text-[var(--ink)] break-words" style={{ fontFamily: 'var(--font-heading)', lineHeight: '0.98' }}>
@@ -174,7 +174,7 @@ const EmergencyProfile = () => {
                   </h1>
 
                   <p className="mt-3 sm:mt-4 max-w-2xl text-sm min-[220px]:text-[15px] sm:text-lg leading-relaxed text-[var(--muted)]">
-                    Emergency details are arranged for immediate action: call contact first, then verify blood group and medical alerts.
+                    {t.emergencyDetailsArranged}
                   </p>
 
                   <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row gap-2 sm:gap-3">
@@ -199,14 +199,14 @@ const EmergencyProfile = () => {
 
                   <div className="mt-4 sm:mt-6 grid gap-2 sm:gap-3 sm:grid-cols-2">
                     <div className="rounded-[18px] sm:rounded-[22px] border border-white/70 bg-white/70 p-3 sm:p-4">
-                      <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">Emergency Contact</div>
+                      <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">{t.emergencyContactLabel}</div>
                       <div className="mt-1.5 sm:mt-2 text-base min-[220px]:text-lg sm:text-xl font-semibold text-[var(--ink)] break-words">{primaryName}</div>
                       <div className="mt-1 text-[13px] min-[220px]:text-[15px] sm:text-[17px] text-[var(--ink)] break-all">{primaryPhone || 'N/A'}</div>
                     </div>
                     <div className="rounded-[18px] sm:rounded-[22px] border border-white/70 bg-white/70 p-3 sm:p-4">
                       <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">{personalNumberLabel}</div>
                       <div className="mt-1.5 sm:mt-2 text-base min-[220px]:text-lg sm:text-xl font-semibold text-[var(--ink)] break-all">{backupPhone || 'N/A'}</div>
-                      <div className="mt-1 text-[12px] min-[220px]:text-[13px] sm:text-[15px] text-[var(--muted)] break-all">Profile ref: {user.uniqueId?.slice(0, 8) || 'N/A'}</div>
+                      <div className="mt-1 text-[12px] min-[220px]:text-[13px] sm:text-[15px] text-[var(--muted)] break-all">{t.profileRef}: {user.uniqueId?.slice(0, 8) || 'N/A'}</div>
                     </div>
                   </div>
                 </div>
@@ -216,9 +216,9 @@ const EmergencyProfile = () => {
             <GlassCard className="p-3 sm:p-7 lg:p-8">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">Quick identity</div>
+                  <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">{t.quickIdentity}</div>
                   <h2 className="mt-1.5 sm:mt-2 text-lg min-[220px]:text-xl sm:text-2xl font-semibold text-[var(--ink)]" style={{ fontFamily: 'var(--font-heading)' }}>
-                    Patient facts
+                    {t.patientFacts}
                   </h2>
                 </div>
                 <div className="flex h-9 w-9 min-[220px]:h-10 min-[220px]:w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl sm:rounded-2xl bg-white/70 text-[var(--accent)] shrink-0">
@@ -299,12 +299,12 @@ const EmergencyProfile = () => {
                 </div>
                 <div className="mt-3 sm:mt-5 grid gap-2 sm:gap-3 sm:grid-cols-2">
                   <div className="rounded-[16px] sm:rounded-[20px] bg-white/78 p-3 sm:p-4">
-                    <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">Record ID</div>
+                    <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">{t.recordId}</div>
                     <div className="mt-1.5 sm:mt-2 text-xs min-[220px]:text-sm sm:text-base font-semibold text-[var(--ink)] break-all">{user.uniqueId || 'N/A'}</div>
                   </div>
                   <div className="rounded-[16px] sm:rounded-[20px] bg-white/78 p-3 sm:p-4">
-                    <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">Status</div>
-                    <div className="mt-1.5 sm:mt-2 text-xs min-[220px]:text-sm sm:text-base font-semibold text-[var(--accent)]">Active and verified</div>
+                    <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">{t.status}</div>
+                    <div className="mt-1.5 sm:mt-2 text-xs min-[220px]:text-sm sm:text-base font-semibold text-[var(--accent)]">{t.activeAndVerified}</div>
                   </div>
                 </div>
               </div>

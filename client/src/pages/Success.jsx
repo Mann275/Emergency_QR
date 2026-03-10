@@ -1,5 +1,5 @@
 import { useLocation, Link, useParams } from 'react-router-dom';
-import { Download, Smartphone, ArrowRight, ExternalLink, QrCode, ShieldCheck } from 'lucide-react';
+import { Download, Smartphone, ArrowRight, ExternalLink, QrCode } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 const Success = () => {
@@ -8,15 +8,13 @@ const Success = () => {
   const location = useLocation();
   const { qrCode, profileUrl } = location.state || {};
 
-  if (!qrCode) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <Link to="/" className="stark-btn">
-          {t.returnHome}
-        </Link>
-      </div>
-    );
-  }
+  if (!qrCode) return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
+      <Link to="/" className="inline-flex items-center gap-2 px-8 py-3 text-xs font-semibold rounded-full transition-base" style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}>
+        {t.returnHome}
+      </Link>
+    </div>
+  );
 
   const handleDownload = () => {
     const link = document.createElement('a');
@@ -28,85 +26,79 @@ const Success = () => {
   };
 
   return (
-    <div className="pb-20">
-      <section className="pt-28 sm:pt-36">
-        <div className="main-wrap max-w-5xl">
-          <div className="grid gap-6 lg:grid-cols-[0.9fr,1.1fr] items-center">
-            <div className="glass-card p-6 sm:p-8 lg:p-10 animate-slide">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/60 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-slate-600">
-                <ShieldCheck size={14} className="text-[var(--accent)]" />
-                Profile live
-              </div>
-              <h1 className="mt-6 text-3xl sm:text-5xl font-bold text-[var(--ink)]" style={{ fontFamily: 'var(--font-heading)', lineHeight: '1.02' }}>
-                {t.profileActive}
-              </h1>
-              <p className="mt-4 text-base leading-relaxed text-[var(--muted)]">
+    <div>
+      <section className="pt-32 pb-20 md:pt-36 md:pb-28">
+        <div className="main-wrap max-w-4xl">
+          <div className="grid md:grid-cols-2 gap-24 items-center">
+
+            <div className="animate-slide">
+              <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4" style={{ fontFamily: 'var(--font-heading)' }}>{t.profileActive}</h1>
+              <p className="text-base leading-relaxed mb-8 opacity-70 font-medium">
                 {t.passLive}
               </p>
 
-              <div className="mt-8 space-y-4">
-                <div className="rounded-[22px] border border-white/70 bg-white/55 p-4">
-                  <div className="flex items-start gap-3">
-                    <Download size={18} className="mt-0.5 text-[var(--accent)]" />
-                    <div>
-                      <div className="text-sm font-semibold text-[var(--ink)]">{t.saveCard}</div>
-                      <p className="mt-1 text-sm leading-relaxed text-[var(--muted)]">{t.saveDesc}</p>
-                    </div>
-                  </div>
+              <div className="space-y-6">
+                <div className="flex gap-4 items-start border border-black/5 bg-white/40 p-5 rounded-2xl">
+                  <Download size={18} className="flex-shrink-0 mt-0.5" style={{ color: 'var(--accent)' }} />
+                  <p className="text-sm leading-relaxed text-[var(--ink)]">
+                    <span className="font-semibold block mb-0.5 text-base">{t.saveCard}</span>
+                    <span className="opacity-80 font-medium">{t.saveDesc}</span>
+                  </p>
                 </div>
-
-                <div className="rounded-[22px] border border-white/70 bg-white/55 p-4">
-                  <div className="flex items-start gap-3">
-                    <Smartphone size={18} className="mt-0.5 text-[var(--accent)]" />
-                    <div>
-                      <div className="text-sm font-semibold text-[var(--ink)]">{t.lockScreen}</div>
-                      <p className="mt-1 text-sm leading-relaxed text-[var(--muted)]">{t.lockDesc}</p>
-                    </div>
-                  </div>
+                <div className="flex gap-4 items-start border border-black/5 bg-white/40 p-5 rounded-2xl">
+                  <Smartphone size={18} className="flex-shrink-0 mt-0.5" style={{ color: 'var(--accent)' }} />
+                  <p className="text-sm leading-relaxed text-[var(--ink)]">
+                    <span className="font-semibold block mb-0.5 text-base">{t.lockScreen}</span>
+                    <span className="opacity-80 font-medium">{t.lockDesc}</span>
+                  </p>
                 </div>
               </div>
 
-              <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                <button onClick={handleDownload} className="stark-btn gap-2">
-                  <Download size={15} />
-                  {t.downloadQr}
+              <div className="mt-10 flex flex-wrap gap-4">
+                <button
+                  onClick={handleDownload}
+                  className="inline-flex items-center gap-2 px-6 py-3.5 text-sm font-bold rounded-xl transition-base shadow-lg shadow-black/5"
+                  style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}
+                >
+                  <Download size={16} /> {t.downloadQr}
                 </button>
-                <a href={profileUrl} target="_blank" rel="noreferrer" className="ghost-btn gap-2">
-                  {t.viewProfile}
-                  <ExternalLink size={15} />
+                <a href={profileUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-6 py-3.5 text-sm font-bold rounded-xl border border-[var(--line)] bg-white transition-base text-[var(--ink)] hover:border-[var(--ink)]">
+                  {t.viewProfile} <ExternalLink size={16} />
                 </a>
               </div>
             </div>
 
-            <div className="glass-card p-6 sm:p-8 animate-slide" style={{ animationDelay: '0.08s' }}>
-              <div className="rounded-[28px] border border-white/75 bg-[rgba(255,255,255,0.82)] p-5 sm:p-8 shadow-[0_24px_60px_rgba(15,23,42,0.12)]">
-                <div className="flex items-center justify-between">
+            <div className="animate-slide flex flex-col items-center" style={{ animationDelay: '0.1s' }}>
+              <div className="bg-white p-6 sm:p-8 shadow-2xl rounded-3xl" style={{ border: '1px solid var(--line)' }}>
+                <div className="flex items-center justify-between w-full mb-6">
                   <div>
-                    <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Emergency pass</div>
-                    <div className="mt-1 text-xl font-semibold text-[var(--ink)]" style={{ fontFamily: 'var(--font-heading)' }}>Ready to share</div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest opacity-50">{t.emergencyPass}</div>
+                    <div className="mt-0.5 text-xl font-bold" style={{ fontFamily: 'var(--font-heading)' }}>{t.readyToShare}</div>
                   </div>
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-[var(--accent)]">
-                    <QrCode size={22} />
+                  <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600">
+                    <QrCode size={20} />
                   </div>
                 </div>
 
-                <div className="mt-6 overflow-hidden rounded-[28px] bg-white p-4 sm:p-6 shadow-[inset_0_0_0_1px_rgba(148,163,184,0.18)]">
-                  <img src={qrCode} alt="Emergency QR" className="mx-auto w-full max-w-[320px]" />
+                <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl w-full max-w-[320px] mx-auto">
+                  <img src={qrCode} alt="Emergency QR" className="mx-auto w-full object-contain mix-blend-multiply" />
                 </div>
 
-                <div className="mt-6 rounded-[22px] border border-dashed border-[var(--line)] px-4 py-4 text-center">
-                  <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Best use</div>
-                  <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
-                    Keep this on your lock screen, wallet card, or medical ID so a scanner can reach the emergency page immediately.
+                <div className="mt-6 border border-dashed border-[var(--line)] px-4 py-4 text-center rounded-2xl w-full bg-slate-50/50">
+                  <div className="text-[10px] font-bold uppercase tracking-widest opacity-50">{t.bestUse}</div>
+                  <p className="mt-1.5 text-xs font-semibold leading-relaxed opacity-80">
+                    {t.bestUseDesc}
                   </p>
                 </div>
 
-                <Link to="/" className="mt-6 inline-flex items-center gap-2 text-base font-semibold text-[var(--accent)]">
-                  {t.backToDashboard}
-                  <ArrowRight size={15} />
-                </Link>
+                <div className="mt-6 flex justify-center w-full">
+                  <Link to="/" className="group inline-flex items-center gap-2 text-sm font-bold text-[var(--ink)] opacity-70 hover:opacity-100 transition-all">
+                    {t.backToDashboard} <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
               </div>
             </div>
+
           </div>
         </div>
       </section>
