@@ -43,9 +43,29 @@ An emergency medical information management system that allows users to create p
    ```
 
 4. **Set up environment variables**
-   - Copy `server/.env.example` to `server/.env`
-   - Configure your MongoDB connection string
-   - Update other environment variables as needed
+
+   **Server (.env)**
+
+   ```bash
+   cd server
+   cp .env.example .env
+   ```
+
+   Configure the following variables:
+   - `MONGODB_URI`: Your MongoDB connection string
+   - `FRONTEND_URL`: Frontend URL for CORS and QR code generation
+   - `PORT`: Server port (default: 5000)
+   - `JWT_SECRET`: Secret key for JWT tokens
+
+   **Client (.env)**
+
+   ```bash
+   cd client
+   cp .env.example .env
+   ```
+
+   Configure:
+   - `VITE_API_URL`: Backend API URL (e.g., `http://localhost:5000/api` for local, `https://your-backend.onrender.com/api` for production)
 
 5. **Start the development servers**
 
@@ -179,6 +199,86 @@ For support, please open an issue in the GitHub repository or contact the projec
 
 ## 🚀 Deployment
 
+### Production Deployment
+
+#### Frontend (Vercel)
+
+1. **Deploy to Vercel**
+   ```bash
+   cd client
+   vercel --prod
+   ```
+2. **Configure Environment Variables**
+   In Vercel dashboard, set:
+   - `VITE_API_URL`: Your production backend URL (e.g., `https://emergency-qr-jp5i.onrender.com/api`)
+
+3. **Build Settings**
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+   - Install Command: `npm install`
+
+#### Backend (Render/Heroku)
+
+1. **Deploy to Render**
+   - Connect your GitHub repository
+   - Select the `server` directory as root
+   - Set build command: `npm install`
+   - Set start command: `npm start`
+
+2. **Configure Environment Variables**
+   Set the following in your hosting platform:
+   ```
+   MONGODB_URI=your_mongodb_atlas_connection_string
+   FRONTEND_URL=https://emergencyqr-gen.vercel.app
+   PORT=5000
+   NODE_ENV=production
+   JWT_SECRET=your_secret_key
+   ```
+
+#### Database (MongoDB Atlas)
+
+1. Create a free cluster on MongoDB Atlas
+2. Whitelist IP addresses (use `0.0.0.0/0` for all IPs)
+3. Create a database user
+4. Copy the connection string and update `MONGODB_URI`
+
+### Health Check System
+
+The application includes an automatic server health monitoring system:
+
+- **Health Endpoint**: `/api/health` - Returns server status
+- **Auto-Detection**: Frontend automatically checks server health every 30 seconds
+- **Visual Feedback**: Yellow banner shows "Server is starting..." when backend is initializing
+- **Error Handling**: Red banner appears when server is unreachable
+- **User Experience**: Users are informed of server status during profile creation and access
+
+This is especially useful for deployments on services like Render (free tier) where the server may go to sleep and take 30-60 seconds to restart.
+
+### Deployment Checklist
+
+#### Before Deploying:
+
+- [ ] Update `client/.env` with production backend URL
+- [ ] Update `server/.env` with production frontend URL
+- [ ] Test health endpoint: `curl https://your-backend-url/api/health`
+- [ ] Verify MongoDB connection string
+- [ ] Ensure CORS settings allow your frontend domain
+- [ ] Check QR code generation with production URLs
+
+#### After Deploying:
+
+- [ ] Test profile creation on production
+- [ ] Verify QR code links to correct profile URL
+- [ ] Test emergency profile access via QR code
+- [ ] Monitor server health status banner
+- [ ] Check network requests in browser DevTools
+
+### Live Deployment
+
+- **Frontend**: https://emergencyqr-gen.vercel.app
+- **Backend**: https://emergency-qr-jp5i.onrender.com
+- **Health Check**: https://emergency-qr-jp5i.onrender.com/api/health
+
 ### Vercel (Frontend)
 
 1. Connect your GitHub repository to Vercel
@@ -196,6 +296,74 @@ For support, please open an issue in the GitHub repository or contact the projec
 1. Create a MongoDB Atlas account
 2. Create a new cluster
 3. Connect your application
+
+## 🔧 Troubleshooting
+
+### Profile Creation Not Working
+
+**Issue**: Profile creation fails or shows "Server is starting" banner
+
+**Solutions**:
+
+1. **Check Backend Health**
+
+   ```bash
+   curl https://your-backend-url/api/health
+   ```
+
+   Expected response:
+
+   ```json
+   {
+     "message": "Emergency QR API is running!",
+     "timestamp": "2024-03-10T..."
+   }
+   ```
+
+2. **Verify Environment Variables**
+   - Client: `VITE_API_URL` should point to backend with `/api` suffix
+   - Server: `FRONTEND_URL` should match your frontend domain
+
+3. **Check CORS Settings**
+   - Ensure server allows requests from your frontend domain
+   - Check browser console for CORS errors
+
+4. **Render Free Tier Delay**
+   - Free tier goes to sleep after 15 minutes of inactivity
+   - First request may take 30-60 seconds to wake up
+   - Health check system will show "Server is starting..." during this time
+
+### QR Code Not Working
+
+**Issue**: QR code doesn't link to the correct profile
+
+**Solutions**:
+
+1. Verify `FRONTEND_URL` in server `.env` matches deployed frontend
+2. Check QR code URL format: `https://your-frontend.com/emergency/{uniqueId}`
+3. Ensure profile was created successfully (check database)
+
+### Connection Timeout
+
+**Issue**: Requests timeout or fail
+
+**Solutions**:
+
+1. Check if MongoDB Atlas allows connections from all IPs (`0.0.0.0/0`)
+2. Verify MongoDB connection string is correct
+3. Check if backend service is running
+4. Increase timeout in API calls if needed
+
+### Server Health Banner Not Disappearing
+
+**Issue**: Health banner stays visible even when server is running
+
+**Solutions**:
+
+1. Check browser console for health check errors
+2. Verify `/api/health` endpoint is accessible
+3. Check CORS settings allow health check requests
+4. Clear browser cache and refresh page
 
 ## 📈 Performance
 
