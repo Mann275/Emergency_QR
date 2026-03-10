@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 
+const isValidPhoneNumber = (phone) => {
+  if (!phone) return false;
+  const normalized = String(phone).replace(/[^\d]/g, '');
+  return normalized.length >= 8 && normalized.length <= 15;
+};
+
 const userSchema = new mongoose.Schema({
   // Personal Information
   name: {
@@ -39,9 +45,7 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Primary phone number is required'],
     validate: {
       validator: function (phone) {
-        // More flexible phone validation - allow various formats
-        const phoneRegex = /^[\+]?[1-9][\d\s\-\(\)]{7,15}$/;
-        return phoneRegex.test(phone.replace(/\s/g, ''));
+        return isValidPhoneNumber(phone);
       },
       message: 'Invalid phone number format'
     }
@@ -51,8 +55,7 @@ const userSchema = new mongoose.Schema({
     validate: {
       validator: function (phone) {
         if (!phone) return true; // Optional field
-        const phoneRegex = /^[\+]?[1-9][\d\s\-\(\)]{7,15}$/;
-        return phoneRegex.test(phone.replace(/\s/g, ''));
+        return isValidPhoneNumber(phone);
       },
       message: 'Invalid alternate phone number format'
     }
@@ -68,8 +71,7 @@ const userSchema = new mongoose.Schema({
       required: [true, 'Emergency contact phone is required'],
       validate: {
         validator: function (phone) {
-          const phoneRegex = /^[\+]?[1-9][\d\s\-\(\)]{7,15}$/;
-          return phoneRegex.test(phone.replace(/\s/g, ''));
+          return isValidPhoneNumber(phone);
         },
         message: 'Invalid emergency contact phone number format'
       }
@@ -158,8 +160,10 @@ userSchema.methods.getEmergencyData = function () {
   return {
     uniqueId: this.uniqueId,
     name: this.name,
+    dateOfBirth: this.dateOfBirth,
     age: this.age,
     bloodGroup: this.bloodGroup,
+    gender: this.gender,
     phone: this.phone,
     alternatePhone: this.alternatePhone,
     emergencyContact: this.emergencyContact,

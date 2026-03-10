@@ -1,12 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Sun, Moon, User, Languages, ChevronDown } from 'lucide-react';
+import { User, Languages, ChevronDown, Shield } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import { useTheme } from '../context/ThemeContext';
 
 const Header = () => {
   const { lang, setLang, t } = useLanguage();
-  const { theme, toggleTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -29,18 +27,27 @@ const Header = () => {
   const currentLang = languages.find(l => l.code === lang) || languages[0];
 
   return (
-    <header className="glass-nav !px-4 !py-3 md:!px-8 md:!py-4">
-      <nav className="flex items-center justify-between">
-        <Link to="/" className="text-lg font-bold tracking-tight transition-base" style={{ fontFamily: 'var(--font-heading)' }}>
-          Emergency QR
+    <header className="glass-nav !px-4 !py-3 md:!px-6 md:!py-4">
+      <nav className="flex items-center justify-between gap-3">
+        <Link to="/" className="flex items-center gap-3 text-slate-900 transition-base min-w-0">
+          <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/60 bg-white/70 text-[var(--accent)] shadow-[0_12px_30px_rgba(60,22,34,0.08)]">
+            <Shield size={18} />
+          </span>
+          <span className="min-w-0">
+            <span className="block text-lg font-bold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
+              Emergency QR
+            </span>
+            <span className="hidden sm:block text-[11px] uppercase tracking-[0.24em] text-slate-500">
+              Medical access card
+            </span>
+          </span>
         </Link>
 
         <div className="flex items-center gap-2 md:gap-4 sm:gap-8 overflow-visible">
-          {/* Custom Language Selector */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="flex items-center gap-1.5 md:gap-2 px-2 py-1.5 transition-all duration-300 active:scale-95"
+              className="flex items-center gap-1.5 md:gap-2 px-3 py-2 rounded-full border border-white/50 bg-white/65 shadow-[0_12px_30px_rgba(15,23,42,0.06)] transition-all duration-300 active:scale-95"
               style={{
                 color: 'var(--ink)'
               }}
@@ -54,10 +61,10 @@ const Header = () => {
               <div
                 className="absolute top-full right-0 mt-2 w-32 py-2 rounded-2xl border shadow-xl z-[150] animate-in fade-in slide-in-from-top-2 duration-200"
                 style={{
-                  background: 'var(--surfaceRaised)',
+                  background: 'rgba(255,255,255,0.82)',
                   backdropFilter: 'blur(12px)',
                   WebkitBackdropFilter: 'blur(12px)',
-                  borderColor: 'var(--line)',
+                  borderColor: 'var(--glass-border)',
                 }}
               >
                 {languages.map((l) => (
@@ -67,7 +74,7 @@ const Header = () => {
                       setLang(l.code);
                       setIsOpen(false);
                     }}
-                    className={`w-full text-left px-4 py-2 text-[13px] font-bold transition-colors hover:bg-black/5 dark:hover:bg-white/5 ${lang === l.code ? 'text-accent' : ''}`}
+                    className={`w-full text-left px-4 py-2 text-[13px] font-bold transition-colors hover:bg-white/70 ${lang === l.code ? 'text-accent' : ''}`}
                     style={{ color: 'var(--ink)' }}
                   >
                     {l.label}
@@ -78,19 +85,10 @@ const Header = () => {
           </div>
 
           <div className="flex items-center gap-3 sm:gap-6">
-            <Link to="/create" className="hidden md:flex items-center gap-2 text-sm font-bold transition-all duration-300 group" aria-label="Create Profile" style={{ color: 'var(--ink)' }}>
+            <Link to="/create" className="hidden md:flex items-center gap-2 rounded-full bg-[var(--accent)] px-4 py-2.5 text-sm font-bold text-white transition-all duration-300 group shadow-[0_18px_35px_rgba(214,31,69,0.22)]" aria-label="Create Profile">
               <User size={18} className="transition-transform group-hover:scale-110" />
               <span>{t.createProfile}</span>
             </Link>
-
-            <button
-              onClick={toggleTheme}
-              className="transition-all duration-300 ml-2"
-              aria-label="Toggle theme"
-              style={{ color: 'var(--ink)' }}
-            >
-              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-            </button>
           </div>
         </div>
       </nav>

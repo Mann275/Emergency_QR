@@ -1,9 +1,24 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ApiService from '../utils/api';
-import { User, Droplets, Calendar, Phone, UserCheck, Pill, AlertTriangle, FileText, Loader2, ArrowRight, ChevronDown } from 'lucide-react';
+import {
+  User,
+  Droplets,
+  Calendar,
+  Phone,
+  UserCheck,
+  Pill,
+  AlertTriangle,
+  FileText,
+  Loader2,
+  ArrowRight,
+  ChevronDown,
+  Shield,
+  HeartPulse,
+} from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { IN, US, GB, AU } from 'country-flag-icons/react/3x2';
+import { toast } from 'react-hot-toast';
 
 const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 const genderOptions = ['Male', 'Female', 'Other', 'Prefer not to say'];
@@ -12,7 +27,6 @@ const CreateProfile = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [phoneCode, setPhoneCode] = useState('+91');
   const [emergencyCode, setEmergencyCode] = useState('+91');
 
@@ -42,6 +56,7 @@ const CreateProfile = () => {
       }));
       return;
     }
+
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
@@ -51,21 +66,22 @@ const CreateProfile = () => {
   const handlePhoneChange = (e, fieldPath) => {
     const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 10);
     if (fieldPath === 'phone') {
-      setFormData(prev => ({ ...prev, phone: digitsOnly }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        emergencyContact: { ...prev.emergencyContact, phone: digitsOnly }
-      }));
+      setFormData((prev) => ({ ...prev, phone: digitsOnly }));
+      return;
     }
+
+    setFormData((prev) => ({
+      ...prev,
+      emergencyContact: { ...prev.emergencyContact, phone: digitsOnly },
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+
     try {
-      if (!formData.name || !formData.bloodGroup || !formData.phone || !formData.emergencyContact.name || !formData.emergencyContact.phone) {
+      if (!formData.name || !formData.bloodGroup || !formData.gender || !formData.dateOfBirth || !formData.phone || !formData.emergencyContact.name || !formData.emergencyContact.phone) {
         throw new Error('Please fill in all required fields.');
       }
 
@@ -74,45 +90,52 @@ const CreateProfile = () => {
         phone: `${phoneCode} ${formData.phone}`,
         emergencyContact: {
           ...formData.emergencyContact,
-          phone: `${emergencyCode} ${formData.emergencyContact.phone}`
-        }
+          phone: `${emergencyCode} ${formData.emergencyContact.phone}`,
+        },
       };
 
       const response = await ApiService.createUser(payload);
       if (response.success) {
-        import('react-hot-toast').then(({ toast }) => {
-          toast.success('Profile created successfully!', {
-            icon: '🚀',
-            style: {
-              borderRadius: '20px',
-              background: 'var(--surfaceRaised)',
-              color: 'var(--ink)',
-              padding: '16px',
-            },
-          });
+        toast.success('Profile created successfully!', {
+          style: {
+            borderRadius: '20px',
+            background: 'rgba(255,255,255,0.92)',
+            color: 'var(--ink)',
+            padding: '16px',
+            border: '1px solid var(--glass-border)',
+          },
         });
+
         navigate(`/success/${response.data.uniqueId}`, {
           state: { qrCode: response.data.qrCode, profileUrl: response.data.profileUrl },
         });
       }
     } catch (err) {
-      setError(err.message || 'Something went wrong.');
+      toast.error(err.message || 'Something went wrong.', {
+        style: {
+          borderRadius: '20px',
+          background: 'rgba(255,255,255,0.92)',
+          color: 'var(--ink)',
+          padding: '16px',
+          border: '1px solid rgba(214, 31, 69, 0.14)',
+        },
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const inputStyle = {
-    border: '1.5px solid var(--line)',
-    color: 'var(--ink)',
-    borderRadius: '16px',
-    padding: '16px 20px',
-    fontSize: '16px',
-    fontWeight: '500',
-    background: 'transparent',
+  const fieldStyle = {
     width: '100%',
+    border: '1px solid var(--line)',
+    borderRadius: '18px',
+    padding: '16px 18px',
+    background: 'rgba(255,255,255,0.5)',
+    color: 'var(--ink)',
+    fontSize: '17px',
+    fontWeight: '500',
     outline: 'none',
-    transition: 'all 0.3s ease',
+    backdropFilter: 'blur(14px)',
     resize: 'none',
   };
 
@@ -122,23 +145,20 @@ const CreateProfile = () => {
     gap: '8px',
     fontSize: '14px',
     fontWeight: '600',
+    letterSpacing: '0.01em',
     marginBottom: '10px',
-    color: 'var(--ink)',
-    opacity: 0.8
+    color: 'var(--muted)',
   };
 
-  const sectionHeadingStyle = {
-    fontSize: '13px',
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: '0.15em',
-    color: 'var(--ink)',
-    opacity: 0.3,
-    marginBottom: '32px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px'
-  };
+  const SectionTitle = ({ icon: Icon, title, copy }) => (
+    <div className="mb-6 sm:mb-8">
+      <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/60 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-slate-600 backdrop-blur-xl">
+        <Icon size={14} className="text-[var(--accent)]" />
+        {title}
+      </div>
+      {copy && <p className="mt-3 max-w-2xl text-base sm:text-lg leading-relaxed text-[var(--muted)]">{copy}</p>}
+    </div>
+  );
 
   const CustomPhoneSelector = ({ value, onChange }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -156,55 +176,43 @@ const CreateProfile = () => {
           setIsOpen(false);
         }
       };
+
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const selected = options.find(o => o.code === value) || options[0];
+    const selected = options.find((option) => option.code === value) || options[0];
 
     return (
-      <div className="relative min-w-[120px]" ref={dropdownRef}>
+      <div className="relative min-w-[110px] sm:min-w-[130px]" ref={dropdownRef}>
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 w-full transition-all duration-300 active:scale-95"
-          style={{
-            ...inputStyle,
-            padding: '16px 14px',
-            background: 'var(--surface)',
-            borderColor: 'var(--line)'
-          }}
+          className="flex w-full items-center gap-2 rounded-2xl border border-[var(--line)] bg-white/55 px-3 py-4 text-base font-medium text-[var(--ink)] backdrop-blur-xl"
         >
-          <div className="w-5 h-[13px] flex items-center justify-center border border-black/10 dark:border-white/10 overflow-hidden">
+          <div className="flex h-[16px] w-6 items-center justify-center overflow-hidden rounded-sm border border-slate-200">
             {selected.icon}
           </div>
-          <span className="font-bold text-sm tracking-tight">{selected.code}</span>
-          <ChevronDown size={14} className={`ml-auto opacity-40 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+          <span>{selected.code}</span>
+          <ChevronDown size={14} className={`ml-auto opacity-50 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         </button>
 
         {isOpen && (
-          <div className="absolute top-full left-0 mt-2 w-full py-2 rounded-2xl border shadow-2xl z-[150] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
-            style={{
-              background: 'var(--surfaceRaised)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-              borderColor: 'var(--line)'
-            }}>
-            {options.map((opt) => (
+          <div className="absolute left-0 top-full z-[120] mt-2 w-full overflow-hidden rounded-2xl border border-[var(--glass-border)] bg-[rgba(255,255,255,0.85)] py-2 shadow-[0_20px_45px_rgba(15,23,42,0.12)] backdrop-blur-xl">
+            {options.map((option) => (
               <button
-                key={opt.code}
+                key={option.code}
                 type="button"
                 onClick={() => {
-                  onChange(opt.code);
+                  onChange(option.code);
                   setIsOpen(false);
                 }}
-                className="flex items-center gap-3 w-full px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                style={{ color: 'var(--ink)' }}
+                className="flex w-full items-center gap-3 px-4 py-3.5 text-left text-base font-medium text-[var(--ink)] transition-colors hover:bg-white/70"
               >
-                <div className="w-5 h-[13px] flex items-center justify-center border border-black/10 dark:border-white/10 overflow-hidden">
-                  {opt.icon}
+                <div className="flex h-[16px] w-6 items-center justify-center overflow-hidden rounded-sm border border-slate-200">
+                  {option.icon}
                 </div>
-                <span className="font-bold text-sm">{opt.code}</span>
+                {option.code}
               </button>
             ))}
           </div>
@@ -214,138 +222,152 @@ const CreateProfile = () => {
   };
 
   return (
-    <div className="min-h-screen pb-32">
-      <section className="pt-32 pb-20 md:pt-40 md:pb-28">
-        <div className="main-wrap max-w-2xl">
-          <div className="animate-slide mb-16">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-heading)', color: 'var(--ink)' }}>
-              {t.createTitle}
-            </h1>
-            <p className="text-base opacity-50 mt-4 leading-relaxed max-w-lg">
-              {t.createDesc}
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="animate-slide" style={{ animationDelay: '0.08s' }}>
-            {error && (
-              <div className="mb-8 p-5 rounded-2xl font-semibold flex items-center gap-3" style={{ background: 'var(--danger)', color: '#fff', fontSize: '15px' }}>
-                <AlertTriangle size={20} /> {error}
+    <div className="pb-24">
+      <section className="pt-28 sm:pt-36">
+        <div className="main-wrap max-w-5xl">
+          <div className="grid gap-6 lg:grid-cols-[0.8fr,1.2fr] items-start">
+            <div className="glass-card p-6 sm:p-8 lg:sticky lg:top-32">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/70 text-[var(--accent)] shadow-[0_14px_28px_rgba(60,22,34,0.08)]">
+                <Shield size={24} />
               </div>
-            )}
-
-            <div className="mb-20">
-              <div style={sectionHeadingStyle}>
-                {t.personalInfo} <span className="h-px bg-current flex-grow"></span>
-              </div>
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="md:col-span-2">
-                  <label style={labelStyle}><User size={16} /> {t.fullName} <span className="opacity-40 ml-1">*</span></label>
-                  <input type="text" name="name" value={formData.name} onChange={handleChange} style={inputStyle} placeholder="E.g. John Doe" required />
-                </div>
-
-                <div>
-                  <label style={labelStyle}><Droplets size={16} /> {t.bloodGroup} <span className="opacity-40 ml-1">*</span></label>
-                  <div className="relative flex items-center">
-                    <select name="bloodGroup" value={formData.bloodGroup} onChange={handleChange}
-                      className="cursor-pointer"
-                      style={{ ...inputStyle, appearance: 'none', paddingRight: '40px', background: 'var(--surface)' }} required>
-                      <option value="" style={{ background: 'var(--surfaceRaised)', color: 'var(--ink)' }}>Select group</option>
-                      {bloodGroups.map(g => <option key={g} value={g} style={{ background: 'var(--surfaceRaised)', color: 'var(--ink)' }}>{g}</option>)}
-                    </select>
-                    <ChevronDown size={16} className="absolute right-4 pointer-events-none opacity-40" />
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-8 mt-8 md:col-span-2">
-                  <div>
-                    <label style={labelStyle}><User size={16} /> {t.gender} <span className="opacity-40 ml-1">*</span></label>
-                    <div className="relative flex items-center">
-                      <select name="gender" value={formData.gender} onChange={handleChange}
-                        className="cursor-pointer"
-                        style={{ ...inputStyle, appearance: 'none', paddingRight: '40px', background: 'var(--surface)' }} required>
-                        <option value="" style={{ background: 'var(--surfaceRaised)', color: 'var(--ink)' }}>Select gender</option>
-                        {genderOptions.map(g => <option key={g} value={g} style={{ background: 'var(--surfaceRaised)', color: 'var(--ink)' }}>{g}</option>)}
-                      </select>
-                      <ChevronDown size={16} className="absolute right-4 pointer-events-none opacity-40" />
-                    </div>
-                  </div>
-                  <div>
-                    <label style={labelStyle}><Calendar size={16} /> {t.dob} <span className="opacity-40 ml-1">*</span></label>
-                    <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required style={inputStyle} />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-20">
-              <div style={sectionHeadingStyle}>
-                {t.emergencyContacts} <span className="h-px bg-current flex-grow"></span>
-              </div>
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="md:col-span-2">
-                  <label style={labelStyle}><Phone size={16} /> {t.yourPhone} <span className="opacity-40 ml-1">*</span></label>
-                  <div className="flex gap-4">
-                    <CustomPhoneSelector value={phoneCode} onChange={setPhoneCode} />
-                    <input type="tel" name="phone" value={formData.phone} onChange={(e) => handlePhoneChange(e, 'phone')} style={inputStyle} placeholder="1234567890" required />
-                  </div>
-                </div>
-                <div className="md:col-span-2 pt-4">
-                  <div style={sectionHeadingStyle} className="!mb-8 opacity-20 text-[10px]">Primary Contact Details</div>
-                </div>
-                <div>
-                  <label style={labelStyle}><Phone size={16} /> Emergency No. <span className="opacity-40 ml-1">*</span></label>
-                  <div className="flex gap-4">
-                    <CustomPhoneSelector value={emergencyCode} onChange={setEmergencyCode} />
-                    <input type="tel" name="emergencyContact.phone" value={formData.emergencyContact.phone} onChange={(e) => handlePhoneChange(e, 'emergencyContact.phone')} style={inputStyle} placeholder="1234567890" required />
-                  </div>
-                </div>
-                <div>
-                  <label style={labelStyle}><UserCheck size={16} /> Contact Name <span className="opacity-40 ml-1">*</span></label>
-                  <input type="text" name="emergencyContact.name" value={formData.emergencyContact.name} onChange={handleChange} style={inputStyle} placeholder="Someone you trust" required />
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-20">
-              <div style={sectionHeadingStyle}>
-                {t.medicalHistory} <span className="h-px bg-current flex-grow"></span>
-              </div>
-              <div className="space-y-8">
-                <div>
-                  <label style={labelStyle}><AlertTriangle size={16} /> {t.chronicConditions}</label>
-                  <textarea name="diseaseDetails" value={formData.diseaseDetails} onChange={handleChange} style={{ ...inputStyle, minHeight: '100px' }} placeholder="Asthma, Diabetes, etc." />
-                </div>
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div>
-                    <label style={labelStyle}><Droplets size={16} /> {t.knownAllergies}</label>
-                    <input type="text" name="allergies" value={formData.allergies} onChange={handleChange} style={inputStyle} placeholder="Peanuts, Penicillin..." />
-                  </div>
-                  <div>
-                    <label style={labelStyle}><Pill size={16} /> {t.medications}</label>
-                    <input type="text" name="medications" value={formData.medications} onChange={handleChange} style={inputStyle} placeholder="Current meds..." />
-                  </div>
-                </div>
-                <div>
-                  <label style={labelStyle}><FileText size={16} /> {t.responderNotes}</label>
-                  <textarea name="notes" value={formData.notes} onChange={handleChange} style={{ ...inputStyle, minHeight: '80px' }} placeholder="Notes for first responders" />
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-12 border-t flex flex-col sm:flex-row items-center justify-between gap-10" style={{ borderColor: 'var(--line)' }}>
-              <p className="text-sm opacity-30 max-w-xs text-center sm:text-left leading-relaxed">
-                {t.disclaimer}
+              <h1 className="mt-6 text-3xl sm:text-4xl font-bold text-[var(--ink)]" style={{ fontFamily: 'var(--font-heading)', lineHeight: '1.02' }}>
+                {t.createTitle}
+              </h1>
+              <p className="mt-4 text-base sm:text-lg leading-relaxed text-[var(--muted)]">
+                {t.createDesc}
               </p>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full sm:w-auto px-12 py-4 text-xs font-bold rounded-full transition-base flex items-center justify-center gap-3 active:scale-95 shadow-lg shadow-black/5"
-                style={{ background: 'var(--accent)', color: 'var(--accent-ink)', border: 'none', cursor: 'pointer' }}
-              >
-                {loading ? <><Loader2 size={16} className="animate-spin" /> {t.working}</> : <>{t.generateQr} <ArrowRight size={14} /></>}
-              </button>
+
+              <div className="mt-8 space-y-4">
+                {[
+                  'Only emergency-safe data is shown publicly.',
+                  'Primary contact and blood group stay visible first.',
+                  'Profile is optimized for mobile lock-screen access.',
+                ].map((item) => (
+                  <div key={item} className="rounded-2xl border border-white/70 bg-white/50 px-4 py-3.5 text-base leading-relaxed text-[var(--muted)]">
+                    {item}
+                  </div>
+                ))}
+              </div>
             </div>
-          </form>
+
+            <form onSubmit={handleSubmit} className="glass-card p-6 sm:p-8 lg:p-10 animate-slide">
+              <SectionTitle icon={User} title={t.personalInfo} copy="Fill only the information a responder should see immediately." />
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label style={labelStyle}><User size={14} /> {t.fullName}</label>
+                  <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="E.g. John Doe" required style={fieldStyle} />
+                </div>
+
+                <div>
+                  <label style={labelStyle}><Droplets size={14} /> {t.bloodGroup}</label>
+                  <div className="relative">
+                    <select
+                      name="bloodGroup"
+                      value={formData.bloodGroup}
+                      onChange={handleChange}
+                      required
+                      style={{ ...fieldStyle, appearance: 'none', paddingRight: '44px' }}
+                    >
+                      <option value="">Select blood group</option>
+                      {bloodGroups.map((group) => (
+                        <option key={group} value={group}>{group}</option>
+                      ))}
+                    </select>
+                    <ChevronDown size={16} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 opacity-40" />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={labelStyle}><UserCheck size={14} /> {t.gender}</label>
+                  <div className="relative">
+                    <select
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleChange}
+                      required
+                      style={{ ...fieldStyle, appearance: 'none', paddingRight: '44px' }}
+                    >
+                      <option value="">Select gender</option>
+                      {genderOptions.map((gender) => (
+                        <option key={gender} value={gender}>{gender}</option>
+                      ))}
+                    </select>
+                    <ChevronDown size={16} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 opacity-40" />
+                  </div>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label style={labelStyle}><Calendar size={14} /> {t.dob}</label>
+                  <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required style={fieldStyle} />
+                </div>
+              </div>
+
+              <div className="my-8 h-px bg-[var(--line)]"></div>
+
+              <SectionTitle icon={Phone} title={t.emergencyContacts} copy="These numbers appear high on the emergency profile, so keep them accurate." />
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label style={labelStyle}><Phone size={14} /> {t.yourPhone}</label>
+                  <div className="flex gap-3">
+                    <CustomPhoneSelector value={phoneCode} onChange={setPhoneCode} />
+                    <input type="tel" name="phone" value={formData.phone} onChange={(e) => handlePhoneChange(e, 'phone')} placeholder="1234567890" required style={fieldStyle} />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={labelStyle}><UserCheck size={14} /> {t.contactName}</label>
+                  <input type="text" name="emergencyContact.name" value={formData.emergencyContact.name} onChange={handleChange} placeholder="Someone you trust" required style={fieldStyle} />
+                </div>
+
+                <div>
+                  <label style={labelStyle}><Phone size={14} /> {t.emergencyPhone}</label>
+                  <div className="flex gap-3">
+                    <CustomPhoneSelector value={emergencyCode} onChange={setEmergencyCode} />
+                    <input type="tel" name="emergencyContact.phone" value={formData.emergencyContact.phone} onChange={(e) => handlePhoneChange(e, 'emergencyContact.phone')} placeholder="1234567890" required style={fieldStyle} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="my-8 h-px bg-[var(--line)]"></div>
+
+              <SectionTitle icon={HeartPulse} title={t.medicalHistory} copy="Add only the details that are helpful during an emergency." />
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label style={labelStyle}><AlertTriangle size={14} /> {t.chronicConditions}</label>
+                  <textarea name="diseaseDetails" value={formData.diseaseDetails} onChange={handleChange} placeholder="Asthma, diabetes, epilepsy..." style={{ ...fieldStyle, minHeight: '96px' }} />
+                </div>
+
+                <div>
+                  <label style={labelStyle}><Droplets size={14} /> {t.knownAllergies}</label>
+                  <input type="text" name="allergies" value={formData.allergies} onChange={handleChange} placeholder="Penicillin, peanuts..." style={fieldStyle} />
+                </div>
+
+                <div>
+                  <label style={labelStyle}><Pill size={14} /> {t.medications}</label>
+                  <input type="text" name="medications" value={formData.medications} onChange={handleChange} placeholder="Current medication..." style={fieldStyle} />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label style={labelStyle}><FileText size={14} /> {t.responderNotes}</label>
+                  <textarea name="notes" value={formData.notes} onChange={handleChange} placeholder="Example: carries inhaler in bag pocket." style={{ ...fieldStyle, minHeight: '88px' }} />
+                </div>
+              </div>
+
+              <div className="mt-10 flex flex-col gap-5 border-t border-[var(--line)] pt-6 sm:flex-row sm:items-center sm:justify-between">
+                <p className="max-w-md text-base sm:text-lg leading-relaxed text-[var(--muted)]">
+                  {t.disclaimer}
+                </p>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="stark-btn gap-3 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {loading ? <><Loader2 size={16} className="animate-spin" /> {t.working}</> : <>{t.generateQr} <ArrowRight size={16} /></>}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </section>
     </div>

@@ -1,5 +1,5 @@
 import { useLocation, Link, useParams } from 'react-router-dom';
-import { Download, Smartphone, ArrowRight, ExternalLink, QrCode } from 'lucide-react';
+import { Download, Smartphone, ArrowRight, ExternalLink, QrCode, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 const Success = () => {
@@ -8,13 +8,15 @@ const Success = () => {
   const location = useLocation();
   const { qrCode, profileUrl } = location.state || {};
 
-  if (!qrCode) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
-      <Link to="/" className="inline-flex items-center gap-2 px-8 py-3 text-xs font-semibold rounded-full transition-base" style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}>
-        {t.returnHome}
-      </Link>
-    </div>
-  );
+  if (!qrCode) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <Link to="/" className="stark-btn">
+          {t.returnHome}
+        </Link>
+      </div>
+    );
+  }
 
   const handleDownload = () => {
     const link = document.createElement('a');
@@ -26,62 +28,85 @@ const Success = () => {
   };
 
   return (
-    <div>
-      <section className="pt-32 pb-20 md:pt-36 md:pb-28">
-        <div className="main-wrap max-w-4xl">
-          <div className="grid md:grid-cols-2 gap-24 items-center">
-
-            <div className="animate-slide">
-              <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-6" style={{ fontFamily: 'var(--font-heading)' }}>{t.profileActive}</h1>
-              <p className="text-base leading-relaxed mb-12 opacity-60">
+    <div className="pb-20">
+      <section className="pt-28 sm:pt-36">
+        <div className="main-wrap max-w-5xl">
+          <div className="grid gap-6 lg:grid-cols-[0.9fr,1.1fr] items-center">
+            <div className="glass-card p-6 sm:p-8 lg:p-10 animate-slide">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/60 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-slate-600">
+                <ShieldCheck size={14} className="text-[var(--accent)]" />
+                Profile live
+              </div>
+              <h1 className="mt-6 text-3xl sm:text-5xl font-bold text-[var(--ink)]" style={{ fontFamily: 'var(--font-heading)', lineHeight: '1.02' }}>
+                {t.profileActive}
+              </h1>
+              <p className="mt-4 text-base leading-relaxed text-[var(--muted)]">
                 {t.passLive}
               </p>
 
-              <div className="space-y-8">
-                <div className="flex gap-4 items-start">
-                  <Download size={18} className="flex-shrink-0 mt-0.5 opacity-50" />
-                  <p className="text-base leading-relaxed">
-                    <span className="font-semibold block mb-1">{t.saveCard}</span>
-                    {t.saveDesc}
-                  </p>
+              <div className="mt-8 space-y-4">
+                <div className="rounded-[22px] border border-white/70 bg-white/55 p-4">
+                  <div className="flex items-start gap-3">
+                    <Download size={18} className="mt-0.5 text-[var(--accent)]" />
+                    <div>
+                      <div className="text-sm font-semibold text-[var(--ink)]">{t.saveCard}</div>
+                      <p className="mt-1 text-sm leading-relaxed text-[var(--muted)]">{t.saveDesc}</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex gap-4 items-start">
-                  <Smartphone size={18} className="flex-shrink-0 mt-0.5 opacity-50" />
-                  <p className="text-base leading-relaxed">
-                    <span className="font-semibold block mb-1">{t.lockScreen}</span>
-                    {t.lockDesc}
-                  </p>
+
+                <div className="rounded-[22px] border border-white/70 bg-white/55 p-4">
+                  <div className="flex items-start gap-3">
+                    <Smartphone size={18} className="mt-0.5 text-[var(--accent)]" />
+                    <div>
+                      <div className="text-sm font-semibold text-[var(--ink)]">{t.lockScreen}</div>
+                      <p className="mt-1 text-sm leading-relaxed text-[var(--muted)]">{t.lockDesc}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-12 flex flex-wrap gap-4">
-                <button
-                  onClick={handleDownload}
-                  className="inline-flex items-center gap-2 px-8 py-3.5 text-xs font-bold rounded-full transition-base shadow-lg shadow-black/5"
-                  style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}
-                >
-                  <Download size={14} /> {t.downloadQr}
+              <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                <button onClick={handleDownload} className="stark-btn gap-2">
+                  <Download size={15} />
+                  {t.downloadQr}
                 </button>
-                <a href={profileUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-8 py-3.5 text-xs font-bold rounded-full border transition-base" style={{ borderColor: 'var(--line)', color: 'var(--ink)' }}>
-                  {t.viewProfile} <ExternalLink size={14} />
+                <a href={profileUrl} target="_blank" rel="noreferrer" className="ghost-btn gap-2">
+                  {t.viewProfile}
+                  <ExternalLink size={15} />
                 </a>
               </div>
             </div>
 
-            <div className="animate-slide flex flex-col items-center" style={{ animationDelay: '0.1s' }}>
-              <div className="bg-white p-10 shadow-2xl" style={{ border: '1px solid var(--line)' }}>
-                <img src={qrCode} alt="Emergency QR" className="w-64 h-64 md:w-80 md:h-80" />
-                <div className="mt-8 text-center text-black flex flex-col items-center">
-                  <QrCode size={18} className="mb-2 opacity-40" />
-                  <p className="text-[10px] font-black uppercase tracking-[0.5em] mb-1">Emergency QR</p>
-                  <p className="text-[8px] font-medium opacity-40 uppercase tracking-widest">Digital Identification Pass</p>
+            <div className="glass-card p-6 sm:p-8 animate-slide" style={{ animationDelay: '0.08s' }}>
+              <div className="rounded-[28px] border border-white/75 bg-[rgba(255,255,255,0.82)] p-5 sm:p-8 shadow-[0_24px_60px_rgba(15,23,42,0.12)]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Emergency pass</div>
+                    <div className="mt-1 text-xl font-semibold text-[var(--ink)]" style={{ fontFamily: 'var(--font-heading)' }}>Ready to share</div>
+                  </div>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-[var(--accent)]">
+                    <QrCode size={22} />
+                  </div>
                 </div>
-              </div>
-              <Link to="/" className="mt-12 text-xs font-bold opacity-30 hover:opacity-100 transition-base uppercase tracking-widest flex items-center gap-2">
-                {t.backToDashboard} <ArrowRight size={12} />
-              </Link>
-            </div>
 
+                <div className="mt-6 overflow-hidden rounded-[28px] bg-white p-4 sm:p-6 shadow-[inset_0_0_0_1px_rgba(148,163,184,0.18)]">
+                  <img src={qrCode} alt="Emergency QR" className="mx-auto w-full max-w-[320px]" />
+                </div>
+
+                <div className="mt-6 rounded-[22px] border border-dashed border-[var(--line)] px-4 py-4 text-center">
+                  <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Best use</div>
+                  <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
+                    Keep this on your lock screen, wallet card, or medical ID so a scanner can reach the emergency page immediately.
+                  </p>
+                </div>
+
+                <Link to="/" className="mt-6 inline-flex items-center gap-2 text-base font-semibold text-[var(--accent)]">
+                  {t.backToDashboard}
+                  <ArrowRight size={15} />
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
