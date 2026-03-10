@@ -1,8 +1,33 @@
 const express = require('express');
 const QRCode = require('qrcode');
+const os = require('os');
 const User = require('../models/User');
 
 const router = express.Router();
+
+const getLocalIpv4Address = () => {
+  const interfaces = os.networkInterfaces();
+
+  for (const entries of Object.values(interfaces)) {
+    for (const entry of entries || []) {
+      if (entry.family === 'IPv4' && !entry.internal) {
+        return entry.address;
+      }
+    }
+  }
+
+  return '127.0.0.1';
+};
+
+const getFrontendBaseUrl = (req) => {
+  if (process.env.FRONTEND_URL) {
+    return process.env.FRONTEND_URL;
+  }
+
+  const configuredPort = process.env.FRONTEND_PORT || '5173';
+  const localIp = getLocalIpv4Address();
+  return `http://${localIp}:${configuredPort}`;
+};
 
 // @route   POST /api/users/create
 // @desc    Create a new user and generate QR code
@@ -72,7 +97,7 @@ router.post('/create', async (req, res) => {
     await user.save();
 
     // Generate QR code URL
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const frontendUrl = getFrontendBaseUrl(req);
     const profileUrl = `${frontendUrl}/emergency/${user.uniqueId}`;
 
     // Generate QR code as base64 image
