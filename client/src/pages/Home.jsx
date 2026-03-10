@@ -8,81 +8,85 @@ import {
   Activity,
   ScanLine,
   Clock3,
+  UserPlus,
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
-
-const featureCards = [
-  {
-    title: "Scan once",
-    copy: "Responders land directly on the emergency profile without any app install or login.",
-    icon: ScanLine,
-  },
-  {
-    title: "Call fast",
-    copy: "Primary contact and backup number are visible above the fold for immediate action.",
-    icon: Phone,
-  },
-  {
-    title: "Medical first",
-    copy: "Blood group, allergies, medications, and notes are prioritized for real emergency use.",
-    icon: HeartPulse,
-  },
-];
 
 const Home = () => {
   const { t } = useLanguage();
 
+  const featureCards = [
+    {
+      title: t.feature1Title,
+      copy: t.feature1Copy,
+      icon: ScanLine,
+    },
+    {
+      title: t.feature2Title,
+      copy: t.feature2Copy,
+      icon: Phone,
+    },
+    {
+      title: t.feature3Title,
+      copy: t.feature3Copy,
+      icon: HeartPulse,
+    },
+  ];
+
   return (
-    <div className="overflow-hidden pb-16 sm:pb-24">
-      <section className="relative pt-28 sm:pt-36 pb-12 sm:pb-20">
+    <div className="overflow-hidden pb-4 sm:pb-8">
+      <section className="relative pt-28 sm:pt-40 pb-12 sm:pb-24">
+        {/* Decorative background blur */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-red-100/50 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+
         <div className="main-wrap">
-          <div className="grid gap-8 lg:grid-cols-[1.15fr,0.85fr] items-center">
-            <div className="animate-slide">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/60 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-slate-600 backdrop-blur-xl">
-                <ShieldCheck size={14} className="text-[var(--accent)]" />
-                Emergency access card
+          <div className="grid gap-12 lg:grid-cols-[1fr,1fr] items-center">
+
+            {/* Hero Left Content */}
+            <div className="animate-slide space-y-8">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white/70 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-[var(--accent)] backdrop-blur-md shadow-sm">
+                <ShieldCheck size={16} />
+                {t.heroBadge}
               </div>
 
               <h1
-                className="mt-6 max-w-3xl text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight text-[var(--ink)]"
+                className="max-w-2xl text-5xl sm:text-6xl lg:text-[76px] font-bold tracking-tight text-[var(--ink)]"
                 style={{
                   fontFamily: "var(--font-heading)",
-                  lineHeight: "0.96",
+                  lineHeight: "0.95",
                 }}
               >
                 {t.heroTitle}
               </h1>
 
-              <p className="mt-6 max-w-2xl text-base sm:text-lg leading-relaxed text-[var(--muted)]">
-                Emergency QR stores the details that matter in a calm, readable
-                profile. One scan reveals blood group, emergency contact,
-                medical notes, and responder instructions instantly.
+              <p className="max-w-xl text-lg sm:text-xl leading-relaxed text-[var(--muted)] opacity-90 font-medium">
+                {t.heroSubDesc}
               </p>
 
-              <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                <Link to="/create" className="stark-btn gap-3">
+              <div className="flex flex-col sm:flex-row gap-5 pt-4">
+                <Link to="/create" className="stark-btn gap-3 py-4 px-8 text-base shadow-lg shadow-black/5 hover:-translate-y-1 transition-transform">
                   {t.heroCta}
-                  <ArrowRight size={16} />
+                  <ArrowRight size={18} />
                 </Link>
-                <a href="#preview" className="ghost-btn">
-                  See preview
+                <a href="#preview" className="ghost-btn py-4 px-8 text-base bg-white/50 hover:bg-white text-[var(--ink)] border border-[var(--line)]">
+                  {t.seePreview}
                 </a>
               </div>
 
-              <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-10 border-t border-[var(--line)]/60">
                 {[
-                  ["10 sec", "scan to action"],
-                  ["1 page", "clear emergency view"],
-                  ["0 app", "camera only access"],
-                ].map(([value, label]) => (
-                  <div key={label} className="glass-panel p-5">
+                  [t.stat1Val, t.stat1Lbl],
+                  [t.stat2Val, t.stat2Lbl],
+                  [t.stat3Val, t.stat3Lbl],
+                ].map(([value, label], idx) => (
+                  <div key={label} className="animate-slide" style={{ animationDelay: `${0.1 + idx * 0.1}s` }}>
                     <div
-                      className="text-2xl font-bold text-[var(--ink)]"
+                      className="text-3xl font-black text-[var(--ink)]"
                       style={{ fontFamily: "var(--font-heading)" }}
                     >
                       {value}
                     </div>
-                    <div className="mt-1 text-sm text-[var(--muted)]">
+                    <div className="mt-1.5 text-xs uppercase tracking-widest font-bold text-slate-500">
                       {label}
                     </div>
                   </div>
@@ -90,158 +94,108 @@ const Home = () => {
               </div>
             </div>
 
-            <div className="animate-slide" style={{ animationDelay: "0.08s" }}>
-              <div className="glass-card p-5 sm:p-7">
-                <div className="rounded-[26px] border border-white/70 bg-[rgba(255,255,255,0.76)] p-4 sm:p-5 shadow-[0_18px_45px_rgba(15,23,42,0.1)]">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-xs uppercase tracking-[0.2em] text-slate-500">
-                        Live emergency card
-                      </div>
-                      <div
-                        className="mt-1 text-xl font-semibold text-[var(--ink)]"
-                        style={{ fontFamily: "var(--font-heading)" }}
-                      >
-                        Lock-screen ready
-                      </div>
-                    </div>
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-[var(--accent)]">
-                      <QrCode size={22} />
-                    </div>
-                  </div>
-
-                  <div className="mt-5 rounded-[24px] bg-[linear-gradient(135deg,rgba(255,255,255,0.9),rgba(236,253,245,0.88))] p-5">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <div className="text-xs uppercase tracking-[0.2em] text-slate-500">
-                          Emergency profile
-                        </div>
-                        <div
-                          className="mt-2 text-3xl font-bold text-[var(--ink)]"
-                          style={{ fontFamily: "var(--font-heading)" }}
-                        >
-                          Patel Mann
-                        </div>
-                      </div>
-                      <div className="rounded-full bg-rose-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-rose-600">
-                        AB+
-                      </div>
-                    </div>
-
-                    <div className="mt-5 grid gap-3">
-                      <div className="glass-panel p-4 bg-white/70">
-                        <div className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                          Primary contact
-                        </div>
-                        <div className="mt-2 text-lg font-semibold text-[var(--ink)]">
-                          +91 79901 26127
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="glass-panel p-4 bg-white/70">
-                          <div className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                            Allergy
-                          </div>
-                          <div className="mt-2 text-sm font-semibold text-rose-600">
-                            None
-                          </div>
-                        </div>
-                        <div className="glass-panel p-4 bg-white/70">
-                          <div className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                            Medication
-                          </div>
-                          <div className="mt-2 text-sm font-semibold text-[var(--ink)]">
-                            Pyaar ki Kami
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 flex items-center justify-between rounded-[22px] border border-dashed border-[var(--line)] px-4 py-3 text-sm text-[var(--muted)]">
-                    <span>Readable in one glance</span>
-                    <span className="font-semibold text-[var(--accent)]">
-                      Responder-first
-                    </span>
-                  </div>
-                </div>
+            {/* Hero Right Graphic - illustration1.png */}
+            <div className="animate-slide flex items-center justify-center lg:justify-end" style={{ animationDelay: "0.15s" }}>
+              <div className="relative w-full max-w-[585px]">
+                <div className="absolute inset-0 bg-white/60 blur-3xl rounded-full scale-110 -z-10"></div>
+                <img
+                  src="/images/img.png"
+                  alt="Medical ID Concept"
+                  className="relative z-10 w-full object-contain mix-blend-multiply"
+                />
               </div>
             </div>
+
           </div>
         </div>
       </section>
 
-      <section id="preview" className="py-8 sm:py-12">
+      <section id="preview" className="py-16 sm:py-32 relative">
         <div className="main-wrap">
-          <div className="grid gap-5 lg:grid-cols-3">
-            {featureCards.map(({ title, copy, icon: Icon }, index) => (
-              <div
-                key={title}
-                className="glass-card p-6 sm:p-7 animate-slide"
-                style={{ animationDelay: `${0.12 + index * 0.05}s` }}
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/70 text-[var(--accent)] shadow-[0_12px_24px_rgba(60,22,34,0.06)]">
-                  <Icon size={20} />
-                </div>
-                <h2
-                  className="mt-5 text-2xl font-semibold text-[var(--ink)]"
-                  style={{ fontFamily: "var(--font-heading)" }}
-                >
-                  {title}
-                </h2>
-                <p className="mt-3 text-sm sm:text-base leading-relaxed text-[var(--muted)]">
-                  {copy}
-                </p>
-              </div>
-            ))}
+
+          <div className="mb-20 text-center max-w-2xl mx-auto">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[var(--ink)] tracking-tight" style={{ fontFamily: "var(--font-heading)" }}>
+              A clinical approach to emergency data.
+            </h2>
           </div>
 
-          <div className="mt-6 glass-card p-6 sm:p-8 lg:p-10">
-            <div className="grid gap-8 lg:grid-cols-[0.9fr,1.1fr] items-center">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-slate-600">
-                  <Clock3 size={14} className="text-[var(--accent)]" />
-                  Fast setup
-                </div>
-                <h2
-                  className="mt-5 text-3xl sm:text-4xl font-bold text-[var(--ink)]"
-                  style={{ fontFamily: "var(--font-heading)" }}
-                >
-                  Build the pass in under two minutes.
-                </h2>
-                <p className="mt-4 text-base leading-relaxed text-[var(--muted)]">
-                  Create the profile once, download the QR, and keep it on your
-                  phone, wallet card, or lock screen. The public page only shows
-                  emergency-safe details.
-                </p>
-              </div>
+          <div className="grid gap-16 lg:gap-24 lg:grid-cols-2 items-center">
 
-              <div className="grid gap-4 sm:grid-cols-3">
-                {[
-                  [Activity, t.step1Title, t.step1Desc],
-                  [
-                    QrCode,
-                    t.step2Title || "Get your QR",
-                    t.step2Desc || "Download a clear QR card for quick access.",
-                  ],
-                  [ShieldCheck, t.step3Title, t.step3Desc],
-                ].map(([Icon, title, copy]) => (
-                  <div
-                    key={title}
-                    className="rounded-[24px] border border-white/70 bg-white/62 p-5 backdrop-blur-xl"
-                  >
-                    <Icon size={18} className="text-[var(--accent)]" />
-                    <div
-                      className="mt-4 text-lg font-semibold text-[var(--ink)]"
-                      style={{ fontFamily: "var(--font-heading)" }}
-                    >
-                      {title}
-                    </div>
-                    <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
-                      {copy}
+            {/* Left side: Feature List (No BG cards) */}
+            <div className="space-y-12 animate-slide" style={{ animationDelay: '0.12s' }}>
+              {featureCards.map((feature, idx) => (
+                <div key={idx} className="flex gap-4 items-start group">
+                  <div className="flex shrink-0 w-12 pt-1.5 items-center justify-center text-[var(--accent)]">
+                    <feature.icon size={26} strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-[var(--ink)] mb-2" style={{ fontFamily: "var(--font-heading)" }}>
+                      {feature.title}
+                    </h3>
+                    <p className="text-lg leading-relaxed text-slate-500 font-medium">
+                      {feature.copy}
                     </p>
                   </div>
-                ))}
+                </div>
+              ))}
+            </div>
+
+            {/* Right side: Giant Illustration 2 */}
+            <div className="flex items-center justify-center relative animate-slide" style={{ animationDelay: '0.15s' }}>
+              <div className="absolute inset-0 bg-[var(--accent)]/5 blur-[100px] rounded-full -z-10"></div>
+              <img
+                src="/images/illustration2.png"
+                alt="Emergency Network Illustration"
+                className="w-full max-w-[500px] mix-blend-multiply drop-shadow-sm"
+              />
+            </div>
+
+          </div>
+
+          {/* Fast Setup Block (No Title, just steps + illustration 1) */}
+          <div className="mt-24 sm:mt-40 relative">
+            <div className="grid gap-16 lg:grid-cols-[1.1fr,0.9fr] items-center">
+              <div className="order-2 lg:order-1 flex justify-center relative">
+                <div className="absolute inset-0 bg-[#06b6d4]/5 blur-[100px] rounded-full -z-10"></div>
+                <img
+                  src="/images/illustration1.png"
+                  alt="Fast workflow"
+                  className="w-full max-w-[550px] mix-blend-multiply"
+                />
+              </div>
+
+              <div className="order-1 lg:order-2 space-y-10">
+                <div className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--ink)]">
+                  {t.fastSetupBadge}
+                </div>
+
+                {/* Fast Setup Title removed per request */}
+
+                <div className="space-y-10">
+                  {[
+                    [UserPlus, t.step1Title, t.step1Desc],
+                    [
+                      QrCode,
+                      t.step2Title || "Get your QR",
+                      t.step2Desc || "Download a clear QR card for quick access.",
+                    ],
+                    [ShieldCheck, t.step3Title, t.step3Desc],
+                  ].map(([Icon, title, copy]) => (
+                    <div key={title} className="flex gap-4 items-start">
+                      <div className="flex w-12 shrink-0 pt-1.5 items-center justify-center text-[var(--accent)]">
+                        <Icon size={26} strokeWidth={1.5} />
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-[var(--ink)] mb-2" style={{ fontFamily: "var(--font-heading)" }}>
+                          {title}
+                        </div>
+                        <p className="text-lg leading-relaxed text-slate-500 font-medium">
+                          {copy}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

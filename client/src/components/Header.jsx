@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { User, Languages, ChevronDown, Shield } from 'lucide-react';
+import { User, Languages, ChevronDown } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 const Header = () => {
@@ -27,18 +27,19 @@ const Header = () => {
   const currentLang = languages.find(l => l.code === lang) || languages[0];
 
   return (
-    <header className="glass-nav !px-4 !py-3 md:!px-6 md:!py-4">
+    <header className="glass-nav px-6 py-4">
       <nav className="flex items-center justify-between gap-3">
         <Link to="/" className="flex items-center gap-3 text-slate-900 transition-base min-w-0">
-          <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/60 bg-white/70 text-[var(--accent)] shadow-[0_12px_30px_rgba(60,22,34,0.08)]">
-            <Shield size={18} />
+          <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/60 bg-white/70 shadow-[0_12px_30px_rgba(60,22,34,0.08)]">
+            <img
+              src="/images/logo_no_text.png"
+              alt="Emergency QR Logo"
+              className="h-6 w-6 object-contain"
+            />
           </span>
           <span className="min-w-0">
             <span className="block text-lg font-bold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
               Emergency QR
-            </span>
-            <span className="hidden sm:block text-[11px] uppercase tracking-[0.24em] text-slate-500">
-              Medical access card
             </span>
           </span>
         </Link>
