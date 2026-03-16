@@ -57,11 +57,14 @@ function AppLayout() {
 
   const glassBaseStyle = {
     borderRadius: "14px",
-    padding: "14px 16px",
+    padding: isMobile ? "12px 14px" : "10px 12px",
     fontWeight: "600",
-    boxShadow: "0 16px 36px rgba(15, 23, 42, 0.12)",
-    backdropFilter: "blur(18px) saturate(175%)",
-    WebkitBackdropFilter: "blur(18px) saturate(175%)",
+    fontSize: isMobile ? "14px" : "13px",
+    boxShadow: isMobile
+      ? "0 12px 28px rgba(15, 23, 42, 0.12)"
+      : "0 10px 22px rgba(15, 23, 42, 0.1)",
+    backdropFilter: "blur(14px) saturate(160%)",
+    WebkitBackdropFilter: "blur(14px) saturate(160%)",
   };
 
   return (
@@ -69,8 +72,8 @@ function AppLayout() {
       <Toaster
         position={isMobile ? "bottom-center" : "bottom-right"}
         containerStyle={{
-          bottom: isMobile ? (isEmergencyRoute ? 16 : 88) : 16,
-          right: 16,
+          bottom: isMobile ? (isEmergencyRoute ? 14 : 84) : 10,
+          right: isMobile ? undefined : 10,
           left: isMobile ? 16 : undefined,
         }}
         toastOptions={{

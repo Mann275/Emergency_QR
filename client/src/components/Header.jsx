@@ -1,22 +1,79 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { User, Languages, ChevronDown, LogOut } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import QRCode from "qrcode";
+import {
+  User,
+  Languages,
+  ChevronDown,
+  LogOut,
+  UserCircle2,
+  PencilLine,
+  QrCode,
+} from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-hot-toast";
 
+const USER_PROFILE_KEY_PREFIX = "emergency_user_profile:";
+const getUserProfileKey = (authUid) => `${USER_PROFILE_KEY_PREFIX}${authUid}`;
+
 const Header = () => {
   const { lang, setLang, t } = useLanguage();
   const { user, logout } = useAuth();
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const location = useLocation();
+  const [isLangOpen, setIsLangOpen] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [profileId, setProfileId] = useState("");
+  const langDropdownRef = useRef(null);
+  const accountDropdownRef = useRef(null);
+
+  useEffect(() => {
+    if (!user?.uid) {
+      setProfileId("");
+      return;
+    }
+
+    const stored = localStorage.getItem(getUserProfileKey(user.uid)) || "";
+    setProfileId(stored);
+  }, [user?.uid, location.pathname]);
 
   const handleLogout = async () => {
+    const shouldLogout = window.confirm("Are you sure you want to logout?");
+    if (!shouldLogout) {
+      return;
+    }
+
     try {
       await logout();
+      setIsAccountOpen(false);
       toast.success("Logged out successfully.");
     } catch (error) {
       toast.error(error.message || "Failed to logout.");
+    }
+  };
+
+  const handleDownloadQr = async () => {
+    if (!profileId) {
+      toast.error("Create your profile first to download QR.");
+      return;
+    }
+
+    try {
+      const profileUrl = `${window.location.origin}/emergency/${profileId}`;
+      const dataUrl = await QRCode.toDataURL(profileUrl, {
+        width: 256,
+        margin: 1,
+      });
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = `emergency-qr-${profileId}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setIsAccountOpen(false);
+      toast.success("QR downloaded.");
+    } catch (error) {
+      toast.error("Could not generate QR right now.");
     }
   };
 
@@ -28,8 +85,18 @@ const Header = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
+      if (
+        langDropdownRef.current &&
+        !langDropdownRef.current.contains(event.target)
+      ) {
+        setIsLangOpen(false);
+      }
+
+      if (
+        accountDropdownRef.current &&
+        !accountDropdownRef.current.contains(event.target)
+      ) {
+        setIsAccountOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -63,9 +130,9 @@ const Header = () => {
         </Link>
 
         <div className="flex items-center gap-2 md:gap-4 sm:gap-8 overflow-visible">
-          <div className="relative" ref={dropdownRef}>
+          <div className="relative" ref={langDropdownRef}>
             <button
-              onClick={() => setIsOpen(!isOpen)}
+              onClick={() => setIsLangOpen(!isLangOpen)}
               className="flex items-center gap-1.5 md:gap-2 px-3 py-2 rounded-full border border-white/50 bg-white/65 shadow-[0_12px_30px_rgba(15,23,42,0.06)] transition-all duration-300 active:scale-95"
               style={{
                 color: "var(--ink)",
@@ -75,11 +142,11 @@ const Header = () => {
               <span className="text-[12px] font-bold">{currentLang.label}</span>
               <ChevronDown
                 size={12}
-                className={`transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+                className={`transition-transform duration-300 ${isLangOpen ? "rotate-180" : ""}`}
               />
             </button>
 
-            {isOpen && (
+            {isLangOpen && (
               <div
                 className="absolute top-full right-0 mt-2 w-32 py-2 rounded-2xl border shadow-xl z-[150] animate-in fade-in slide-in-from-top-2 duration-200"
                 style={{
@@ -94,7 +161,7 @@ const Header = () => {
                     key={l.code}
                     onClick={() => {
                       setLang(l.code);
-                      setIsOpen(false);
+                      setIsLangOpen(false);
                     }}
                     className={`w-full text-left px-4 py-2 text-[13px] font-bold transition-colors hover:bg-white/70 ${lang === l.code ? "text-accent" : ""}`}
                     style={{ color: "var(--ink)" }}
@@ -122,15 +189,66 @@ const Header = () => {
             )}
 
             {user && (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="hidden md:flex items-center gap-2 rounded-full border border-[var(--line)] bg-white/65 px-4 py-2.5 text-sm font-bold text-[var(--ink)] transition hover:bg-white/80"
-                aria-label="Logout"
-              >
-                <LogOut size={16} />
-                <span>Logout</span>
-              </button>
+              <div className="relative" ref={accountDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsAccountOpen(!isAccountOpen)}
+                  className="flex items-center gap-2 rounded-full border border-white/50 bg-white/65 px-3 py-2 text-sm font-bold text-[var(--ink)] shadow-[0_12px_30px_rgba(15,23,42,0.06)] transition-all duration-300"
+                >
+                  <UserCircle2 size={16} />
+                  <span className="hidden sm:inline">Account</span>
+                  <ChevronDown
+                    size={12}
+                    className={`transition-transform duration-300 ${isAccountOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+
+                {isAccountOpen && (
+                  <div
+                    className="absolute top-full right-0 mt-2 w-52 overflow-hidden rounded-2xl border shadow-xl z-[160]"
+                    style={{
+                      background: "rgba(255,255,255,0.9)",
+                      backdropFilter: "blur(14px)",
+                      WebkitBackdropFilter: "blur(14px)",
+                      borderColor: "var(--glass-border)",
+                    }}
+                  >
+                    {profileId ? (
+                      <>
+                        <Link
+                          to={`/edit/${profileId}`}
+                          onClick={() => setIsAccountOpen(false)}
+                          className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-[var(--ink)] hover:bg-white/75"
+                        >
+                          <PencilLine size={15} /> Edit Profile
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={handleDownloadQr}
+                          className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-semibold text-[var(--ink)] hover:bg-white/75"
+                        >
+                          <QrCode size={15} /> Download QR
+                        </button>
+                      </>
+                    ) : (
+                      <Link
+                        to="/create"
+                        onClick={() => setIsAccountOpen(false)}
+                        className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-[var(--ink)] hover:bg-white/75"
+                      >
+                        <User size={15} /> Create Profile
+                      </Link>
+                    )}
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-2 border-t border-white/70 px-4 py-3 text-left text-sm font-semibold text-[var(--muted)] hover:bg-white/75"
+                    >
+                      <LogOut size={15} /> Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import QRCode from "qrcode";
 import ApiService from "../utils/api";
 import {
   ArrowLeft,
@@ -14,8 +15,10 @@ import {
   Calendar,
   BadgeAlert,
   Pencil,
+  QrCode,
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
+import { toast } from "react-hot-toast";
 
 const EmergencyProfile = () => {
   const { id } = useParams();
@@ -24,6 +27,25 @@ const EmergencyProfile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [canEdit, setCanEdit] = useState(false);
+
+  const handleDownloadQr = async () => {
+    try {
+      const profileUrl = `${window.location.origin}/emergency/${id}`;
+      const dataUrl = await QRCode.toDataURL(profileUrl, {
+        width: 256,
+        margin: 1,
+      });
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = `emergency-qr-${id}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("QR downloaded.");
+    } catch (downloadError) {
+      toast.error("Could not generate QR right now.");
+    }
+  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -159,13 +181,23 @@ const EmergencyProfile = () => {
                 Back
               </Link>
               {canEdit && (
-                <Link
-                  to={`/edit/${id}`}
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-white/70 bg-white/65 px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base font-semibold text-[var(--ink)] shadow-[0_12px_26px_rgba(60,22,34,0.06)] backdrop-blur-xl"
-                >
-                  <Pencil size={14} />
-                  {t.editProfile || "Edit profile"}
-                </Link>
+                <>
+                  <Link
+                    to={`/edit/${id}`}
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-white/70 bg-white/65 px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base font-semibold text-[var(--ink)] shadow-[0_12px_26px_rgba(60,22,34,0.06)] backdrop-blur-xl"
+                  >
+                    <Pencil size={14} />
+                    {t.editProfile || "Edit profile"}
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleDownloadQr}
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-white/70 bg-white/65 px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base font-semibold text-[var(--ink)] shadow-[0_12px_26px_rgba(60,22,34,0.06)] backdrop-blur-xl"
+                  >
+                    <QrCode size={14} />
+                    Download QR
+                  </button>
+                </>
               )}
             </div>
 

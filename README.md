@@ -1,111 +1,121 @@
 # Emergency QR
 
-> QR-based emergency medical profile system. One scan reveals blood group, medications, allergies, and emergency contacts — no app install required.
+Emergency QR is a full-stack emergency profile system.
+A user creates one profile and gets one QR that can be scanned instantly in emergencies.
 
-## Tech Stack
+## Why This Project
 
-| Layer    | Stack                                          |
-|----------|-------------------------------------------------|
-| Frontend | React 18, React Router 6, Tailwind CSS 3, Vite 4 |
-| Backend  | Node.js, Express 4, Mongoose 8                  |
-| Database | MongoDB                                         |
-| Other    | QR Code generation, i18n (EN/HI/GU)             |
+- Fast emergency access without app install
+- Public emergency view with only critical information
+- Owner-only editing on the original device/session
+- Mobile-first UI with multilingual support (English, Hindi, Gujarati)
 
-## Getting Started
+## Core Rule
 
-### Prerequisites
+`1 user = 1 QR`
 
-- Node.js ≥ 16
-- MongoDB instance (local or Atlas)
+Once a logged-in user creates a profile:
 
-### Setup
+- revisiting create form pre-fills old details
+- saving updates keeps the same profile ID
+- QR remains the same
+
+## Stack
+
+- Frontend: React 18, React Router 6, Tailwind CSS 3, Vite 4
+- Backend: Node.js, Express 4, Mongoose 8
+- Database: MongoDB
+- Auth: Firebase Auth (email/password + Google)
+- Security: JWT edit tokens, bcrypt hashing, helmet, rate limiting, NoSQL sanitization
+
+## Local Setup
+
+### 1) Clone
 
 ```bash
-# Clone
 git clone https://github.com/Mann275/Emergency_QR.git
 cd Emergency_QR
+```
 
-# Server
+### 2) Server
+
+```bash
 cd server
 npm install
-cp .env.example .env   # configure MONGODB_URI
-npm run dev             # runs on :5000
+cp .env.example .env
+npm run dev
+```
 
-# Client (new terminal)
+Server runs on `http://localhost:5000`.
+
+### 3) Client
+
+```bash
 cd client
 npm install
-npm run dev             # runs on :5173
+cp .env.example .env
+npm run dev
 ```
 
-### Environment Variables
+Client runs on `http://localhost:5173`.
 
-**Server** (`server/.env`)
-```env
-MONGODB_URI=mongodb://localhost:27017/emergencyqr
-PORT=5000
-FRONTEND_URL=http://localhost:5173
-```
+## Environment Files
 
-**Client** (`client/.env`)
-```env
-VITE_API_URL=http://localhost:5000/api
-```
+Use these templates:
 
-## Project Structure
+- [server/.env.example](server/.env.example)
+- [client/.env.example](client/.env.example)
 
-```
-Emergency_QR/
-├── server/
-│   ├── models/User.js        # Mongoose schema
-│   ├── routes/users.js       # REST API endpoints
-│   └── server.js             # Express entry point
-├── client/src/
-│   ├── pages/
-│   │   ├── Home.jsx           # Landing page
-│   │   ├── CreateProfile.jsx  # Profile creation form
-│   │   ├── EditProfile.jsx    # Profile editing form
-│   │   ├── EmergencyProfile.jsx # Public emergency view
-│   │   └── Success.jsx        # QR download page
-│   ├── components/            # Header, Footer, BottomNav
-│   ├── context/               # Language & Theme providers
-│   └── utils/api.js           # API service layer
-└── README.md
-```
+## Important Flows
+
+### Profile create/update
+
+- Create API returns profile ID + edit token
+- Edit token is stored per profile in browser storage
+- Update API requires this token in Bearer auth
+- Unauthorized users cannot edit by guessing ID
+
+### Emergency profile page
+
+- Publicly readable by QR/URL
+- Edit button appears only for the owner session/device
+
+### Account actions
+
+- Logged-in users get account dropdown actions:
+  - Edit Profile
+  - Download QR
+  - Logout
 
 ## API Endpoints
 
-| Method | Route                    | Description              |
-|--------|--------------------------|--------------------------|
-| POST   | `/api/users/create`      | Create profile + QR code |
-| GET    | `/api/users/:id`         | Get emergency profile    |
-| PUT    | `/api/users/update/:id`  | Update profile           |
-| GET    | `/api/users`             | List all profiles        |
+- `POST /api/users/create` create or update owner profile while keeping same QR
+- `GET /api/users/:id` fetch public emergency profile
+- `PUT /api/users/update/:id` owner-authorized profile update
+- `GET /api/health` backend health check
 
-## Client Routes
+## Security Notes
 
-| Path             | Page               |
-|------------------|--------------------|
-| `/`              | Home               |
-| `/create`        | Create Profile     |
-| `/edit/:id`      | Edit Profile       |
-| `/emergency/:id` | Emergency Profile  |
-| `/success/:id`   | QR Download        |
+- Helmet secure headers
+- Rate limiting on API and write routes
+- Request sanitization against NoSQL operator injection
+- JWT + bcrypt protected edit authorization
 
-## Features
+## Project Structure
 
-- **Profile CRUD** — Create and edit medical profiles with personal info, emergency contacts, and medical history
-- **QR Generation** — Unique QR code per profile linking to the public emergency page
-- **Zero-install access** — Any phone camera opens the emergency profile instantly
-- **Multi-language** — English, Hindi, and Gujarati supported
-- **Responsive** — Mobile-first design with glassmorphic UI
-
-## Contributing
-
-1. Fork the repo
-2. Create your branch (`git checkout -b feature/your-feature`)
-3. Commit changes (`git commit -m 'Add feature'`)
-4. Push (`git push origin feature/your-feature`)
-5. Open a Pull Request
+```text
+Emergency_QR/
+	client/
+		src/
+			components/
+			context/
+			pages/
+			utils/
+	server/
+		models/
+		routes/
+		server.js
+```
 
 ## License
 
