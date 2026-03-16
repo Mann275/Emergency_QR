@@ -122,6 +122,11 @@ const userSchema = new mongoose.Schema(
     },
 
     // System fields
+    ownerAuthUid: {
+      type: String,
+      trim: true,
+      maxlength: [200, "Owner auth UID cannot be more than 200 characters"],
+    },
     uniqueId: {
       type: String,
     },
@@ -152,6 +157,7 @@ userSchema.pre("save", function (next) {
 
 // Indexes for better performance
 userSchema.index({ uniqueId: 1 });
+userSchema.index({ ownerAuthUid: 1 }, { unique: true, sparse: true });
 userSchema.index({ phone: 1 });
 userSchema.index({ createdAt: -1 });
 

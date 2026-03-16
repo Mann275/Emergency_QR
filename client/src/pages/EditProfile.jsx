@@ -45,6 +45,7 @@ const EditProfile = () => {
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [accessDenied, setAccessDenied] = useState(false);
   const [phoneCode, setPhoneCode] = useState("+91");
   const [emergencyCode, setEmergencyCode] = useState("+91");
 
@@ -67,6 +68,12 @@ const EditProfile = () => {
   // Fetch existing profile on mount
   useEffect(() => {
     const fetchProfile = async () => {
+      if (!ApiService.hasEditToken(id)) {
+        setAccessDenied(true);
+        setFetching(false);
+        return;
+      }
+
       try {
         const response = await ApiService.getUserById(id);
         if (response.success) {
@@ -308,6 +315,39 @@ const EditProfile = () => {
               <p className="mt-4 text-base font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
                 {t.retrieving || "Loading profile..."}
               </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  if (accessDenied) {
+    return (
+      <div className="pb-24">
+        <section className="pt-20 sm:pt-28">
+          <div className="main-wrap max-w-3xl">
+            <div className="glass-card p-6 sm:p-8 text-center animate-slide">
+              <AlertTriangle
+                size={34}
+                className="mx-auto text-[var(--danger)]"
+              />
+              <h1
+                className="mt-3 text-2xl sm:text-3xl font-bold text-[var(--ink)]"
+                style={{ fontFamily: "var(--font-heading)" }}
+              >
+                Edit not allowed
+              </h1>
+              <p className="mt-3 text-[var(--muted)]">
+                Only the original creator can edit this profile from the same
+                device/browser.
+              </p>
+              <Link
+                to={`/emergency/${id}`}
+                className="stark-btn mt-6 inline-flex gap-2"
+              >
+                <ArrowLeft size={14} /> Back to profile
+              </Link>
             </div>
           </div>
         </section>

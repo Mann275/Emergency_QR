@@ -26,6 +26,21 @@ import { toast } from "react-hot-toast";
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const genderOptions = ["Male", "Female", "Other", "Prefer not to say"];
+const PHONE_CODES = ["+91", "+1", "+44", "+61"];
+const USER_PROFILE_KEY_PREFIX = "emergency_user_profile:";
+
+const getUserProfileKey = (authUid) => `${USER_PROFILE_KEY_PREFIX}${authUid}`;
+
+const parsePhone = (raw) => {
+  if (!raw) return ["+91", ""];
+  const str = String(raw).trim();
+  for (const code of PHONE_CODES) {
+    if (str.startsWith(code)) {
+      return [code, str.slice(code.length).trim()];
+    }
+  }
+  return ["+91", str.replace(/^\+?\d{1,3}\s*/, "")];
+};
 
 const CreateProfile = () => {
   const { t } = useLanguage();
@@ -42,6 +57,8 @@ const CreateProfile = () => {
   const [authMode, setAuthMode] = useState("signin");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
+  const [isProfilePrefilling, setIsProfilePrefilling] = useState(false);
+  const [existingProfileId, setExistingProfileId] = useState("");
   const [phoneCode, setPhoneCode] = useState("+91");
   const [emergencyCode, setEmergencyCode] = useState("+91");
 
@@ -110,6 +127,7 @@ const CreateProfile = () => {
 
       const payload = {
         ...formData,
+        ownerAuthUid: user?.uid,
         phone: `${phoneCode} ${formData.phone}`,
         emergencyContact: {
           ...formData.emergencyContact,
@@ -119,7 +137,19 @@ const CreateProfile = () => {
 
       const response = await ApiService.createUser(payload);
       if (response.success) {
-        toast.success("Profile created successfully!");
+        if (user?.uid && response?.data?.uniqueId) {
+          localStorage.setItem(
+            getUserProfileKey(user.uid),
+            response.data.uniqueId,
+          );
+          setExistingProfileId(response.data.uniqueId);
+        }
+
+        toast.success(
+          existingProfileId
+            ? "Changes saved. Your same QR remains active."
+            : "Profile created successfully!",
+        );
 
         navigate(`/success/${response.data.uniqueId}`, {
           state: {
@@ -134,6 +164,70 @@ const CreateProfile = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const prefillExistingProfile = async () => {
+      if (!user?.uid) {
+        setExistingProfileId("");
+        return;
+      }
+
+      const knownProfileId = localStorage.getItem(getUserProfileKey(user.uid));
+      if (!knownProfileId) {
+        return;
+      }
+
+      try {
+        setIsProfilePrefilling(true);
+        const response = await ApiService.getUserById(knownProfileId);
+        if (!response?.success || !response?.data) {
+          return;
+        }
+
+        const profile = response.data;
+        const [pCode, pNum] = parsePhone(profile.phone);
+        const [eCode, eNum] = parsePhone(profile.emergencyContact?.phone);
+
+        let dob = "";
+        if (profile.dateOfBirth) {
+          const dt = new Date(profile.dateOfBirth);
+          dob = Number.isNaN(dt.getTime())
+            ? ""
+            : dt.toISOString().split("T")[0];
+        }
+
+        setPhoneCode(pCode);
+        setEmergencyCode(eCode);
+        setExistingProfileId(knownProfileId);
+        setFormData((prev) => ({
+          ...prev,
+          name: profile.name || "",
+          dateOfBirth: dob,
+          bloodGroup: profile.bloodGroup || "",
+          gender: profile.gender || "",
+          phone: pNum,
+          alternatePhone: profile.alternatePhone || "",
+          emergencyContact: {
+            name: profile.emergencyContact?.name || "",
+            phone: eNum,
+          },
+          disease: Boolean(profile.disease),
+          diseaseDetails: profile.diseaseDetails || "",
+          allergies: profile.allergies || "",
+          medications: profile.medications || "",
+          address: profile.address || "",
+          notes: profile.notes || "",
+        }));
+      } catch (error) {
+        localStorage.removeItem(getUserProfileKey(user.uid));
+        setExistingProfileId("");
+      } finally {
+        setIsProfilePrefilling(false);
+      }
+    };
+
+    prefillExistingProfile();
+  }, [user?.uid]);
 
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
@@ -451,6 +545,18 @@ const CreateProfile = () => {
               onSubmit={handleSubmit}
               className="glass-card p-6 sm:p-8 animate-slide"
             >
+              {isProfilePrefilling ? (
+                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+                  <Loader2 size={14} className="animate-spin" /> Loading your
+                  saved details
+                </div>
+              ) : existingProfileId ? (
+                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+                  <HeartPulse size={14} className="text-[var(--accent)]" />{" "}
+                  Existing profile detected. Updating keeps the same QR.
+                </div>
+              ) : null}
+
               <SectionTitle
                 icon={User}
                 title={t.personalInfo}
@@ -696,7 +802,10 @@ const CreateProfile = () => {
                     </>
                   ) : (
                     <>
-                      {t.generateQr} <ArrowRight size={16} />
+                      {existingProfileId
+                        ? t.updateProfile || "Save changes"
+                        : t.generateQr}{" "}
+                      <ArrowRight size={16} />
                     </>
                   )}
                 </button>

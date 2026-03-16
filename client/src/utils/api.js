@@ -18,6 +18,16 @@ const EDIT_TOKEN_KEY_PREFIX = "emergency_edit_token:";
 const getEditTokenKey = (id) => `${EDIT_TOKEN_KEY_PREFIX}${id}`;
 
 class ApiService {
+  hasEditToken(id) {
+    if (!id) return false;
+    return Boolean(localStorage.getItem(getEditTokenKey(id)));
+  }
+
+  getEditToken(id) {
+    if (!id) return null;
+    return localStorage.getItem(getEditTokenKey(id));
+  }
+
   async checkHealth() {
     try {
       const healthUrl = API_BASE_URL.replace("/api", "/api/health");
@@ -96,7 +106,7 @@ class ApiService {
 
   async updateUser(id, userData) {
     try {
-      const editToken = localStorage.getItem(getEditTokenKey(id));
+      const editToken = this.getEditToken(id);
       if (!editToken) {
         throw new Error(
           "Edit authorization missing. Please use the same device/browser used to create this profile.",

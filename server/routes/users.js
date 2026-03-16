@@ -96,6 +96,7 @@ router.post("/create", writeLimiter, async (req, res) => {
     const payload = sanitizePayload(req.body);
 
     const {
+      ownerAuthUid,
       name,
       dateOfBirth,
       bloodGroup,
@@ -110,6 +111,9 @@ router.post("/create", writeLimiter, async (req, res) => {
       address,
       notes,
     } = payload;
+
+    const normalizedOwnerAuthUid =
+      typeof ownerAuthUid === "string" && ownerAuthUid ? ownerAuthUid : null;
 
     if (!name || !bloodGroup || !phone || !emergencyContact?.phone) {
       return res.status(400).json({
@@ -137,7 +141,26 @@ router.post("/create", writeLimiter, async (req, res) => {
     if (address) userData.address = address;
     if (notes) userData.notes = notes;
 
-    const user = new User(userData);
+    let user = null;
+
+    if (normalizedOwnerAuthUid) {
+      user = await User.findOne({
+        ownerAuthUid: normalizedOwnerAuthUid,
+        isActive: true,
+      }).select("+editTokenHash");
+    }
+
+    const isExistingUser = !!user;
+
+    if (!user) {
+      if (normalizedOwnerAuthUid) {
+        userData.ownerAuthUid = normalizedOwnerAuthUid;
+      }
+      user = new User(userData);
+    } else {
+      Object.assign(user, userData);
+    }
+
     await user.save();
 
     const editSecret = crypto.randomBytes(24).toString("hex");
@@ -149,30 +172,31 @@ router.post("/create", writeLimiter, async (req, res) => {
     const frontendUrl = getFrontendBaseUrl(req);
     const profileUrl = `${frontendUrl}/emergency/${user.uniqueId}`;
 
-    // Generate QR code as base64 image
-    const qrCodeDataUrl = await QRCode.toDataURL(profileUrl, {
-      errorCorrectionLevel: "M",
-      type: "image/png",
-      quality: 0.92,
-      margin: 1,
-      color: {
-        dark: "#000000",
-        light: "#FFFFFF",
-      },
-      width: 256,
-    });
-
-    // Update user with QR code URL
-    user.qrCodeUrl = qrCodeDataUrl;
-    await user.save();
+    // Keep QR stable for the same user/profile; generate only when it does not exist.
+    if (!user.qrCodeUrl) {
+      user.qrCodeUrl = await QRCode.toDataURL(profileUrl, {
+        errorCorrectionLevel: "M",
+        type: "image/png",
+        quality: 0.92,
+        margin: 1,
+        color: {
+          dark: "#000000",
+          light: "#FFFFFF",
+        },
+        width: 256,
+      });
+      await user.save();
+    }
 
     res.status(201).json({
       success: true,
-      message: "Emergency profile created successfully",
+      message: isExistingUser
+        ? "Emergency profile updated successfully"
+        : "Emergency profile created successfully",
       data: {
         uniqueId: user.uniqueId,
         profileUrl,
-        qrCode: qrCodeDataUrl,
+        qrCode: user.qrCodeUrl,
         editToken,
         createdAt: user.createdAt,
       },

@@ -48,6 +48,7 @@ app.use(cors(corsOptions));
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
   }),
 );
 app.use(express.json({ limit: "100kb" }));

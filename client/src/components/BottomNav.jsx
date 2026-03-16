@@ -1,12 +1,22 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, User } from "lucide-react";
+import { Home, User, LogOut } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
+import { toast } from "react-hot-toast";
 
 const BottomNav = () => {
   const { t } = useLanguage();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success("Logged out successfully.");
+    } catch (error) {
+      toast.error(error.message || "Failed to logout.");
+    }
+  };
 
   const navItems = [
     {
@@ -23,6 +33,16 @@ const BottomNav = () => {
           },
         ]
       : []),
+    ...(user
+      ? [
+          {
+            to: "#logout",
+            icon: <LogOut size={16} />,
+            label: "Logout",
+            isAction: true,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -31,7 +51,21 @@ const BottomNav = () => {
         className={`grid ${navItems.length === 1 ? "grid-cols-1" : "grid-cols-2"} gap-1.5`}
       >
         {navItems.map((item) => {
-          const isActive = location.pathname === item.to;
+          const isActive = !item.isAction && location.pathname === item.to;
+
+          if (item.isAction) {
+            return (
+              <button
+                key={item.to}
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center justify-center gap-1.5 rounded-[16px] px-3 py-2 text-sm font-semibold text-[var(--muted)] transition-base hover:bg-white hover:text-[var(--accent)]"
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </button>
+            );
+          }
 
           return (
             <Link
