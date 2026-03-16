@@ -68,7 +68,7 @@ function AppLayout() {
   };
 
   return (
-    <div className={`app-shell ${isEmergencyRoute ? "" : "pb-16 md:pb-0"}`}>
+    <div className={`app-shell ${isEmergencyRoute ? "" : "pb-24 md:pb-0"}`}>
       <Toaster
         position={isMobile ? "bottom-center" : "bottom-right"}
         containerStyle={{
@@ -87,15 +87,14 @@ function AppLayout() {
           success: {
             style: {
               ...glassBaseStyle,
-              background: isMobile
-                ? "#166534"
-                : "linear-gradient(135deg, rgba(20, 83, 45, 0.86), rgba(22, 101, 52, 0.74))",
-              color: "#ecfdf5",
-              border: "1px solid rgba(187, 247, 208, 0.35)",
+              background: "rgba(255, 255, 255, 0.9)",
+              color: "var(--ink)",
+              border: "1px solid rgba(200, 30, 75, 0.22)",
+              boxShadow: "0 14px 32px rgba(60, 22, 34, 0.16)",
             },
             iconTheme: {
-              primary: "#ecfdf5",
-              secondary: "#166534",
+              primary: "var(--accent)",
+              secondary: "#ffffff",
             },
           },
           error: {

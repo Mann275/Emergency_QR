@@ -106,7 +106,7 @@ const Header = () => {
   const currentLang = languages.find((l) => l.code === lang) || languages[0];
 
   return (
-    <header className="glass-nav px-6 py-4">
+    <header className="glass-nav px-4 py-3 sm:px-6 sm:py-4">
       <nav className="flex items-center justify-between gap-3">
         <Link
           to="/"
@@ -114,7 +114,7 @@ const Header = () => {
         >
           <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/60 bg-white/70 shadow-[0_12px_30px_rgba(60,22,34,0.08)]">
             <img
-              src="/images/logo_no_text.png"
+              src="https://ik.imagekit.io/shubhampathak/emergency-qr/logo_no_text.png"
               alt="Emergency QR Logo"
               className="h-6 w-6 object-contain"
             />
@@ -196,7 +196,9 @@ const Header = () => {
                   className="flex items-center gap-2 rounded-full border border-white/50 bg-white/65 px-3 py-2 text-sm font-bold text-[var(--ink)] shadow-[0_12px_30px_rgba(15,23,42,0.06)] transition-all duration-300"
                 >
                   <UserCircle2 size={16} />
-                  <span className="hidden sm:inline">Account</span>
+                  <span className="hidden sm:inline">
+                    {`Hi, ${user?.displayName || "there"}!`}
+                  </span>
                   <ChevronDown
                     size={12}
                     className={`transition-transform duration-300 ${isAccountOpen ? "rotate-180" : ""}`}
