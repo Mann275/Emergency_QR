@@ -16,6 +16,7 @@ import {
   ChevronDown,
   Pencil,
   HeartPulse,
+  Info,
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { IN, US, GB, AU } from "country-flag-icons/react/3x2";
@@ -217,7 +218,7 @@ const EditProfile = () => {
 
   const SectionTitle = ({ icon: Icon, title, copy }) => (
     <div className="mb-6 sm:mb-8">
-      <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/60 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-slate-600 backdrop-blur-xl">
+      <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/60 px-3 py-2 text-xs font-semibold text-slate-600 backdrop-blur-xl">
         <Icon size={14} className="text-[var(--accent)]" />
         {title}
       </div>
@@ -367,17 +368,28 @@ const EditProfile = () => {
                 alt=""
                 className="w-14 sm:w-28 h-auto mix-blend-multiply shrink-0"
               />
-              <h1
-                className="text-3xl sm:text-5xl font-bold text-[var(--ink)] tracking-tight leading-tight"
-                style={{ fontFamily: "var(--font-heading)" }}
-              >
-                {t.editTitle || "Edit your profile"}
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1
+                  className="text-3xl sm:text-5xl font-bold text-[var(--ink)] tracking-tight leading-tight"
+                  style={{ fontFamily: "var(--font-heading)" }}
+                >
+                  {t.editTitle || "Edit your profile"}
+                </h1>
+                <div className="relative group pt-0.5">
+                  <button
+                    type="button"
+                    aria-label="Edit profile information"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--line)] bg-white/80 text-[var(--muted)] shadow-sm transition hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/30"
+                  >
+                    <Info size={14} />
+                  </button>
+                  <div className="absolute left-1/2 top-full z-30 mt-2 w-64 -translate-x-1/2 rounded-2xl border border-white/70 bg-white/95 p-3 text-left text-[12px] font-medium tracking-normal text-[var(--muted)] shadow-[0_28px_60px_rgba(20,10,18,0.25)] backdrop-blur-xl opacity-0 invisible transition-all duration-300 -translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 pointer-events-none origin-top">
+                    <div className="absolute -top-1 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border border-white/70 bg-white/95"></div>
+                    Update your medical details. Changes will reflect on your emergency QR immediately.
+                  </div>
+                </div>
+              </div>
             </div>
-            <p className="mt-2 text-base sm:text-lg text-[var(--muted)] leading-relaxed">
-              {t.editDesc ||
-                "Update your medical details. Changes are saved immediately."}
-            </p>
           </div>
 
           <form
@@ -619,17 +631,10 @@ const EditProfile = () => {
               </p>
 
               <div className="flex items-center gap-3">
-                <Link
-                  to={`/emergency/${id}`}
-                  className="ghost-btn gap-2 px-5 py-3 text-sm shrink-0 border border-[var(--line)] text-[var(--muted)]"
-                >
-                  <ArrowLeft size={14} />
-                  {t.cancelEdit || "Cancel"}
-                </Link>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="stark-btn gap-3 shrink-0 whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-70"
+                  className="stark-btn gap-2 shrink-0 whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {loading ? (
                     <>
@@ -637,12 +642,15 @@ const EditProfile = () => {
                       {t.updating || "Updating..."}
                     </>
                   ) : (
-                    <>
-                      {t.updateProfile || "Update profile"}{" "}
-                      <ArrowRight size={16} />
-                    </>
+                    <>{t.updateProfile || "Update profile"}</>
                   )}
                 </button>
+                <Link
+                  to={`/emergency/${id}`}
+                  className="ghost-btn gap-2 px-5 py-3 text-sm shrink-0 border border-[var(--line)] text-[var(--muted)]"
+                >
+                  {t.cancelEdit || "Cancel"}
+                </Link>
               </div>
             </div>
           </form>
