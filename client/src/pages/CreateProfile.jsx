@@ -15,9 +15,10 @@ import {
   ChevronDown,
   HeartPulse,
   Info,
+  Eye,
+  EyeOff,
   Mail,
   Lock,
-  Chrome,
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
@@ -57,6 +58,8 @@ const CreateProfile = () => {
   const [authMode, setAuthMode] = useState("signin");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [isProfilePrefilling, setIsProfilePrefilling] = useState(false);
   const [existingProfileId, setExistingProfileId] = useState("");
   const [phoneCode, setPhoneCode] = useState("+91");
@@ -79,6 +82,7 @@ const CreateProfile = () => {
   });
 
   const handleChange = (e) => {
+    if (!user) return;
     const { name, value, type, checked } = e.target;
     if (name.startsWith("emergencyContact.")) {
       const field = name.split(".")[1];
@@ -96,6 +100,7 @@ const CreateProfile = () => {
   };
 
   const handlePhoneChange = (e, fieldPath) => {
+    if (!user) return;
     const digitsOnly = e.target.value.replace(/\D/g, "").slice(0, 10);
     if (fieldPath === "phone") {
       setFormData((prev) => ({ ...prev, phone: digitsOnly }));
@@ -110,6 +115,15 @@ const CreateProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!user) {
+      setShowAuthPrompt(true);
+      setTimeout(() => {
+        document
+          .getElementById("auth-panel")
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 0);
+      return;
+    }
     setLoading(true);
 
     try {
@@ -166,6 +180,9 @@ const CreateProfile = () => {
   };
 
   useEffect(() => {
+    if (user) {
+      setShowAuthPrompt(false);
+    }
     const prefillExistingProfile = async () => {
       if (!user?.uid) {
         setExistingProfileId("");
@@ -241,10 +258,10 @@ const CreateProfile = () => {
       setAuthSubmitting(true);
       if (authMode === "signup") {
         await signUp(authEmail, authPassword);
-        toast.success("Account created successfully.");
+        toast.success("Account created successfully :)");
       } else {
         await signIn(authEmail, authPassword);
-        toast.success("Signed in successfully.");
+        toast.success("Signed in successfully :)");
       }
     } catch (error) {
       toast.error(error.message || "Authentication failed.");
@@ -257,7 +274,7 @@ const CreateProfile = () => {
     try {
       setAuthSubmitting(true);
       await signInWithGoogle();
-      toast.success("Signed in with Google.");
+      toast.success("Signed in with Google :)");
     } catch (error) {
       toast.error(error.message || "Google sign-in failed.");
     } finally {
@@ -304,7 +321,7 @@ const CreateProfile = () => {
     </div>
   );
 
-  const CustomPhoneSelector = ({ value, onChange }) => {
+  const CustomPhoneSelector = ({ value, onChange, disabled = false }) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
     const options = [
@@ -339,8 +356,12 @@ const CreateProfile = () => {
       >
         <button
           type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex w-full items-center gap-2 rounded-2xl border border-[var(--line)] bg-white/55 px-3 py-4 text-base font-medium text-[var(--ink)] backdrop-blur-xl"
+          onClick={() => {
+            if (disabled) return;
+            setIsOpen(!isOpen);
+          }}
+          disabled={disabled}
+          className="flex w-full items-center gap-2 rounded-2xl border border-[var(--line)] bg-white/55 px-3 py-4 text-base font-medium text-[var(--ink)] backdrop-blur-xl disabled:cursor-not-allowed disabled:opacity-70"
         >
           <div className="flex h-[16px] w-6 items-center justify-center overflow-hidden rounded-sm border border-slate-200">
             {selected.icon}
@@ -377,32 +398,42 @@ const CreateProfile = () => {
   };
 
   const isSignUp = authMode === "signup";
+  const isReadOnly = !user;
+  const fieldStylePreview = isReadOnly
+    ? { ...fieldStyle, opacity: 0.75, cursor: "not-allowed" }
+    : fieldStyle;
 
   return (
-    <div className="pb-24">
-      <section className="pt-20 sm:pt-28">
+    <div
+      className="pb-[calc(8rem+env(safe-area-inset-bottom))] sm:pb-24"
+      style={{ "--line": "rgba(35, 19, 26, 0.25)" }}
+    >
+      <section className="pt-16 sm:pt-24 lg:pt-28">
         <div className="main-wrap max-w-3xl">
-          <div className="text-center mb-8 animate-slide">
-            <div className="flex flex-row items-center justify-center gap-4 sm:gap-6 mb-4">
+          <div className="mb-3 animate-slide relative z-30">
+            <div className="mx-auto flex max-w-lg items-center justify-center gap-3 text-center">
               <img
                 src="/images/illustration3.png"
                 alt=""
-                className="w-14 sm:w-28 h-auto mix-blend-multiply shrink-0"
+                className="w-12 sm:w-16 h-auto mix-blend-multiply shrink-0"
               />
-              <div className="relative group flex items-center gap-3 sm:gap-4">
+              <div className="flex items-center gap-2">
                 <h1
-                  className="text-3xl sm:text-5xl font-bold text-[var(--ink)] tracking-tight leading-tight"
+                  className="text-2xl sm:text-4xl font-bold text-[var(--ink)] tracking-tight leading-tight"
                   style={{ fontFamily: "var(--font-heading)" }}
                 >
                   {t.createTitle}
                 </h1>
-                <div className="relative pt-1 scale-90 sm:scale-100">
-                  <Info
-                    size={20}
-                    className="text-[var(--muted)] cursor-help opacity-30 hover:opacity-100 transition-opacity"
-                  />
-                  <div className="absolute top-full right-0 mt-2 w-56 p-3 rounded-xl bg-[#23131a] text-white text-[12px] font-normal tracking-normal shadow-2xl z-[200] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 -translate-y-1 group-hover:translate-y-0 pointer-events-none text-left">
-                    <div className="absolute -top-1 right-2 w-2.5 h-2.5 bg-[#23131a] rotate-45"></div>
+                <div className="relative group pt-0 sm:pt-1 scale-90 sm:scale-100">
+                  <button
+                    type="button"
+                    aria-label="Why we ask for these details"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[var(--line)] bg-white/80 text-[var(--muted)] shadow-sm transition hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/30"
+                  >
+                    <Info size={14} />
+                  </button>
+                  <div className="absolute left-1/2 top-full z-[400] mt-4 w-64 -translate-x-1/2 rounded-2xl border border-white/70 bg-white/95 p-3 text-left text-[12px] font-medium tracking-normal text-[var(--muted)] shadow-[0_28px_60px_rgba(20,10,18,0.25)] backdrop-blur-xl opacity-0 invisible transition-all duration-300 -translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 pointer-events-none">
+                    <div className="absolute -top-1 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border border-white/70 bg-white/95"></div>
                     {t.createDesc}
                   </div>
                 </div>
@@ -410,152 +441,21 @@ const CreateProfile = () => {
             </div>
           </div>
 
-          {!user ? (
-            <div className="glass-card p-6 sm:p-8 animate-slide">
-              <SectionTitle
-                icon={UserCheck}
-                title="Secure Access"
-                copy={
-                  isSignUp
-                    ? "Create a new account to start managing your emergency profile."
-                    : "Sign in to create and manage your emergency profile."
-                }
-              />
-              {authLoading ? (
-                <div className="flex items-center gap-2 text-[var(--muted)]">
-                  <Loader2 size={16} className="animate-spin" />
-                  Checking authentication...
-                </div>
-              ) : (
-                <form onSubmit={handleAuthSubmit} className="grid gap-5">
-                  <div className="inline-flex rounded-2xl border border-[var(--line)] bg-white/55 p-1">
-                    <button
-                      type="button"
-                      onClick={() => setAuthMode("signin")}
-                      className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                        authMode === "signin"
-                          ? "bg-[var(--accent)] text-white"
-                          : "text-[var(--ink)]"
-                      }`}
-                    >
-                      Sign in
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAuthMode("signup")}
-                      className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                        authMode === "signup"
-                          ? "bg-[var(--accent)] text-white"
-                          : "text-[var(--ink)]"
-                      }`}
-                    >
-                      Sign up
-                    </button>
-                  </div>
-
-                  <div>
-                    <label style={labelStyle}>
-                      <Mail size={14} /> Email
-                    </label>
-                    <input
-                      type="email"
-                      value={authEmail}
-                      onChange={(e) => setAuthEmail(e.target.value)}
-                      placeholder={
-                        isSignUp
-                          ? "Enter a new email address"
-                          : "Enter your account email"
-                      }
-                      required
-                      style={fieldStyle}
-                    />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>
-                      <Lock size={14} /> Password
-                    </label>
-                    <input
-                      type="password"
-                      value={authPassword}
-                      onChange={(e) => setAuthPassword(e.target.value)}
-                      placeholder={
-                        isSignUp
-                          ? "Create password (min 6 characters)"
-                          : "Enter your password"
-                      }
-                      minLength={6}
-                      required
-                      style={fieldStyle}
-                    />
-                  </div>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <button
-                      type="submit"
-                      disabled={authSubmitting}
-                      className="stark-btn gap-2 disabled:cursor-not-allowed disabled:opacity-70"
-                    >
-                      {authSubmitting ? (
-                        <>
-                          <Loader2 size={16} className="animate-spin" />
-                          Please wait
-                        </>
-                      ) : isSignUp ? (
-                        "Create account"
-                      ) : (
-                        "Sign in"
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setAuthMode(isSignUp ? "signin" : "signup")
-                      }
-                      className="rounded-xl border border-[var(--line)] bg-white/45 px-3.5 py-2 text-sm font-semibold text-[var(--muted)] transition hover:bg-white/70"
-                    >
-                      {isSignUp
-                        ? "Use your existing account"
-                        : "Create a new account"}
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                    <span className="h-px flex-1 bg-[var(--line)]" />
-                    OR
-                    <span className="h-px flex-1 bg-[var(--line)]" />
-                  </div>
-
-                  <div>
-                    <button
-                      type="button"
-                      onClick={handleGoogleSignIn}
-                      disabled={authSubmitting}
-                      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--line)] bg-white/60 px-4 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/80 disabled:cursor-not-allowed disabled:opacity-70"
-                    >
-                      <Chrome size={16} />
-                      {isSignUp
-                        ? "Continue with Google (Sign up)"
-                        : "Continue with Google"}
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
-          ) : (
-            <form
-              onSubmit={handleSubmit}
-              className="glass-card p-6 sm:p-8 animate-slide"
-            >
-              {isProfilePrefilling ? (
-                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
-                  <Loader2 size={14} className="animate-spin" /> Loading your
-                  saved details
-                </div>
-              ) : existingProfileId ? (
-                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
-                  <HeartPulse size={14} className="text-[var(--accent)]" />{" "}
-                  Existing profile detected. Updating keeps the same QR.
-                </div>
-              ) : null}
+          <form
+            onSubmit={handleSubmit}
+            className="glass-card border-[rgba(35,19,26,0.25)] p-6 sm:p-8 animate-slide"
+          >
+            {user && isProfilePrefilling ? (
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+                <Loader2 size={14} className="animate-spin" /> Loading your
+                saved details
+              </div>
+            ) : user && existingProfileId ? (
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+                <HeartPulse size={14} className="text-[var(--accent)]" />{" "}
+                Existing profile detected. Updating keeps the same QR.
+              </div>
+            ) : null}
 
               <SectionTitle
                 icon={User}
@@ -574,7 +474,8 @@ const CreateProfile = () => {
                     onChange={handleChange}
                     placeholder="E.g. John Doe"
                     required
-                    style={fieldStyle}
+                    readOnly={isReadOnly}
+                    style={fieldStylePreview}
                   />
                 </div>
 
@@ -588,8 +489,9 @@ const CreateProfile = () => {
                       value={formData.bloodGroup}
                       onChange={handleChange}
                       required
+                      disabled={isReadOnly}
                       style={{
-                        ...fieldStyle,
+                        ...(isReadOnly ? fieldStylePreview : fieldStyle),
                         appearance: "none",
                         paddingRight: "44px",
                       }}
@@ -618,8 +520,9 @@ const CreateProfile = () => {
                       value={formData.gender}
                       onChange={handleChange}
                       required
+                      disabled={isReadOnly}
                       style={{
-                        ...fieldStyle,
+                        ...(isReadOnly ? fieldStylePreview : fieldStyle),
                         appearance: "none",
                         paddingRight: "44px",
                       }}
@@ -648,7 +551,8 @@ const CreateProfile = () => {
                     value={formData.dateOfBirth}
                     onChange={handleChange}
                     required
-                    style={fieldStyle}
+                    readOnly={isReadOnly}
+                    style={fieldStylePreview}
                   />
                 </div>
               </div>
@@ -669,6 +573,7 @@ const CreateProfile = () => {
                     <CustomPhoneSelector
                       value={phoneCode}
                       onChange={setPhoneCode}
+                      disabled={isReadOnly}
                     />
                     <input
                       className="min-w-0 flex-1"
@@ -678,7 +583,8 @@ const CreateProfile = () => {
                       onChange={(e) => handlePhoneChange(e, "phone")}
                       placeholder="1234567890"
                       required
-                      style={fieldStyle}
+                      readOnly={isReadOnly}
+                      style={fieldStylePreview}
                     />
                   </div>
                 </div>
@@ -694,7 +600,8 @@ const CreateProfile = () => {
                     onChange={handleChange}
                     placeholder="Someone you trust"
                     required
-                    style={fieldStyle}
+                    readOnly={isReadOnly}
+                    style={fieldStylePreview}
                   />
                 </div>
 
@@ -706,6 +613,7 @@ const CreateProfile = () => {
                     <CustomPhoneSelector
                       value={emergencyCode}
                       onChange={setEmergencyCode}
+                      disabled={isReadOnly}
                     />
                     <input
                       className="min-w-0 flex-1"
@@ -717,7 +625,8 @@ const CreateProfile = () => {
                       }
                       placeholder="1234567890"
                       required
-                      style={fieldStyle}
+                      readOnly={isReadOnly}
+                      style={fieldStylePreview}
                     />
                   </div>
                 </div>
@@ -740,7 +649,8 @@ const CreateProfile = () => {
                     value={formData.diseaseDetails}
                     onChange={handleChange}
                     placeholder="Asthma, diabetes, epilepsy..."
-                    style={{ ...fieldStyle, minHeight: "96px" }}
+                    readOnly={isReadOnly}
+                    style={{ ...fieldStylePreview, minHeight: "96px" }}
                   />
                 </div>
 
@@ -754,7 +664,8 @@ const CreateProfile = () => {
                     value={formData.allergies}
                     onChange={handleChange}
                     placeholder="Penicillin, peanuts..."
-                    style={fieldStyle}
+                    readOnly={isReadOnly}
+                    style={fieldStylePreview}
                   />
                 </div>
 
@@ -768,7 +679,8 @@ const CreateProfile = () => {
                     value={formData.medications}
                     onChange={handleChange}
                     placeholder="Current medication..."
-                    style={fieldStyle}
+                    readOnly={isReadOnly}
+                    style={fieldStylePreview}
                   />
                 </div>
 
@@ -781,7 +693,8 @@ const CreateProfile = () => {
                     value={formData.notes}
                     onChange={handleChange}
                     placeholder="Example: carries inhaler in bag pocket."
-                    style={{ ...fieldStyle, minHeight: "88px" }}
+                    readOnly={isReadOnly}
+                    style={{ ...fieldStylePreview, minHeight: "88px" }}
                   />
                 </div>
               </div>
@@ -810,7 +723,130 @@ const CreateProfile = () => {
                   )}
                 </button>
               </div>
-            </form>
+          </form>
+
+          {!user && showAuthPrompt && (
+            <div
+              id="auth-panel"
+              className="glass-card border-[rgba(35,19,26,0.25)] p-6 sm:p-8 animate-slide relative z-0 max-w-lg w-full mx-auto mt-6"
+            >
+              {authLoading ? (
+                <div className="flex items-center gap-2 text-[var(--muted)]">
+                  <Loader2 size={16} className="animate-spin" />
+                  Checking authentication...
+                </div>
+              ) : (
+                <form onSubmit={handleAuthSubmit} className="grid gap-5">
+                  <div className="grid gap-2">
+                    <label style={labelStyle}>
+                      <Mail size={14} /> Email
+                    </label>
+                    <input
+                      type="email"
+                      value={authEmail}
+                      onChange={(e) => setAuthEmail(e.target.value)}
+                      placeholder={
+                        isSignUp
+                          ? "Enter a new email address"
+                          : "Enter your account email"
+                      }
+                      required
+                      style={fieldStyle}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <label style={labelStyle}>
+                      <Lock size={14} /> Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={authPassword}
+                        onChange={(e) => setAuthPassword(e.target.value)}
+                        placeholder={
+                          isSignUp
+                            ? "Create password (min 6 characters)"
+                            : "Enter your password"
+                        }
+                        minLength={6}
+                        required
+                        style={{ ...fieldStyle, paddingRight: "46px" }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        aria-label={
+                          showPassword ? "Hide password" : "Show password"
+                        }
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] transition hover:text-[var(--ink)]"
+                      >
+                        {showPassword ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
+                    <button
+                      type="submit"
+                      disabled={authSubmitting}
+                      className="stark-btn gap-2 disabled:cursor-not-allowed disabled:opacity-70 w-full sm:w-fit justify-center"
+                    >
+                      {authSubmitting ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" />
+                          Please wait
+                        </>
+                      ) : isSignUp ? (
+                        "Create account"
+                      ) : (
+                        "Sign in"
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setAuthMode(isSignUp ? "signin" : "signup")
+                      }
+                      className="rounded-full border border-[var(--line)] bg-white/45 px-3.5 py-2 text-sm font-semibold text-[var(--muted)] transition hover:bg-white/70 w-full sm:w-fit"
+                    >
+                      {isSignUp
+                        ? "Use your existing account"
+                        : "Create a new account"}
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                    <span className="h-px flex-1 bg-[var(--line)]" />
+                    OR
+                    <span className="h-px flex-1 bg-[var(--line)]" />
+                  </div>
+
+                  <div>
+                    <button
+                      type="button"
+                      onClick={handleGoogleSignIn}
+                      disabled={authSubmitting}
+                      className="flex w-fit mx-auto items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-white/60 px-4 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/80 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      <span className="flex h-5 w-5 items-center justify-center">
+                        <svg viewBox="0 0 48 48" className="h-5 w-5">
+                          <path fill="#EA4335" d="M24 9.5c3.4 0 6.5 1.2 8.9 3.2l6.6-6.6C35.7 2.4 30.2 0 24 0 14.6 0 6.4 5.4 2.6 13.2l7.8 6.1C12.1 13.2 17.6 9.5 24 9.5z" />
+                          <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-2.8-.4-4.1H24v7.8h12.7c-.6 3-2.3 5.5-4.9 7.2l7.6 5.8c4.5-4.2 7.1-10.4 7.1-16.7z" />
+                          <path fill="#FBBC05" d="M10.4 28.7c-1-3-1-6.4 0-9.4l-7.8-6.1C-.7 18.7-.7 29.3 2.6 35.8l7.8-7.1z" />
+                          <path fill="#34A853" d="M24 48c6.2 0 11.4-2.1 15.2-5.7l-7.6-5.8c-2.1 1.4-4.8 2.2-7.6 2.2-6.4 0-11.9-3.7-14.6-9l-7.8 7.1C6.4 42.6 14.6 48 24 48z" />
+                        </svg>
+                      </span>
+                      {isSignUp
+                        ? "Continue with Google (Sign up)"
+                        : "Continue with Google"}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
           )}
         </div>
       </section>
