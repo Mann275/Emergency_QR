@@ -35,7 +35,7 @@ const Home = () => {
 
   return (
     <div className="overflow-hidden pb-4 sm:pb-8">
-      <section className="relative pt-28 sm:pt-40 pb-12 sm:pb-24">
+      <section className="relative pt-24 sm:pt-40 pb-10 sm:pb-24">
         {/* Decorative background blur */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-red-100/50 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
 
@@ -43,50 +43,52 @@ const Home = () => {
           <div className="grid gap-12 lg:grid-cols-[1fr,1fr] items-center">
 
             {/* Hero Left Content */}
-            <div className="animate-slide space-y-8">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white/70 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-[var(--accent)] backdrop-blur-md shadow-sm">
-                <ShieldCheck size={16} />
-                {t.heroBadge}
-              </div>
-
+            <div className="animate-slide space-y-7 text-center lg:text-left flex flex-col items-center lg:items-start">
               <h1
-                className="max-w-2xl text-5xl sm:text-6xl lg:text-[76px] font-bold tracking-tight text-[var(--ink)]"
+                className="max-w-2xl text-[42px] sm:text-6xl lg:text-[76px] font-bold tracking-tight text-[var(--ink)] mx-auto lg:mx-0"
                 style={{
                   fontFamily: "var(--font-heading)",
-                  lineHeight: "0.95",
+                  lineHeight: "1.02",
                 }}
               >
                 {t.heroTitle}
               </h1>
 
-              <p className="max-w-xl text-lg sm:text-xl leading-relaxed text-[var(--muted)] opacity-90 font-medium">
+              <p className="max-w-xl text-base sm:text-lg leading-relaxed text-[var(--muted)] opacity-90 font-medium mx-auto lg:mx-0">
                 {t.heroSubDesc}
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-5 pt-4">
-                <Link to="/create" className="stark-btn gap-3 py-4 px-8 text-base shadow-lg shadow-black/5 hover:-translate-y-1 transition-transform">
+              <div className="flex flex-col sm:flex-row gap-4 pt-3 items-center lg:items-start justify-center lg:justify-start w-full sm:w-auto">
+                <Link to="/create" className="stark-btn gap-3 py-4 px-8 text-base shadow-lg shadow-black/5 hover:-translate-y-1 transition-transform justify-center">
                   {t.heroCta}
                   <ArrowRight size={18} />
                 </Link>
-                <a href="#preview" className="ghost-btn py-4 px-8 text-base bg-white/50 hover:bg-white text-[var(--ink)] border border-[var(--line)]">
+                <a href="#preview" className="ghost-btn py-4 px-8 text-base bg-white/50 hover:bg-white text-[var(--ink)] border border-[var(--line)] justify-center">
                   {t.seePreview}
                 </a>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-10 border-t border-[var(--line)]/60">
+              <div className="grid grid-cols-3 gap-3 pt-8 border-t border-[var(--line)]/60 text-center w-full">
                 {[
-                  [t.stat1Val, t.stat1Lbl],
-                  [t.stat2Val, t.stat2Lbl],
-                  [t.stat3Val, t.stat3Lbl],
-                ].map(([value, label], idx) => (
-                  <div key={label} className="animate-slide" style={{ animationDelay: `${0.1 + idx * 0.1}s` }}>
+                  [t.stat1Val, t.stat1Lbl, Clock3],
+                  [t.stat2Val, t.stat2Lbl, QrCode],
+                  [t.stat3Val, t.stat3Lbl, Activity],
+                ].map(([value, label, Icon], idx) => (
+                  <div
+                    key={label}
+                    className="animate-slide rounded-2xl border border-[var(--line)]/60 bg-white/60 px-2.5 py-3"
+                    style={{ animationDelay: `${0.1 + idx * 0.1}s` }}
+                  >
+                    <div className="mb-1 flex items-center justify-center text-[var(--accent)]">
+                      <Icon size={18} strokeWidth={1.8} />
+                    </div>
                     <div
-                      className="text-3xl font-black text-[var(--ink)]"
+                      className="text-2xl sm:text-3xl font-black text-[var(--ink)]"
                       style={{ fontFamily: "var(--font-heading)" }}
                     >
                       {value}
                     </div>
-                    <div className="mt-1.5 text-xs uppercase tracking-widest font-bold text-slate-500">
+                    <div className="mt-1 text-[10px] uppercase tracking-widest font-bold text-slate-500">
                       {label}
                     </div>
                   </div>
@@ -96,7 +98,7 @@ const Home = () => {
 
             {/* Hero Right Graphic - illustration1.png */}
             <div className="animate-slide flex items-center justify-center lg:justify-end" style={{ animationDelay: "0.15s" }}>
-              <div className="relative w-full max-w-[585px]">
+              <div className="relative w-full max-w-[420px] sm:max-w-[520px] lg:max-w-[585px]">
                 <div className="absolute inset-0 bg-white/60 blur-3xl rounded-full scale-110 -z-10"></div>
                 <img
                   src="/images/img.png"
@@ -113,8 +115,8 @@ const Home = () => {
       <section id="preview" className="py-16 sm:py-32 relative">
         <div className="main-wrap">
 
-          <div className="mb-20 text-center max-w-2xl mx-auto">
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[var(--ink)] tracking-tight" style={{ fontFamily: "var(--font-heading)" }}>
+          <div className="mb-14 sm:mb-20 text-center max-w-2xl mx-auto">
+            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black text-[var(--ink)] tracking-tight" style={{ fontFamily: "var(--font-heading)" }}>
               A clinical approach to emergency data.
             </h2>
           </div>
@@ -122,17 +124,17 @@ const Home = () => {
           <div className="grid gap-16 lg:gap-24 lg:grid-cols-2 items-center">
 
             {/* Left side: Feature List (No BG cards) */}
-            <div className="space-y-12 animate-slide" style={{ animationDelay: '0.12s' }}>
+            <div className="space-y-10 sm:space-y-12 animate-slide text-left" style={{ animationDelay: '0.12s' }}>
               {featureCards.map((feature, idx) => (
-                <div key={idx} className="flex gap-4 items-start group">
-                  <div className="flex shrink-0 w-12 pt-1.5 items-center justify-center text-[var(--accent)]">
+                <div key={idx} className="flex flex-row gap-3 sm:gap-4 items-start text-left group">
+                  <div className="flex shrink-0 w-10 sm:w-12 pt-1 items-start justify-center text-[var(--accent)]">
                     <feature.icon size={26} strokeWidth={1.5} />
                   </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-[var(--ink)] mb-2" style={{ fontFamily: "var(--font-heading)" }}>
+                  <div className="flex-1 max-w-none">
+                    <h3 className="text-xl sm:text-2xl font-bold text-[var(--ink)] mb-2" style={{ fontFamily: "var(--font-heading)" }}>
                       {feature.title}
                     </h3>
-                    <p className="text-lg leading-relaxed text-slate-500 font-medium">
+                    <p className="text-base sm:text-lg leading-relaxed text-slate-500 font-medium">
                       {feature.copy}
                     </p>
                   </div>
@@ -164,8 +166,8 @@ const Home = () => {
                 />
               </div>
 
-              <div className="order-1 lg:order-2 space-y-10">
-                <div className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--ink)]">
+              <div className="order-1 lg:order-2 space-y-8 sm:space-y-10 text-left">
+                <div className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] text-[var(--ink)]">
                   {t.fastSetupBadge}
                 </div>
 
@@ -181,15 +183,15 @@ const Home = () => {
                     ],
                     [ShieldCheck, t.step3Title, t.step3Desc],
                   ].map(([Icon, title, copy]) => (
-                    <div key={title} className="flex gap-4 items-start">
-                      <div className="flex w-12 shrink-0 pt-1.5 items-center justify-center text-[var(--accent)]">
+                    <div key={title} className="flex flex-row gap-3 sm:gap-4 items-start text-left">
+                      <div className="flex w-10 sm:w-12 shrink-0 pt-1 items-start justify-center text-[var(--accent)]">
                         <Icon size={26} strokeWidth={1.5} />
                       </div>
-                      <div>
-                        <div className="text-2xl font-bold text-[var(--ink)] mb-2" style={{ fontFamily: "var(--font-heading)" }}>
+                      <div className="flex-1 max-w-none">
+                        <div className="text-xl sm:text-2xl font-bold text-[var(--ink)] mb-2" style={{ fontFamily: "var(--font-heading)" }}>
                           {title}
                         </div>
-                        <p className="text-lg leading-relaxed text-slate-500 font-medium">
+                        <p className="text-base sm:text-lg leading-relaxed text-slate-500 font-medium">
                           {copy}
                         </p>
                       </div>
