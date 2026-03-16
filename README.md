@@ -1,232 +1,112 @@
-# Emergency QR - Medical Information Management System
+# Emergency QR
 
-An emergency medical information management system that allows users to create personal profiles with critical medical data and generate a QR code for quick access during emergencies.
+> QR-based emergency medical profile system. One scan reveals blood group, medications, allergies, and emergency contacts — no app install required.
 
-## 🌟 Features
+## Tech Stack
 
-- **Personal Profile Creation**: Create and manage detailed medical profiles
-- **QR Code Generation**: Generate unique QR codes for instant profile access
-- **Emergency Access**: Quick access to medical information during critical situations
-- **Responsive Design**: Works on all devices - mobile, tablet, and desktop
-- **Secure Storage**: Medical data is securely stored and accessible only through QR code
-- **Offline Access**: Profile data can be accessed without internet connection
+| Layer    | Stack                                          |
+|----------|-------------------------------------------------|
+| Frontend | React 18, React Router 6, Tailwind CSS 3, Vite 4 |
+| Backend  | Node.js, Express 4, Mongoose 8                  |
+| Database | MongoDB                                         |
+| Other    | QR Code generation, i18n (EN/HI/GU)             |
 
-## 🚀 Quick Start
+## Getting Started
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
-- MongoDB (local or cloud instance)
-- npm or yarn package manager
+- Node.js ≥ 16
+- MongoDB instance (local or Atlas)
 
-### Installation
+### Setup
 
-1. **Clone the repository**
+```bash
+# Clone
+git clone https://github.com/Mann275/Emergency_QR.git
+cd Emergency_QR
 
-   ```bash
-   git clone https://github.com/yourusername/emergency-qr.git
-   cd emergency-qr
-   ```
+# Server
+cd server
+npm install
+cp .env.example .env   # configure MONGODB_URI
+npm run dev             # runs on :5000
 
-2. **Install server dependencies**
-
-   ```bash
-   cd server
-   npm install
-   ```
-
-3. **Install client dependencies**
-
-   ```bash
-   cd ../client
-   npm install
-   ```
-
-4. **Set up environment variables**
-   - Copy `server/.env.example` to `server/.env`
-   - Configure your MongoDB connection string
-   - Update other environment variables as needed
-
-5. **Start the development servers**
-
-   ```bash
-   # Start backend server (port 5000)
-   cd server
-   npm run dev
-
-   # Start frontend server (port 3000) in new terminal
-   cd client
-   npm run dev
-   ```
-
-6. **Open your browser**
-   Navigate to `http://localhost:3000`
-
-## 📁 Project Structure
-
-```
-emergency-qr/
-├── server/                 # Backend API (Node.js + Express)
-│   ├── models/            # Database models
-│   ├── routes/            # API routes
-│   ├── middleware/        # Middleware functions
-│   ├── server.js          # Server entry point
-│   ├── package.json       # Server dependencies
-│   └── .env.example       # Environment variables example
-├── client/                 # Frontend application (React + Vite)
-│   ├── src/
-│   │   ├── components/    # Reusable React components
-│   │   ├── pages/         # Page components
-│   │   ├── utils/         # Utility functions
-│   │   ├── App.jsx        # Main App component
-│   │   └── main.jsx       # Application entry point
-│   ├── public/            # Static assets
-│   ├── index.html         # HTML template
-│   └── package.json       # Frontend dependencies
-├── README.md              # Project documentation
-└── .gitignore            # Git ignore rules
+# Client (new terminal)
+cd client
+npm install
+npm run dev             # runs on :5173
 ```
 
-## 🛠️ Tech Stack
+### Environment Variables
 
-### Frontend
-
-- **React 18.2.0**: UI library
-- **React Router 6.8.0**: Routing management
-- **Tailwind CSS 3.3.0**: Utility-first CSS framework
-- **Vite 4.4.5**: Build tool and dev server
-- **Axios 1.6.0**: HTTP client
-- **QRCode.js 1.5.3**: QR code generation
-
-### Backend
-
-- **Node.js**: JavaScript runtime
-- **Express 4.18.2**: Web framework
-- **MongoDB**: NoSQL database
-- **Mongoose 8.0.0**: ODM for MongoDB
-- **CORS 2.8.5**: Cross-origin resource sharing
-- **JWT 9.0.2**: JSON Web Token authentication
-- **bcryptjs 2.4.3**: Password hashing
-- **Validator 13.11.0**: Data validation
-
-## 📱 Usage
-
-### Creating a Profile
-
-1. Visit the homepage and click "Create Profile"
-2. Fill in all the required fields including:
-   - Personal information
-   - Emergency contacts
-   - Medical history
-   - Current medications
-   - Allergies
-   - Insurance information
-3. Click "Generate QR Code"
-4. Download and save your QR code
-5. Print or store the QR code in a accessible location (wallet, phone case, etc.)
-
-### Accessing a Profile
-
-1. Scan the QR code with any QR scanner
-2. The profile information will be displayed instantly
-3. No login or authentication required for emergency access
-
-## 🔒 Security
-
-- Medical data is stored securely in MongoDB
-- QR codes contain encrypted profile identifiers
-- No sensitive data is stored directly in the QR code
-- Data is only accessible through authorized API endpoints
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a new branch (`git checkout -b feature/your-feature`)
-3. Make your changes
-4. Commit your changes (`git commit -m 'Add some feature'`)
-5. Push to the branch (`git push origin feature/your-feature`)
-6. Open a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 📞 Support
-
-For support, please open an issue in the GitHub repository or contact the project maintainers.
-
-## 🎥 Demo
-
-[Watch a quick demo of the application](#)
-
-## 📊 Screenshots
-
-### Homepage
-
-![Homepage](https://via.placeholder.com/800x400/4CAF50/ffffff?text=Homepage)
-
-### Create Profile
-
-![Create Profile](https://via.placeholder.com/800x400/2196F3/ffffff?text=Create+Profile)
-
-### QR Code Generation
-
-![QR Code](https://via.placeholder.com/800x400/FFC107/000000?text=QR+Code+Generation)
-
-### Profile Display
-
-![Profile](https://via.placeholder.com/800x400/9C27B0/ffffff?text=Profile+Display)
-
-## 🚀 Deployment
-
-### Vercel (Frontend)
-
-1. Connect your GitHub repository to Vercel
-2. Configure build settings
-3. Deploy with one click
-
-### Heroku (Backend)
-
-1. Create a Heroku account
-2. Install the Heroku CLI
-3. Deploy your backend
-
-### MongoDB Atlas
-
-1. Create a MongoDB Atlas account
-2. Create a new cluster
-3. Connect your application
-
-## 📈 Performance
-
-- Fast initial load times
-- Responsive design for all screen sizes
-- Optimized for mobile devices
-- Minimal bundle size
-
-## 🔧 Configuration
-
-### Environment Variables (Server)
-
+**Server** (`server/.env`)
 ```env
-NODE_ENV=development
-PORT=5000
 MONGODB_URI=mongodb://localhost:27017/emergencyqr
-JWT_SECRET=your_jwt_secret_key_here
-FRONTEND_URL=http://localhost:3000
+PORT=5000
+FRONTEND_URL=http://localhost:5173
 ```
 
-### Environment Variables (Client)
-
+**Client** (`client/.env`)
 ```env
-VITE_API_URL=http://localhost:5000
+VITE_API_URL=http://localhost:5000/api
 ```
 
-## 🛡️ Security Measures
+## Project Structure
 
-- Input validation
-- CORS configuration
-- Helmet security headers
-- Rate limiting
-- Data sanitization
-- Error handling
+```
+Emergency_QR/
+├── server/
+│   ├── models/User.js        # Mongoose schema
+│   ├── routes/users.js       # REST API endpoints
+│   └── server.js             # Express entry point
+├── client/src/
+│   ├── pages/
+│   │   ├── Home.jsx           # Landing page
+│   │   ├── CreateProfile.jsx  # Profile creation form
+│   │   ├── EditProfile.jsx    # Profile editing form
+│   │   ├── EmergencyProfile.jsx # Public emergency view
+│   │   └── Success.jsx        # QR download page
+│   ├── components/            # Header, Footer, BottomNav
+│   ├── context/               # Language & Theme providers
+│   └── utils/api.js           # API service layer
+└── README.md
+```
+
+## API Endpoints
+
+| Method | Route                    | Description              |
+|--------|--------------------------|--------------------------|
+| POST   | `/api/users/create`      | Create profile + QR code |
+| GET    | `/api/users/:id`         | Get emergency profile    |
+| PUT    | `/api/users/update/:id`  | Update profile           |
+| GET    | `/api/users`             | List all profiles        |
+
+## Client Routes
+
+| Path             | Page               |
+|------------------|--------------------|
+| `/`              | Home               |
+| `/create`        | Create Profile     |
+| `/edit/:id`      | Edit Profile       |
+| `/emergency/:id` | Emergency Profile  |
+| `/success/:id`   | QR Download        |
+
+## Features
+
+- **Profile CRUD** — Create and edit medical profiles with personal info, emergency contacts, and medical history
+- **QR Generation** — Unique QR code per profile linking to the public emergency page
+- **Zero-install access** — Any phone camera opens the emergency profile instantly
+- **Multi-language** — English, Hindi, and Gujarati supported
+- **Responsive** — Mobile-first design with glassmorphic UI
+
+## Contributing
+
+1. Fork the repo
+2. Create your branch (`git checkout -b feature/your-feature`)
+3. Commit changes (`git commit -m 'Add feature'`)
+4. Push (`git push origin feature/your-feature`)
+5. Open a Pull Request
+
+## License
+
+MIT
