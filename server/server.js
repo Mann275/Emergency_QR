@@ -1,6 +1,9 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+const mongoSanitize = require("express-mongo-sanitize");
 const dns = require("dns");
 require("dotenv").config();
 
@@ -10,6 +13,7 @@ dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const API_RATE_LIMIT_MAX = 200;
 const mongoUri =
   (process.env.MONGODB_URI || "").trim() ||
   "mongodb://127.0.0.1:27017/emergencyqr";
@@ -41,8 +45,26 @@ const corsOptions = {
 
 // Middleware
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  }),
+);
+app.use(express.json({ limit: "100kb" }));
 app.use(express.urlencoded({ extended: true }));
+app.use(mongoSanitize());
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: API_RATE_LIMIT_MAX,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: "Too many requests. Please try again later.",
+  },
+});
+
+app.use("/api", apiLimiter);
 
 // MongoDB Connection
 const connectDB = async () => {

@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import ApiService from '../utils/api';
+import { useState, useRef, useEffect } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
+import ApiService from "../utils/api";
 import {
   User,
   Droplets,
@@ -16,26 +16,26 @@ import {
   ChevronDown,
   Pencil,
   HeartPulse,
-} from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
-import { IN, US, GB, AU } from 'country-flag-icons/react/3x2';
-import { toast } from 'react-hot-toast';
+} from "lucide-react";
+import { useLanguage } from "../context/LanguageContext";
+import { IN, US, GB, AU } from "country-flag-icons/react/3x2";
+import { toast } from "react-hot-toast";
 
-const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
-const genderOptions = ['Male', 'Female', 'Other', 'Prefer not to say'];
+const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+const genderOptions = ["Male", "Female", "Other", "Prefer not to say"];
 
-const phoneCodes = ['+91', '+1', '+44', '+61'];
+const phoneCodes = ["+91", "+1", "+44", "+61"];
 
 /** Split a stored phone string like "+91 1234567890" into [code, number]. */
 const parsePhone = (raw) => {
-  if (!raw) return ['+91', ''];
+  if (!raw) return ["+91", ""];
   const str = String(raw).trim();
   for (const code of phoneCodes) {
     if (str.startsWith(code)) {
       return [code, str.slice(code.length).trim()];
     }
   }
-  return ['+91', str.replace(/^\+?\d{1,3}\s*/, '')];
+  return ["+91", str.replace(/^\+?\d{1,3}\s*/, "")];
 };
 
 const EditProfile = () => {
@@ -45,23 +45,23 @@ const EditProfile = () => {
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
-  const [phoneCode, setPhoneCode] = useState('+91');
-  const [emergencyCode, setEmergencyCode] = useState('+91');
+  const [phoneCode, setPhoneCode] = useState("+91");
+  const [emergencyCode, setEmergencyCode] = useState("+91");
 
   const [formData, setFormData] = useState({
-    name: '',
-    dateOfBirth: '',
-    bloodGroup: '',
-    gender: '',
-    phone: '',
-    alternatePhone: '',
-    emergencyContact: { name: '', phone: '' },
+    name: "",
+    dateOfBirth: "",
+    bloodGroup: "",
+    gender: "",
+    phone: "",
+    alternatePhone: "",
+    emergencyContact: { name: "", phone: "" },
     disease: false,
-    diseaseDetails: '',
-    allergies: '',
-    medications: '',
-    address: '',
-    notes: '',
+    diseaseDetails: "",
+    allergies: "",
+    medications: "",
+    address: "",
+    notes: "",
   });
 
   // Fetch existing profile on mount
@@ -79,41 +79,33 @@ const EditProfile = () => {
           setEmergencyCode(eCode);
 
           // Format dateOfBirth for <input type="date">
-          let dob = '';
+          let dob = "";
           if (d.dateOfBirth) {
             const dt = new Date(d.dateOfBirth);
-            dob = dt.toISOString().split('T')[0];
+            dob = dt.toISOString().split("T")[0];
           }
 
           setFormData({
-            name: d.name || '',
+            name: d.name || "",
             dateOfBirth: dob,
-            bloodGroup: d.bloodGroup || '',
-            gender: d.gender || '',
+            bloodGroup: d.bloodGroup || "",
+            gender: d.gender || "",
             phone: pNum,
-            alternatePhone: d.alternatePhone || '',
+            alternatePhone: d.alternatePhone || "",
             emergencyContact: {
-              name: d.emergencyContact?.name || '',
+              name: d.emergencyContact?.name || "",
               phone: eNum,
             },
             disease: d.disease || false,
-            diseaseDetails: d.diseaseDetails || '',
-            allergies: d.allergies || '',
-            medications: d.medications || '',
-            address: d.address || '',
-            notes: d.notes || '',
+            diseaseDetails: d.diseaseDetails || "",
+            allergies: d.allergies || "",
+            medications: d.medications || "",
+            address: d.address || "",
+            notes: d.notes || "",
           });
         }
       } catch (err) {
-        toast.error(err.message || 'Failed to load profile.', {
-          style: {
-            borderRadius: '20px',
-            background: 'rgba(255,255,255,0.92)',
-            color: 'var(--ink)',
-            padding: '16px',
-            border: '1px solid rgba(214, 31, 69, 0.14)',
-          },
-        });
+        toast.error(err.message || "Failed to load profile.");
       } finally {
         setFetching(false);
       }
@@ -124,8 +116,8 @@ const EditProfile = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    if (name.startsWith('emergencyContact.')) {
-      const field = name.split('.')[1];
+    if (name.startsWith("emergencyContact.")) {
+      const field = name.split(".")[1];
       setFormData((prev) => ({
         ...prev,
         emergencyContact: { ...prev.emergencyContact, [field]: value },
@@ -135,13 +127,13 @@ const EditProfile = () => {
 
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handlePhoneChange = (e, fieldPath) => {
-    const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 10);
-    if (fieldPath === 'phone') {
+    const digitsOnly = e.target.value.replace(/\D/g, "").slice(0, 10);
+    if (fieldPath === "phone") {
       setFormData((prev) => ({ ...prev, phone: digitsOnly }));
       return;
     }
@@ -157,8 +149,16 @@ const EditProfile = () => {
     setLoading(true);
 
     try {
-      if (!formData.name || !formData.bloodGroup || !formData.gender || !formData.dateOfBirth || !formData.phone || !formData.emergencyContact.name || !formData.emergencyContact.phone) {
-        throw new Error('Please fill in all required fields.');
+      if (
+        !formData.name ||
+        !formData.bloodGroup ||
+        !formData.gender ||
+        !formData.dateOfBirth ||
+        !formData.phone ||
+        !formData.emergencyContact.name ||
+        !formData.emergencyContact.phone
+      ) {
+        throw new Error("Please fill in all required fields.");
       }
 
       const payload = {
@@ -172,56 +172,40 @@ const EditProfile = () => {
 
       const response = await ApiService.updateUser(id, payload);
       if (response.success) {
-        toast.success(t.profileUpdated || 'Profile updated successfully!', {
-          style: {
-            borderRadius: '20px',
-            background: 'rgba(255,255,255,0.92)',
-            color: 'var(--ink)',
-            padding: '16px',
-            border: '1px solid var(--glass-border)',
-          },
-        });
+        toast.success(t.profileUpdated || "Profile updated successfully!");
 
         navigate(`/emergency/${id}`);
       }
     } catch (err) {
-      toast.error(err.message || 'Something went wrong.', {
-        style: {
-          borderRadius: '20px',
-          background: 'rgba(255,255,255,0.92)',
-          color: 'var(--ink)',
-          padding: '16px',
-          border: '1px solid rgba(214, 31, 69, 0.14)',
-        },
-      });
+      toast.error(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
   };
 
   const fieldStyle = {
-    width: '100%',
-    border: '1px solid var(--line)',
-    borderRadius: '18px',
-    padding: '16px 18px',
-    background: 'rgba(255,255,255,0.5)',
-    color: 'var(--ink)',
-    fontSize: '17px',
-    fontWeight: '500',
-    outline: 'none',
-    backdropFilter: 'blur(14px)',
-    resize: 'none',
+    width: "100%",
+    border: "1px solid var(--line)",
+    borderRadius: "18px",
+    padding: "16px 18px",
+    background: "rgba(255,255,255,0.5)",
+    color: "var(--ink)",
+    fontSize: "17px",
+    fontWeight: "500",
+    outline: "none",
+    backdropFilter: "blur(14px)",
+    resize: "none",
   };
 
   const labelStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    fontSize: '14px',
-    fontWeight: '600',
-    letterSpacing: '0.01em',
-    marginBottom: '10px',
-    color: 'var(--muted)',
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "14px",
+    fontWeight: "600",
+    letterSpacing: "0.01em",
+    marginBottom: "10px",
+    color: "var(--muted)",
   };
 
   const SectionTitle = ({ icon: Icon, title, copy }) => (
@@ -230,7 +214,11 @@ const EditProfile = () => {
         <Icon size={14} className="text-[var(--accent)]" />
         {title}
       </div>
-      {copy && <p className="mt-3 max-w-2xl text-base sm:text-lg leading-relaxed text-[var(--muted)]">{copy}</p>}
+      {copy && (
+        <p className="mt-3 max-w-2xl text-base sm:text-lg leading-relaxed text-[var(--muted)]">
+          {copy}
+        </p>
+      )}
     </div>
   );
 
@@ -238,27 +226,35 @@ const EditProfile = () => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
     const options = [
-      { code: '+91', icon: <IN title="India" /> },
-      { code: '+1', icon: <US title="USA" /> },
-      { code: '+44', icon: <GB title="UK" /> },
-      { code: '+61', icon: <AU title="Australia" /> },
+      { code: "+91", icon: <IN title="India" /> },
+      { code: "+1", icon: <US title="USA" /> },
+      { code: "+44", icon: <GB title="UK" /> },
+      { code: "+61", icon: <AU title="Australia" /> },
     ];
 
     useEffect(() => {
       const handleClickOutside = (event) => {
-        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        if (
+          dropdownRef.current &&
+          !dropdownRef.current.contains(event.target)
+        ) {
           setIsOpen(false);
         }
       };
 
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const selected = options.find((option) => option.code === value) || options[0];
+    const selected =
+      options.find((option) => option.code === value) || options[0];
 
     return (
-      <div className="relative min-w-[110px] sm:min-w-[130px]" ref={dropdownRef}>
+      <div
+        className="relative min-w-[110px] sm:min-w-[130px]"
+        ref={dropdownRef}
+      >
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
@@ -268,7 +264,10 @@ const EditProfile = () => {
             {selected.icon}
           </div>
           <span>{selected.code}</span>
-          <ChevronDown size={14} className={`ml-auto opacity-50 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown
+            size={14}
+            className={`ml-auto opacity-50 transition-transform ${isOpen ? "rotate-180" : ""}`}
+          />
         </button>
 
         {isOpen && (
@@ -302,9 +301,12 @@ const EditProfile = () => {
         <section className="pt-20 sm:pt-28">
           <div className="main-wrap max-w-3xl">
             <div className="text-center py-20 animate-slide">
-              <HeartPulse size={42} className="mx-auto text-[var(--accent)] animate-pulse" />
+              <HeartPulse
+                size={42}
+                className="mx-auto text-[var(--accent)] animate-pulse"
+              />
               <p className="mt-4 text-base font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
-                {t.retrieving || 'Loading profile...'}
+                {t.retrieving || "Loading profile..."}
               </p>
             </div>
           </div>
@@ -325,115 +327,249 @@ const EditProfile = () => {
                 alt=""
                 className="w-14 sm:w-28 h-auto mix-blend-multiply shrink-0"
               />
-              <h1 className="text-3xl sm:text-5xl font-bold text-[var(--ink)] tracking-tight leading-tight" style={{ fontFamily: 'var(--font-heading)' }}>
-                {t.editTitle || 'Edit your profile'}
+              <h1
+                className="text-3xl sm:text-5xl font-bold text-[var(--ink)] tracking-tight leading-tight"
+                style={{ fontFamily: "var(--font-heading)" }}
+              >
+                {t.editTitle || "Edit your profile"}
               </h1>
             </div>
             <p className="mt-2 text-base sm:text-lg text-[var(--muted)] leading-relaxed">
-              {t.editDesc || 'Update your medical details. Changes are saved immediately.'}
+              {t.editDesc ||
+                "Update your medical details. Changes are saved immediately."}
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="glass-card p-6 sm:p-8 animate-slide">
-            <SectionTitle icon={User} title={t.personalInfo} copy="Fill only the information a responder should see immediately." />
+          <form
+            onSubmit={handleSubmit}
+            className="glass-card p-6 sm:p-8 animate-slide"
+          >
+            <SectionTitle
+              icon={User}
+              title={t.personalInfo}
+              copy="Fill only the information a responder should see immediately."
+            />
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2">
-                <label style={labelStyle}><User size={14} /> {t.fullName}</label>
-                <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="E.g. John Doe" required style={fieldStyle} />
+                <label style={labelStyle}>
+                  <User size={14} /> {t.fullName}
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="E.g. John Doe"
+                  required
+                  style={fieldStyle}
+                />
               </div>
 
               <div>
-                <label style={labelStyle}><Droplets size={14} /> {t.bloodGroup}</label>
+                <label style={labelStyle}>
+                  <Droplets size={14} /> {t.bloodGroup}
+                </label>
                 <div className="relative">
                   <select
                     name="bloodGroup"
                     value={formData.bloodGroup}
                     onChange={handleChange}
                     required
-                    style={{ ...fieldStyle, appearance: 'none', paddingRight: '44px' }}
+                    style={{
+                      ...fieldStyle,
+                      appearance: "none",
+                      paddingRight: "44px",
+                    }}
                   >
                     <option value="">{t.selectBloodGroup}</option>
                     {bloodGroups.map((group) => (
-                      <option key={group} value={group}>{group}</option>
+                      <option key={group} value={group}>
+                        {group}
+                      </option>
                     ))}
                   </select>
-                  <ChevronDown size={16} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 opacity-40" />
+                  <ChevronDown
+                    size={16}
+                    className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 opacity-40"
+                  />
                 </div>
               </div>
 
               <div>
-                <label style={labelStyle}><UserCheck size={14} /> {t.gender}</label>
+                <label style={labelStyle}>
+                  <UserCheck size={14} /> {t.gender}
+                </label>
                 <div className="relative">
                   <select
                     name="gender"
                     value={formData.gender}
                     onChange={handleChange}
                     required
-                    style={{ ...fieldStyle, appearance: 'none', paddingRight: '44px' }}
+                    style={{
+                      ...fieldStyle,
+                      appearance: "none",
+                      paddingRight: "44px",
+                    }}
                   >
                     <option value="">{t.selectGender}</option>
                     {genderOptions.map((gender) => (
-                      <option key={gender} value={gender}>{gender}</option>
+                      <option key={gender} value={gender}>
+                        {gender}
+                      </option>
                     ))}
                   </select>
-                  <ChevronDown size={16} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 opacity-40" />
+                  <ChevronDown
+                    size={16}
+                    className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 opacity-40"
+                  />
                 </div>
               </div>
 
               <div className="sm:col-span-2">
-                <label style={labelStyle}><Calendar size={14} /> {t.dob}</label>
-                <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required style={fieldStyle} />
+                <label style={labelStyle}>
+                  <Calendar size={14} /> {t.dob}
+                </label>
+                <input
+                  type="date"
+                  name="dateOfBirth"
+                  value={formData.dateOfBirth}
+                  onChange={handleChange}
+                  required
+                  style={fieldStyle}
+                />
               </div>
             </div>
 
             <div className="my-8 h-px bg-[var(--line)]"></div>
 
-            <SectionTitle icon={Phone} title={t.emergencyContacts} copy="These numbers appear high on the emergency profile, so keep them accurate." />
+            <SectionTitle
+              icon={Phone}
+              title={t.emergencyContacts}
+              copy="These numbers appear high on the emergency profile, so keep them accurate."
+            />
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2">
-                <label style={labelStyle}><Phone size={14} /> {t.yourPhone}</label>
+                <label style={labelStyle}>
+                  <Phone size={14} /> {t.yourPhone}
+                </label>
                 <div className="flex w-full gap-3">
-                  <CustomPhoneSelector value={phoneCode} onChange={setPhoneCode} />
-                  <input className="min-w-0 flex-1" type="tel" name="phone" value={formData.phone} onChange={(e) => handlePhoneChange(e, 'phone')} placeholder="1234567890" required style={fieldStyle} />
+                  <CustomPhoneSelector
+                    value={phoneCode}
+                    onChange={setPhoneCode}
+                  />
+                  <input
+                    className="min-w-0 flex-1"
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={(e) => handlePhoneChange(e, "phone")}
+                    placeholder="1234567890"
+                    required
+                    style={fieldStyle}
+                  />
                 </div>
               </div>
 
               <div>
-                <label style={labelStyle}><UserCheck size={14} /> {t.contactName}</label>
-                <input type="text" name="emergencyContact.name" value={formData.emergencyContact.name} onChange={handleChange} placeholder="Someone you trust" required style={fieldStyle} />
+                <label style={labelStyle}>
+                  <UserCheck size={14} /> {t.contactName}
+                </label>
+                <input
+                  type="text"
+                  name="emergencyContact.name"
+                  value={formData.emergencyContact.name}
+                  onChange={handleChange}
+                  placeholder="Someone you trust"
+                  required
+                  style={fieldStyle}
+                />
               </div>
 
               <div>
-                <label style={labelStyle}><Phone size={14} /> {t.emergencyPhone}</label>
+                <label style={labelStyle}>
+                  <Phone size={14} /> {t.emergencyPhone}
+                </label>
                 <div className="flex w-full gap-3">
-                  <CustomPhoneSelector value={emergencyCode} onChange={setEmergencyCode} />
-                  <input className="min-w-0 flex-1" type="tel" name="emergencyContact.phone" value={formData.emergencyContact.phone} onChange={(e) => handlePhoneChange(e, 'emergencyContact.phone')} placeholder="1234567890" required style={fieldStyle} />
+                  <CustomPhoneSelector
+                    value={emergencyCode}
+                    onChange={setEmergencyCode}
+                  />
+                  <input
+                    className="min-w-0 flex-1"
+                    type="tel"
+                    name="emergencyContact.phone"
+                    value={formData.emergencyContact.phone}
+                    onChange={(e) =>
+                      handlePhoneChange(e, "emergencyContact.phone")
+                    }
+                    placeholder="1234567890"
+                    required
+                    style={fieldStyle}
+                  />
                 </div>
               </div>
             </div>
 
             <div className="my-8 h-px bg-[var(--line)]"></div>
 
-            <SectionTitle icon={HeartPulse} title={t.medicalHistory} copy="Add only the details that are helpful during an emergency." />
+            <SectionTitle
+              icon={HeartPulse}
+              title={t.medicalHistory}
+              copy="Add only the details that are helpful during an emergency."
+            />
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2">
-                <label style={labelStyle}><AlertTriangle size={14} /> {t.chronicConditions}</label>
-                <textarea name="diseaseDetails" value={formData.diseaseDetails} onChange={handleChange} placeholder="Asthma, diabetes, epilepsy..." style={{ ...fieldStyle, minHeight: '96px' }} />
+                <label style={labelStyle}>
+                  <AlertTriangle size={14} /> {t.chronicConditions}
+                </label>
+                <textarea
+                  name="diseaseDetails"
+                  value={formData.diseaseDetails}
+                  onChange={handleChange}
+                  placeholder="Asthma, diabetes, epilepsy..."
+                  style={{ ...fieldStyle, minHeight: "96px" }}
+                />
               </div>
 
               <div>
-                <label style={labelStyle}><Droplets size={14} /> {t.knownAllergies}</label>
-                <input type="text" name="allergies" value={formData.allergies} onChange={handleChange} placeholder="Penicillin, peanuts..." style={fieldStyle} />
+                <label style={labelStyle}>
+                  <Droplets size={14} /> {t.knownAllergies}
+                </label>
+                <input
+                  type="text"
+                  name="allergies"
+                  value={formData.allergies}
+                  onChange={handleChange}
+                  placeholder="Penicillin, peanuts..."
+                  style={fieldStyle}
+                />
               </div>
 
               <div>
-                <label style={labelStyle}><Pill size={14} /> {t.medications}</label>
-                <input type="text" name="medications" value={formData.medications} onChange={handleChange} placeholder="Current medication..." style={fieldStyle} />
+                <label style={labelStyle}>
+                  <Pill size={14} /> {t.medications}
+                </label>
+                <input
+                  type="text"
+                  name="medications"
+                  value={formData.medications}
+                  onChange={handleChange}
+                  placeholder="Current medication..."
+                  style={fieldStyle}
+                />
               </div>
 
               <div className="sm:col-span-2">
-                <label style={labelStyle}><FileText size={14} /> {t.responderNotes}</label>
-                <textarea name="notes" value={formData.notes} onChange={handleChange} placeholder="Example: carries inhaler in bag pocket." style={{ ...fieldStyle, minHeight: '88px' }} />
+                <label style={labelStyle}>
+                  <FileText size={14} /> {t.responderNotes}
+                </label>
+                <textarea
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleChange}
+                  placeholder="Example: carries inhaler in bag pocket."
+                  style={{ ...fieldStyle, minHeight: "88px" }}
+                />
               </div>
             </div>
 
@@ -448,14 +584,24 @@ const EditProfile = () => {
                   className="ghost-btn gap-2 px-5 py-3 text-sm shrink-0 border border-[var(--line)] text-[var(--muted)]"
                 >
                   <ArrowLeft size={14} />
-                  {t.cancelEdit || 'Cancel'}
+                  {t.cancelEdit || "Cancel"}
                 </Link>
                 <button
                   type="submit"
                   disabled={loading}
                   className="stark-btn gap-3 shrink-0 whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {loading ? <><Loader2 size={16} className="animate-spin" /> {t.updating || 'Updating...'}</> : <>{t.updateProfile || 'Update profile'} <ArrowRight size={16} /></>}
+                  {loading ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />{" "}
+                      {t.updating || "Updating..."}
+                    </>
+                  ) : (
+                    <>
+                      {t.updateProfile || "Update profile"}{" "}
+                      <ArrowRight size={16} />
+                    </>
+                  )}
                 </button>
               </div>
             </div>

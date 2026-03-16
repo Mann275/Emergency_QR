@@ -7,8 +7,10 @@ import React, {
 } from "react";
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut,
 } from "firebase/auth";
 import { auth } from "../firebase";
@@ -35,6 +37,10 @@ const mapFirebaseAuthError = (error) => {
       return "Invalid email or password.";
     case "auth/too-many-requests":
       return "Too many attempts. Please wait and try again.";
+    case "auth/popup-closed-by-user":
+      return "Google sign-in popup was closed before completing sign-in.";
+    case "auth/popup-blocked":
+      return "Popup was blocked by browser. Allow popups and try again.";
     default:
       return error?.message || "Authentication failed.";
   }
@@ -69,12 +75,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      return await signInWithPopup(auth, provider);
+    } catch (error) {
+      throw new Error(mapFirebaseAuthError(error));
+    }
+  };
+
   const logout = () => {
     return signOut(auth);
   };
 
   const value = useMemo(
-    () => ({ user, loading, signIn, signUp, logout }),
+    () => ({ user, loading, signIn, signUp, signInWithGoogle, logout }),
     [user, loading],
   );
 

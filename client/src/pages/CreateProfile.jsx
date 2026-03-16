@@ -17,6 +17,7 @@ import {
   Info,
   Mail,
   Lock,
+  Chrome,
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
@@ -28,7 +29,13 @@ const genderOptions = ["Male", "Female", "Other", "Prefer not to say"];
 
 const CreateProfile = () => {
   const { t } = useLanguage();
-  const { user, loading: authLoading, signIn, signUp } = useAuth();
+  const {
+    user,
+    loading: authLoading,
+    signIn,
+    signUp,
+    signInWithGoogle,
+  } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [authSubmitting, setAuthSubmitting] = useState(false);
@@ -112,15 +119,7 @@ const CreateProfile = () => {
 
       const response = await ApiService.createUser(payload);
       if (response.success) {
-        toast.success("Profile created successfully!", {
-          style: {
-            borderRadius: "20px",
-            background: "rgba(255,255,255,0.92)",
-            color: "var(--ink)",
-            padding: "16px",
-            border: "1px solid var(--glass-border)",
-          },
-        });
+        toast.success("Profile created successfully!");
 
         navigate(`/success/${response.data.uniqueId}`, {
           state: {
@@ -130,15 +129,7 @@ const CreateProfile = () => {
         });
       }
     } catch (err) {
-      toast.error(err.message || "Something went wrong.", {
-        style: {
-          borderRadius: "20px",
-          background: "rgba(255,255,255,0.92)",
-          color: "var(--ink)",
-          padding: "16px",
-          border: "1px solid rgba(214, 31, 69, 0.14)",
-        },
-      });
+      toast.error(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -163,6 +154,18 @@ const CreateProfile = () => {
       }
     } catch (error) {
       toast.error(error.message || "Authentication failed.");
+    } finally {
+      setAuthSubmitting(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setAuthSubmitting(true);
+      await signInWithGoogle();
+      toast.success("Signed in with Google.");
+    } catch (error) {
+      toast.error(error.message || "Google sign-in failed.");
     } finally {
       setAuthSubmitting(false);
     }
@@ -279,6 +282,8 @@ const CreateProfile = () => {
     );
   };
 
+  const isSignUp = authMode === "signup";
+
   return (
     <div className="pb-24">
       <section className="pt-20 sm:pt-28">
@@ -316,7 +321,11 @@ const CreateProfile = () => {
               <SectionTitle
                 icon={UserCheck}
                 title="Secure Access"
-                copy="Sign in to create and manage your emergency profile."
+                copy={
+                  isSignUp
+                    ? "Create a new account to start managing your emergency profile."
+                    : "Sign in to create and manage your emergency profile."
+                }
               />
               {authLoading ? (
                 <div className="flex items-center gap-2 text-[var(--muted)]">
@@ -325,6 +334,31 @@ const CreateProfile = () => {
                 </div>
               ) : (
                 <form onSubmit={handleAuthSubmit} className="grid gap-5">
+                  <div className="inline-flex rounded-2xl border border-[var(--line)] bg-white/55 p-1">
+                    <button
+                      type="button"
+                      onClick={() => setAuthMode("signin")}
+                      className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                        authMode === "signin"
+                          ? "bg-[var(--accent)] text-white"
+                          : "text-[var(--ink)]"
+                      }`}
+                    >
+                      Sign in
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAuthMode("signup")}
+                      className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                        authMode === "signup"
+                          ? "bg-[var(--accent)] text-white"
+                          : "text-[var(--ink)]"
+                      }`}
+                    >
+                      Sign up
+                    </button>
+                  </div>
+
                   <div>
                     <label style={labelStyle}>
                       <Mail size={14} /> Email
@@ -333,7 +367,11 @@ const CreateProfile = () => {
                       type="email"
                       value={authEmail}
                       onChange={(e) => setAuthEmail(e.target.value)}
-                      placeholder="you@example.com"
+                      placeholder={
+                        isSignUp
+                          ? "Enter a new email address"
+                          : "Enter your account email"
+                      }
                       required
                       style={fieldStyle}
                     />
@@ -346,7 +384,11 @@ const CreateProfile = () => {
                       type="password"
                       value={authPassword}
                       onChange={(e) => setAuthPassword(e.target.value)}
-                      placeholder="At least 6 characters"
+                      placeholder={
+                        isSignUp
+                          ? "Create password (min 6 characters)"
+                          : "Enter your password"
+                      }
                       minLength={6}
                       required
                       style={fieldStyle}
@@ -363,7 +405,7 @@ const CreateProfile = () => {
                           <Loader2 size={16} className="animate-spin" />
                           Please wait
                         </>
-                      ) : authMode === "signup" ? (
+                      ) : isSignUp ? (
                         "Create account"
                       ) : (
                         "Sign in"
@@ -372,15 +414,33 @@ const CreateProfile = () => {
                     <button
                       type="button"
                       onClick={() =>
-                        setAuthMode((prev) =>
-                          prev === "signin" ? "signup" : "signin",
-                        )
+                        setAuthMode(isSignUp ? "signin" : "signup")
                       }
-                      className="rounded-xl border border-[var(--line)] px-4 py-2.5 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/50"
+                      className="rounded-xl border border-[var(--line)] bg-white/45 px-3.5 py-2 text-sm font-semibold text-[var(--muted)] transition hover:bg-white/70"
                     >
-                      {authMode === "signin"
-                        ? "Need an account? Sign up"
-                        : "Have an account? Sign in"}
+                      {isSignUp
+                        ? "Use your existing account"
+                        : "Create a new account"}
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                    <span className="h-px flex-1 bg-[var(--line)]" />
+                    OR
+                    <span className="h-px flex-1 bg-[var(--line)]" />
+                  </div>
+
+                  <div>
+                    <button
+                      type="button"
+                      onClick={handleGoogleSignIn}
+                      disabled={authSubmitting}
+                      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--line)] bg-white/60 px-4 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/80 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      <Chrome size={16} />
+                      {isSignUp
+                        ? "Continue with Google (Sign up)"
+                        : "Continue with Google"}
                     </button>
                   </div>
                 </form>

@@ -13,6 +13,9 @@ const getApiBaseUrl = () => {
 };
 
 const API_BASE_URL = getApiBaseUrl();
+const EDIT_TOKEN_KEY_PREFIX = "emergency_edit_token:";
+
+const getEditTokenKey = (id) => `${EDIT_TOKEN_KEY_PREFIX}${id}`;
 
 class ApiService {
   async checkHealth() {
@@ -61,6 +64,13 @@ class ApiService {
         throw new Error(errorMessage);
       }
 
+      if (data?.data?.uniqueId && data?.data?.editToken) {
+        localStorage.setItem(
+          getEditTokenKey(data.data.uniqueId),
+          data.data.editToken,
+        );
+      }
+
       return data;
     } catch (error) {
       console.error("API Error:", error);
@@ -86,10 +96,18 @@ class ApiService {
 
   async updateUser(id, userData) {
     try {
+      const editToken = localStorage.getItem(getEditTokenKey(id));
+      if (!editToken) {
+        throw new Error(
+          "Edit authorization missing. Please use the same device/browser used to create this profile.",
+        );
+      }
+
       const response = await fetch(`${API_BASE_URL}/users/update/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${editToken}`,
         },
         body: JSON.stringify(userData),
       });

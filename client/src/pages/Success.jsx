@@ -1,6 +1,13 @@
-import { useLocation, Link, useParams } from 'react-router-dom';
-import { Download, Smartphone, ArrowRight, ExternalLink, QrCode } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
+import { useLocation, Link, useParams } from "react-router-dom";
+import {
+  Download,
+  Smartphone,
+  ArrowRight,
+  ExternalLink,
+  QrCode,
+  Pencil,
+} from "lucide-react";
+import { useLanguage } from "../context/LanguageContext";
 
 const Success = () => {
   const { id } = useParams();
@@ -8,18 +15,26 @@ const Success = () => {
   const location = useLocation();
   const { qrCode, profileUrl } = location.state || {};
 
-  if (!qrCode) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
-      <Link to="/" className="inline-flex items-center gap-2 px-8 py-3 text-xs font-semibold rounded-full transition-base" style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}>
-        {t.returnHome}
-      </Link>
-    </div>
-  );
+  if (!qrCode)
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: "var(--bg)" }}
+      >
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 px-8 py-3 text-xs font-semibold rounded-full transition-base"
+          style={{ background: "var(--accent)", color: "var(--accent-ink)" }}
+        >
+          {t.returnHome}
+        </Link>
+      </div>
+    );
 
   const handleDownload = () => {
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = qrCode;
-    link.download = `emergency-qr-${id || 'profile'}.png`;
+    link.download = `emergency-qr-${id || "profile"}.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -30,25 +45,41 @@ const Success = () => {
       <section className="pt-32 pb-20 md:pt-36 md:pb-28">
         <div className="main-wrap max-w-4xl">
           <div className="grid md:grid-cols-2 gap-24 items-center">
-
             <div className="animate-slide">
-              <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4" style={{ fontFamily: 'var(--font-heading)' }}>{t.profileActive}</h1>
+              <h1
+                className="text-3xl md:text-5xl font-bold tracking-tight mb-4"
+                style={{ fontFamily: "var(--font-heading)" }}
+              >
+                {t.profileActive}
+              </h1>
               <p className="text-base leading-relaxed mb-8 opacity-70 font-medium">
                 {t.passLive}
               </p>
 
               <div className="space-y-6">
                 <div className="flex gap-4 items-start border border-black/5 bg-white/40 p-5 rounded-2xl">
-                  <Download size={18} className="flex-shrink-0 mt-0.5" style={{ color: 'var(--accent)' }} />
+                  <Download
+                    size={18}
+                    className="flex-shrink-0 mt-0.5"
+                    style={{ color: "var(--accent)" }}
+                  />
                   <p className="text-sm leading-relaxed text-[var(--ink)]">
-                    <span className="font-semibold block mb-0.5 text-base">{t.saveCard}</span>
+                    <span className="font-semibold block mb-0.5 text-base">
+                      {t.saveCard}
+                    </span>
                     <span className="opacity-80 font-medium">{t.saveDesc}</span>
                   </p>
                 </div>
                 <div className="flex gap-4 items-start border border-black/5 bg-white/40 p-5 rounded-2xl">
-                  <Smartphone size={18} className="flex-shrink-0 mt-0.5" style={{ color: 'var(--accent)' }} />
+                  <Smartphone
+                    size={18}
+                    className="flex-shrink-0 mt-0.5"
+                    style={{ color: "var(--accent)" }}
+                  />
                   <p className="text-sm leading-relaxed text-[var(--ink)]">
-                    <span className="font-semibold block mb-0.5 text-base">{t.lockScreen}</span>
+                    <span className="font-semibold block mb-0.5 text-base">
+                      {t.lockScreen}
+                    </span>
                     <span className="opacity-80 font-medium">{t.lockDesc}</span>
                   </p>
                 </div>
@@ -58,22 +89,55 @@ const Success = () => {
                 <button
                   onClick={handleDownload}
                   className="inline-flex items-center gap-2 px-6 py-3.5 text-sm font-bold rounded-xl transition-base shadow-lg shadow-black/5"
-                  style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}
+                  style={{
+                    background: "var(--accent)",
+                    color: "var(--accent-ink)",
+                  }}
                 >
                   <Download size={16} /> {t.downloadQr}
                 </button>
-                <a href={profileUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-6 py-3.5 text-sm font-bold rounded-xl border border-[var(--line)] bg-white transition-base text-[var(--ink)] hover:border-[var(--ink)]">
+                <a
+                  href={profileUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3.5 text-sm font-bold rounded-xl border border-[var(--line)] bg-white transition-base text-[var(--ink)] hover:border-[var(--ink)]"
+                >
                   {t.viewProfile} <ExternalLink size={16} />
                 </a>
+                <Link
+                  to={`/edit/${id}`}
+                  className="inline-flex items-center gap-2 px-6 py-3.5 text-sm font-bold rounded-xl border border-[var(--line)] bg-white/85 transition-base text-[var(--ink)] hover:border-[var(--ink)]"
+                >
+                  {t.editProfile || "Edit profile"} <Pencil size={16} />
+                </Link>
               </div>
+
+              <p className="mt-4 text-sm font-medium text-[var(--muted)] opacity-90">
+                {t.editProfile
+                  ? `${t.editProfile} anytime from this page.`
+                  : "You can edit your profile anytime."}
+              </p>
             </div>
 
-            <div className="animate-slide flex flex-col items-center" style={{ animationDelay: '0.1s' }}>
-              <div className="bg-white p-6 sm:p-8 shadow-2xl rounded-3xl" style={{ border: '1px solid var(--line)' }}>
+            <div
+              className="animate-slide flex flex-col items-center"
+              style={{ animationDelay: "0.1s" }}
+            >
+              <div
+                className="bg-white p-6 sm:p-8 shadow-2xl rounded-3xl"
+                style={{ border: "1px solid var(--line)" }}
+              >
                 <div className="flex items-center justify-between w-full mb-6">
                   <div>
-                    <div className="text-[10px] font-bold uppercase tracking-widest opacity-50">{t.emergencyPass}</div>
-                    <div className="mt-0.5 text-xl font-bold" style={{ fontFamily: 'var(--font-heading)' }}>{t.readyToShare}</div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest opacity-50">
+                      {t.emergencyPass}
+                    </div>
+                    <div
+                      className="mt-0.5 text-xl font-bold"
+                      style={{ fontFamily: "var(--font-heading)" }}
+                    >
+                      {t.readyToShare}
+                    </div>
                   </div>
                   <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600">
                     <QrCode size={20} />
@@ -81,24 +145,36 @@ const Success = () => {
                 </div>
 
                 <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl w-full max-w-[320px] mx-auto">
-                  <img src={qrCode} alt="Emergency QR" className="mx-auto w-full object-contain mix-blend-multiply" />
+                  <img
+                    src={qrCode}
+                    alt="Emergency QR"
+                    className="mx-auto w-full object-contain mix-blend-multiply"
+                  />
                 </div>
 
                 <div className="mt-6 border border-dashed border-[var(--line)] px-4 py-4 text-center rounded-2xl w-full bg-slate-50/50">
-                  <div className="text-[10px] font-bold uppercase tracking-widest opacity-50">{t.bestUse}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest opacity-50">
+                    {t.bestUse}
+                  </div>
                   <p className="mt-1.5 text-xs font-semibold leading-relaxed opacity-80">
                     {t.bestUseDesc}
                   </p>
                 </div>
 
                 <div className="mt-6 flex justify-center w-full">
-                  <Link to="/" className="group inline-flex items-center gap-2 text-sm font-bold text-[var(--ink)] opacity-70 hover:opacity-100 transition-all">
-                    {t.backToDashboard} <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                  <Link
+                    to="/"
+                    className="group inline-flex items-center gap-2 text-sm font-bold text-[var(--ink)] opacity-70 hover:opacity-100 transition-all"
+                  >
+                    {t.backToDashboard}{" "}
+                    <ArrowRight
+                      size={14}
+                      className="group-hover:translate-x-1 transition-transform"
+                    />
                   </Link>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </section>

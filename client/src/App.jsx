@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -6,7 +7,10 @@ import {
 } from "react-router-dom";
 import { LanguageProvider } from "./context/LanguageContext";
 import { ThemeProvider } from "./context/ThemeContext";
-import { ServerHealthProvider } from "./context/ServerHealthContext";
+import {
+  ServerHealthProvider,
+  useServerHealth,
+} from "./context/ServerHealthContext";
 import { AuthProvider } from "./context/AuthContext";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -16,23 +20,94 @@ import CreateProfile from "./pages/CreateProfile";
 import EmergencyProfile from "./pages/EmergencyProfile";
 import EditProfile from "./pages/EditProfile";
 import Success from "./pages/Success";
-import { Toaster } from "react-hot-toast";
+import { Toaster, toast } from "react-hot-toast";
 
 function AppLayout() {
   const location = useLocation();
   const isEmergencyRoute = location.pathname.startsWith("/emergency/");
+  const { isHealthy, isChecking } = useServerHealth();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 768px)");
+    const sync = () => setIsMobile(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    if (isChecking && !isHealthy) {
+      toast.loading("Server is starting... Please wait", {
+        id: "server-health",
+      });
+      return;
+    }
+
+    if (!isChecking && !isHealthy) {
+      toast.error("Server is not responding. Please try again in a moment.", {
+        id: "server-health",
+        duration: 5000,
+      });
+      return;
+    }
+
+    toast.dismiss("server-health");
+  }, [isHealthy, isChecking]);
+
+  const glassBaseStyle = {
+    borderRadius: "14px",
+    padding: "14px 16px",
+    fontWeight: "600",
+    boxShadow: "0 16px 36px rgba(15, 23, 42, 0.12)",
+    backdropFilter: "blur(18px) saturate(175%)",
+    WebkitBackdropFilter: "blur(18px) saturate(175%)",
+  };
 
   return (
-    <div className={`app-shell ${isEmergencyRoute ? "" : "pb-20 md:pb-0"}`}>
+    <div className={`app-shell ${isEmergencyRoute ? "" : "pb-16 md:pb-0"}`}>
       <Toaster
-        position="top-center"
+        position={isMobile ? "bottom-center" : "bottom-right"}
+        containerStyle={{
+          bottom: isMobile ? (isEmergencyRoute ? 16 : 88) : 16,
+          right: 16,
+          left: isMobile ? 16 : undefined,
+        }}
         toastOptions={{
           duration: 4000,
           style: {
-            background: "var(--surface)",
+            ...glassBaseStyle,
+            background: "rgba(255, 255, 255, 0.62)",
             color: "var(--ink)",
-            border: "1px solid var(--line)",
-            borderRadius: "12px",
+            border: "1px solid rgba(255, 255, 255, 0.6)",
+          },
+          success: {
+            style: {
+              ...glassBaseStyle,
+              background: isMobile
+                ? "#166534"
+                : "linear-gradient(135deg, rgba(20, 83, 45, 0.86), rgba(22, 101, 52, 0.74))",
+              color: "#ecfdf5",
+              border: "1px solid rgba(187, 247, 208, 0.35)",
+            },
+            iconTheme: {
+              primary: "#ecfdf5",
+              secondary: "#166534",
+            },
+          },
+          error: {
+            style: {
+              ...glassBaseStyle,
+              background: isMobile
+                ? "#b91c1c"
+                : "linear-gradient(135deg, rgba(127, 29, 29, 0.9), rgba(185, 28, 28, 0.76))",
+              color: "#fff1f2",
+              border: "1px solid rgba(254, 202, 202, 0.34)",
+            },
+            iconTheme: {
+              primary: "#fff1f2",
+              secondary: "#b91c1c",
+            },
           },
         }}
       />

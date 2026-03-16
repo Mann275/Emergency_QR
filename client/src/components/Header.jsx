@@ -1,17 +1,29 @@
-import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { User, Languages, ChevronDown } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
+import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { User, Languages, ChevronDown, LogOut } from "lucide-react";
+import { useLanguage } from "../context/LanguageContext";
+import { useAuth } from "../context/AuthContext";
+import { toast } from "react-hot-toast";
 
 const Header = () => {
   const { lang, setLang, t } = useLanguage();
+  const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success("Logged out successfully.");
+    } catch (error) {
+      toast.error(error.message || "Failed to logout.");
+    }
+  };
+
   const languages = [
-    { code: 'en', label: 'EN' },
-    { code: 'hi', label: 'हिन्दी' },
-    { code: 'gu', label: 'ગુજરાતી' },
+    { code: "en", label: "EN" },
+    { code: "hi", label: "हिन्दी" },
+    { code: "gu", label: "ગુજરાતી" },
   ];
 
   useEffect(() => {
@@ -20,16 +32,19 @@ const Header = () => {
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const currentLang = languages.find(l => l.code === lang) || languages[0];
+  const currentLang = languages.find((l) => l.code === lang) || languages[0];
 
   return (
     <header className="glass-nav px-6 py-4">
       <nav className="flex items-center justify-between gap-3">
-        <Link to="/" className="flex items-center gap-3 text-slate-900 transition-base min-w-0">
+        <Link
+          to="/"
+          className="flex items-center gap-3 text-slate-900 transition-base min-w-0"
+        >
           <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/60 bg-white/70 shadow-[0_12px_30px_rgba(60,22,34,0.08)]">
             <img
               src="/images/logo_no_text.png"
@@ -38,7 +53,10 @@ const Header = () => {
             />
           </span>
           <span className="min-w-0">
-            <span className="block text-lg font-bold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
+            <span
+              className="block text-lg font-bold tracking-tight"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
               Emergency QR
             </span>
           </span>
@@ -50,22 +68,25 @@ const Header = () => {
               onClick={() => setIsOpen(!isOpen)}
               className="flex items-center gap-1.5 md:gap-2 px-3 py-2 rounded-full border border-white/50 bg-white/65 shadow-[0_12px_30px_rgba(15,23,42,0.06)] transition-all duration-300 active:scale-95"
               style={{
-                color: 'var(--ink)'
+                color: "var(--ink)",
               }}
             >
               <Languages size={16} />
               <span className="text-[12px] font-bold">{currentLang.label}</span>
-              <ChevronDown size={12} className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown
+                size={12}
+                className={`transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+              />
             </button>
 
             {isOpen && (
               <div
                 className="absolute top-full right-0 mt-2 w-32 py-2 rounded-2xl border shadow-xl z-[150] animate-in fade-in slide-in-from-top-2 duration-200"
                 style={{
-                  background: 'rgba(255,255,255,0.82)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)',
-                  borderColor: 'var(--glass-border)',
+                  background: "rgba(255,255,255,0.82)",
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  borderColor: "var(--glass-border)",
                 }}
               >
                 {languages.map((l) => (
@@ -75,8 +96,8 @@ const Header = () => {
                       setLang(l.code);
                       setIsOpen(false);
                     }}
-                    className={`w-full text-left px-4 py-2 text-[13px] font-bold transition-colors hover:bg-white/70 ${lang === l.code ? 'text-accent' : ''}`}
-                    style={{ color: 'var(--ink)' }}
+                    className={`w-full text-left px-4 py-2 text-[13px] font-bold transition-colors hover:bg-white/70 ${lang === l.code ? "text-accent" : ""}`}
+                    style={{ color: "var(--ink)" }}
                   >
                     {l.label}
                   </button>
@@ -86,10 +107,31 @@ const Header = () => {
           </div>
 
           <div className="flex items-center gap-3 sm:gap-6">
-            <Link to="/create" className="hidden md:flex items-center gap-2 rounded-full bg-[var(--accent)] px-4 py-2.5 text-sm font-bold text-white transition-all duration-300 group shadow-[0_18px_35px_rgba(214,31,69,0.22)]" aria-label="Create Profile">
-              <User size={18} className="transition-transform group-hover:scale-110" />
-              <span>{t.createProfile}</span>
-            </Link>
+            {!user && (
+              <Link
+                to="/create"
+                className="hidden md:flex items-center gap-2 rounded-full bg-[var(--accent)] px-4 py-2.5 text-sm font-bold text-white transition-all duration-300 group shadow-[0_18px_35px_rgba(214,31,69,0.22)]"
+                aria-label="Create Profile"
+              >
+                <User
+                  size={18}
+                  className="transition-transform group-hover:scale-110"
+                />
+                <span>{t.createProfile}</span>
+              </Link>
+            )}
+
+            {user && (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="hidden md:flex items-center gap-2 rounded-full border border-[var(--line)] bg-white/65 px-4 py-2.5 text-sm font-bold text-[var(--ink)] transition hover:bg-white/80"
+                aria-label="Logout"
+              >
+                <LogOut size={16} />
+                <span>Logout</span>
+              </button>
+            )}
           </div>
         </div>
       </nav>
