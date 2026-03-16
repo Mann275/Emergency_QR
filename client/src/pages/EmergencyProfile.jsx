@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import ApiService from '../utils/api';
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import ApiService from "../utils/api";
 import {
   ArrowLeft,
   Phone,
@@ -20,6 +20,7 @@ import { useLanguage } from '../context/LanguageContext';
 const EmergencyProfile = () => {
   const { id } = useParams();
   const { t } = useLanguage();
+  const { isHealthy, isChecking } = useServerHealth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -43,22 +44,23 @@ const EmergencyProfile = () => {
     fetchUser();
   }, [id, t.failedLoad, t.notFound]);
 
-  const GlassCard = ({ children, className = '', style = {} }) => (
-    <div
-      className={`glass-card ${className}`}
-      style={style}
-    >
+  const GlassCard = ({ children, className = "", style = {} }) => (
+    <div className={`glass-card ${className}`} style={style}>
       {children}
     </div>
   );
 
-  const Pill = ({ icon: Icon, label, tone = 'default' }) => (
+  const Pill = ({ icon: Icon, label, tone = "default" }) => (
     <div
       className="inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs sm:text-[11px] font-bold uppercase tracking-[0.18em] sm:tracking-[0.22em]"
       style={{
-        borderColor: tone === 'danger' ? 'rgba(225, 29, 72, 0.16)' : 'var(--glass-border)',
-        background: tone === 'danger' ? 'rgba(255, 241, 242, 0.7)' : 'rgba(255,255,255,0.6)',
-        color: tone === 'danger' ? 'var(--danger)' : 'var(--muted)',
+        borderColor:
+          tone === "danger" ? "rgba(225, 29, 72, 0.16)" : "var(--glass-border)",
+        background:
+          tone === "danger"
+            ? "rgba(255, 241, 242, 0.7)"
+            : "rgba(255,255,255,0.6)",
+        color: tone === "danger" ? "var(--danger)" : "var(--muted)",
       }}
     >
       <Icon size={13} />
@@ -70,7 +72,10 @@ const EmergencyProfile = () => {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <GlassCard className="p-8 sm:p-10 text-center max-w-md w-full">
-          <HeartPulse size={42} className="mx-auto text-[var(--accent)] animate-pulse" />
+          <HeartPulse
+            size={42}
+            className="mx-auto text-[var(--accent)] animate-pulse"
+          />
           <p className="mt-4 text-base font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
             {t.retrieving}
           </p>
@@ -84,7 +89,10 @@ const EmergencyProfile = () => {
       <div className="min-h-screen flex items-center justify-center px-4">
         <GlassCard className="p-8 sm:p-10 text-center max-w-md w-full">
           <ShieldAlert size={46} className="mx-auto text-rose-600" />
-          <h1 className="mt-5 text-3xl font-bold text-[var(--ink)]" style={{ fontFamily: 'var(--font-heading)' }}>
+          <h1
+            className="mt-5 text-3xl font-bold text-[var(--ink)]"
+            style={{ fontFamily: "var(--font-heading)" }}
+          >
             {t.accessError}
           </h1>
           <p className="mt-3 text-base text-[var(--muted)]">{error}</p>
@@ -98,12 +106,14 @@ const EmergencyProfile = () => {
 
   const contact = user.emergencyContact || {};
   const primaryName = contact.name || t.notSpecified;
-  const primaryPhone = (contact.phone || user.phone || '').toString();
-  const backupPhone = (user.phone || '').toString();
-  const bloodGroup = user.bloodGroup || 'N/A';
-  const age = user.age ? `${user.age} yrs` : 'N/A';
+  const primaryPhone = (contact.phone || user.phone || "").toString();
+  const backupPhone = (user.phone || "").toString();
+  const bloodGroup = user.bloodGroup || "N/A";
+  const age = user.age ? `${user.age} yrs` : "N/A";
   const gender = user.gender || t.notSpecified;
-  const dob = user.dateOfBirth ? new Date(user.dateOfBirth).toLocaleDateString() : 'N/A';
+  const dob = user.dateOfBirth
+    ? new Date(user.dateOfBirth).toLocaleDateString()
+    : "N/A";
 
   const criticalItems = [
     {
@@ -136,6 +146,36 @@ const EmergencyProfile = () => {
 
   return (
     <div className="min-h-screen pb-10 sm:pb-16">
+      {/* Server Health Banner */}
+      {!isHealthy && (
+        <div
+          className="fixed top-0 left-0 right-0 z-50 px-4 py-3 text-center text-sm font-semibold shadow-lg"
+          style={{
+            background: isChecking
+              ? "linear-gradient(90deg, #f59e0b 0%, #f97316 100%)"
+              : "linear-gradient(90deg, #ef4444 0%, #dc2626 100%)",
+            color: "#ffffff",
+          }}
+        >
+          <div className="flex items-center justify-center gap-2">
+            {isChecking ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                <span>Server is starting... Please wait</span>
+              </>
+            ) : (
+              <>
+                <AlertTriangle size={16} />
+                <span>
+                  Server is not responding. Please check your connection or try
+                  again later.
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       <section className="pt-2 sm:pt-8">
         <div className="main-wrap max-w-6xl">
           <div className="mb-3 sm:mb-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3">
@@ -160,8 +200,16 @@ const EmergencyProfile = () => {
             <GlassCard className="p-3 sm:p-7 lg:p-8 overflow-hidden">
               <div className="grid gap-4 sm:gap-6 lg:grid-cols-[0.82fr,1.18fr] items-start">
                 <div className="rounded-[22px] sm:rounded-[28px] border border-white/75 bg-white/80 p-3 sm:p-6 text-center">
-                  <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.03em] text-[var(--muted)]">{t.bloodGroupLabel}</div>
-                  <div className="mt-3 sm:mt-4 text-4xl min-[220px]:text-5xl sm:text-7xl font-black text-rose-600 break-words" style={{ fontFamily: 'var(--font-heading)', lineHeight: '0.95' }}>
+                  <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.03em] text-[var(--muted)]">
+                    {t.bloodGroupLabel}
+                  </div>
+                  <div
+                    className="mt-3 sm:mt-4 text-4xl min-[220px]:text-5xl sm:text-7xl font-black text-rose-600 break-words"
+                    style={{
+                      fontFamily: "var(--font-heading)",
+                      lineHeight: "0.95",
+                    }}
+                  >
                     {bloodGroup}
                   </div>
                   <div className="mt-4 sm:mt-6 inline-flex items-center gap-1.5 sm:gap-2 rounded-full bg-rose-50 px-2.5 sm:px-3 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold uppercase tracking-[0.12em] sm:tracking-[0.16em] text-[var(--accent)]">
@@ -176,7 +224,13 @@ const EmergencyProfile = () => {
                     {t.scannerFirstView}
                   </div>
 
-                  <h1 className="mt-3 sm:mt-5 text-2xl min-[220px]:text-3xl sm:text-5xl font-bold text-[var(--ink)] break-words" style={{ fontFamily: 'var(--font-heading)', lineHeight: '0.98' }}>
+                  <h1
+                    className="mt-3 sm:mt-5 text-2xl min-[220px]:text-3xl sm:text-5xl font-bold text-[var(--ink)] break-words"
+                    style={{
+                      fontFamily: "var(--font-heading)",
+                      lineHeight: "0.98",
+                    }}
+                  >
                     {user.name || t.notSpecified}
                   </h1>
 
@@ -186,7 +240,7 @@ const EmergencyProfile = () => {
 
                   <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row gap-2 sm:gap-3">
                     <a
-                      href={`tel:${primaryPhone.replace(/\s+/g, '')}`}
+                      href={`tel:${primaryPhone.replace(/\s+/g, "")}`}
                       className="stark-btn gap-2 sm:gap-3 justify-center px-3 sm:px-7 py-2.5 sm:py-3.5 text-sm sm:text-[15px]"
                     >
                       <Phone size={14} />
@@ -195,7 +249,7 @@ const EmergencyProfile = () => {
 
                     {backupPhone && backupPhone !== primaryPhone && (
                       <a
-                        href={`tel:${backupPhone.replace(/\s+/g, '')}`}
+                        href={`tel:${backupPhone.replace(/\s+/g, "")}`}
                         className="ghost-btn gap-2 sm:gap-3 justify-center px-3 sm:px-7 py-2.5 sm:py-3.5 text-sm sm:text-[15px]"
                       >
                         <User size={14} />
@@ -206,14 +260,26 @@ const EmergencyProfile = () => {
 
                   <div className="mt-4 sm:mt-6 grid gap-2 sm:gap-3 sm:grid-cols-2">
                     <div className="rounded-[18px] sm:rounded-[22px] border border-white/70 bg-white/70 p-3 sm:p-4">
-                      <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">{t.emergencyContactLabel}</div>
-                      <div className="mt-1.5 sm:mt-2 text-base min-[220px]:text-lg sm:text-xl font-semibold text-[var(--ink)] break-words">{primaryName}</div>
-                      <div className="mt-1 text-[13px] min-[220px]:text-[15px] sm:text-[17px] text-[var(--ink)] break-all">{primaryPhone || 'N/A'}</div>
+                      <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">
+                        {t.emergencyContactLabel}
+                      </div>
+                      <div className="mt-1.5 sm:mt-2 text-base min-[220px]:text-lg sm:text-xl font-semibold text-[var(--ink)] break-words">
+                        {primaryName}
+                      </div>
+                      <div className="mt-1 text-[13px] min-[220px]:text-[15px] sm:text-[17px] text-[var(--ink)] break-all">
+                        {primaryPhone || "N/A"}
+                      </div>
                     </div>
                     <div className="rounded-[18px] sm:rounded-[22px] border border-white/70 bg-white/70 p-3 sm:p-4">
-                      <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">{personalNumberLabel}</div>
-                      <div className="mt-1.5 sm:mt-2 text-base min-[220px]:text-lg sm:text-xl font-semibold text-[var(--ink)] break-all">{backupPhone || 'N/A'}</div>
-                      <div className="mt-1 text-[12px] min-[220px]:text-[13px] sm:text-[15px] text-[var(--muted)] break-all">{t.profileRef}: {user.uniqueId?.slice(0, 8) || 'N/A'}</div>
+                      <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">
+                        {personalNumberLabel}
+                      </div>
+                      <div className="mt-1.5 sm:mt-2 text-base min-[220px]:text-lg sm:text-xl font-semibold text-[var(--ink)] break-all">
+                        {backupPhone || "N/A"}
+                      </div>
+                      <div className="mt-1 text-[12px] min-[220px]:text-[13px] sm:text-[15px] text-[var(--muted)] break-all">
+                        {t.profileRef}: {user.uniqueId?.slice(0, 8) || "N/A"}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -223,8 +289,13 @@ const EmergencyProfile = () => {
             <GlassCard className="p-3 sm:p-7 lg:p-8">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">{t.quickIdentity}</div>
-                  <h2 className="mt-1.5 sm:mt-2 text-lg min-[220px]:text-xl sm:text-2xl font-semibold text-[var(--ink)]" style={{ fontFamily: 'var(--font-heading)' }}>
+                  <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">
+                    {t.quickIdentity}
+                  </div>
+                  <h2
+                    className="mt-1.5 sm:mt-2 text-lg min-[220px]:text-xl sm:text-2xl font-semibold text-[var(--ink)]"
+                    style={{ fontFamily: "var(--font-heading)" }}
+                  >
                     {t.patientFacts}
                   </h2>
                 </div>
@@ -236,7 +307,10 @@ const EmergencyProfile = () => {
 
               <div className="mt-3 sm:mt-6 grid gap-2 sm:gap-3">
                 {facts.map(({ label, value, icon: Icon }) => (
-                  <div key={label} className="rounded-[18px] sm:rounded-[22px] border border-white/70 bg-white/70 p-3 sm:p-4">
+                  <div
+                    key={label}
+                    className="rounded-[18px] sm:rounded-[22px] border border-white/70 bg-white/70 p-3 sm:p-4"
+                  >
                     <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">
                       <Icon size={12} className="sm:hidden" />
                       <Icon size={13} className="hidden sm:block" />
@@ -254,8 +328,14 @@ const EmergencyProfile = () => {
           <div className="mt-3 sm:mt-5 grid gap-3 sm:gap-5 lg:grid-cols-[1fr,0.9fr]">
             <GlassCard className="p-3 sm:p-7 lg:p-8">
               <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">
-                <Activity size={12} className="text-[var(--accent)] sm:hidden" />
-                <Activity size={14} className="text-[var(--accent)] hidden sm:block" />
+                <Activity
+                  size={12}
+                  className="text-[var(--accent)] sm:hidden"
+                />
+                <Activity
+                  size={14}
+                  className="text-[var(--accent)] hidden sm:block"
+                />
                 {t.medicalDetails}
               </div>
 
@@ -265,11 +345,20 @@ const EmergencyProfile = () => {
                     key={item.label}
                     className="rounded-[18px] sm:rounded-[24px] border p-3 sm:p-5"
                     style={{
-                      borderColor: item.danger ? 'rgba(225, 29, 72, 0.15)' : 'var(--glass-border)',
-                      background: item.danger ? 'rgba(255, 241, 242, 0.78)' : 'rgba(255,255,255,0.72)',
+                      borderColor: item.danger
+                        ? "rgba(225, 29, 72, 0.15)"
+                        : "var(--glass-border)",
+                      background: item.danger
+                        ? "rgba(255, 241, 242, 0.78)"
+                        : "rgba(255,255,255,0.72)",
                     }}
                   >
-                    <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em]" style={{ color: item.danger ? 'var(--danger)' : 'var(--muted)' }}>
+                    <div
+                      className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em]"
+                      style={{
+                        color: item.danger ? "var(--danger)" : "var(--muted)",
+                      }}
+                    >
                       {item.label}
                     </div>
                     <div className="mt-2 sm:mt-3 text-sm min-[220px]:text-base sm:text-xl font-semibold leading-relaxed text-[var(--ink)] break-all sm:break-words">
@@ -295,8 +384,14 @@ const EmergencyProfile = () => {
 
             <GlassCard className="p-3 sm:p-7 lg:p-8">
               <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">
-                <ShieldCheck size={12} className="text-[var(--accent)] sm:hidden" />
-                <ShieldCheck size={14} className="text-[var(--accent)] hidden sm:block" />
+                <ShieldCheck
+                  size={12}
+                  className="text-[var(--accent)] sm:hidden"
+                />
+                <ShieldCheck
+                  size={14}
+                  className="text-[var(--accent)] hidden sm:block"
+                />
                 {t.verifiedLog}
               </div>
 
@@ -306,12 +401,20 @@ const EmergencyProfile = () => {
                 </div>
                 <div className="mt-3 sm:mt-5 grid gap-2 sm:gap-3 sm:grid-cols-2">
                   <div className="rounded-[16px] sm:rounded-[20px] bg-white/78 p-3 sm:p-4">
-                    <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">{t.recordId}</div>
-                    <div className="mt-1.5 sm:mt-2 text-xs min-[220px]:text-sm sm:text-base font-semibold text-[var(--ink)] break-all">{user.uniqueId || 'N/A'}</div>
+                    <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">
+                      {t.recordId}
+                    </div>
+                    <div className="mt-1.5 sm:mt-2 text-xs min-[220px]:text-sm sm:text-base font-semibold text-[var(--ink)] break-all">
+                      {user.uniqueId || "N/A"}
+                    </div>
                   </div>
                   <div className="rounded-[16px] sm:rounded-[20px] bg-white/78 p-3 sm:p-4">
-                    <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">{t.status}</div>
-                    <div className="mt-1.5 sm:mt-2 text-xs min-[220px]:text-sm sm:text-base font-semibold text-[var(--accent)]">{t.activeAndVerified}</div>
+                    <div className="text-[11px] sm:text-[13px] font-semibold tracking-[0.02em] text-[var(--muted)]">
+                      {t.status}
+                    </div>
+                    <div className="mt-1.5 sm:mt-2 text-xs min-[220px]:text-sm sm:text-base font-semibold text-[var(--accent)]">
+                      {t.activeAndVerified}
+                    </div>
                   </div>
                 </div>
               </div>

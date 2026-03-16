@@ -13,19 +13,19 @@ import { Toaster } from 'react-hot-toast';
 
 function AppLayout() {
   const location = useLocation();
-  const isEmergencyRoute = location.pathname.startsWith('/emergency/');
+  const isEmergencyRoute = location.pathname.startsWith("/emergency/");
 
   return (
-    <div className={`app-shell ${isEmergencyRoute ? '' : 'pb-20 md:pb-0'}`}>
+    <div className={`app-shell ${isEmergencyRoute ? "" : "pb-20 md:pb-0"}`}>
       <Toaster
         position="top-center"
         toastOptions={{
           duration: 4000,
           style: {
-            background: 'var(--surface)',
-            color: 'var(--ink)',
-            border: '1px solid var(--line)',
-            borderRadius: '12px',
+            background: "var(--surface)",
+            color: "var(--ink)",
+            border: "1px solid var(--line)",
+            borderRadius: "12px",
           },
         }}
       />
@@ -49,9 +49,13 @@ function App() {
   return (
     <ThemeProvider>
       <LanguageProvider>
-        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <AppLayout />
-        </Router>
+        <ServerHealthProvider>
+          <Router
+            future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+          >
+            <AppLayout />
+          </Router>
+        </ServerHealthProvider>
       </LanguageProvider>
     </ThemeProvider>
   );

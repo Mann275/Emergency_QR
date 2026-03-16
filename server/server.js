@@ -10,10 +10,37 @@ dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const mongoUri = (process.env.MONGODB_URI || "").trim() || "mongodb://127.0.0.1:27017/emergencyqr";
+const mongoUri =
+  (process.env.MONGODB_URI || "").trim() ||
+  "mongodb://127.0.0.1:27017/emergencyqr";
+
+// CORS Configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = [
+      process.env.FRONTEND_URL || "http://localhost:5173",
+      "http://localhost:5173",
+      "https://emergencyqr-gen.vercel.app",
+    ];
+
+    if (
+      allowedOrigins.indexOf(origin) !== -1 ||
+      allowedOrigins.some((allowed) => origin.includes(allowed))
+    ) {
+      callback(null, true);
+    } else {
+      callback(null, true); // Allow all origins for now (you can restrict this later)
+    }
+  },
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
 
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -21,14 +48,21 @@ app.use(express.urlencoded({ extended: true }));
 const connectDB = async () => {
   try {
     if (!process.env.MONGODB_URI) {
-      console.warn("MONGODB_URI not set. Falling back to local MongoDB at mongodb://127.0.0.1:27017/emergencyqr");
+      console.warn(
+        "MONGODB_URI not set. Falling back to local MongoDB at mongodb://127.0.0.1:27017/emergencyqr",
+      );
     }
 
     const conn = await mongoose.connect(mongoUri);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
-    if (error.code === "ECONNREFUSED" && String(error.hostname || "").includes("_mongodb._tcp")) {
-      console.error("Database connection error: Atlas SRV DNS lookup failed. Check network DNS/VPN/firewall or use a non-SRV Mongo URI.");
+    if (
+      error.code === "ECONNREFUSED" &&
+      String(error.hostname || "").includes("_mongodb._tcp")
+    ) {
+      console.error(
+        "Database connection error: Atlas SRV DNS lookup failed. Check network DNS/VPN/firewall or use a non-SRV Mongo URI.",
+      );
     }
 
     console.error("Database connection error:", error);
