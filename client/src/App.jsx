@@ -7,6 +7,7 @@ import {
 import { LanguageProvider } from "./context/LanguageContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ServerHealthProvider } from "./context/ServerHealthContext";
+import { AuthProvider } from "./context/AuthContext";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import BottomNav from "./components/BottomNav";
@@ -53,13 +54,15 @@ function App() {
   return (
     <ThemeProvider>
       <LanguageProvider>
-        <ServerHealthProvider>
-          <Router
-            future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-          >
-            <AppLayout />
-          </Router>
-        </ServerHealthProvider>
+        <AuthProvider>
+          <ServerHealthProvider>
+            <Router
+              future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+            >
+              <AppLayout />
+            </Router>
+          </ServerHealthProvider>
+        </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>
   );

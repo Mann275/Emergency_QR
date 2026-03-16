@@ -13,12 +13,13 @@ import {
   Loader2,
   ArrowRight,
   ChevronDown,
-  Shield,
   HeartPulse,
   Info,
+  Mail,
+  Lock,
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
-import { useServerHealth } from "../context/ServerHealthContext";
+import { useAuth } from "../context/AuthContext";
 import { IN, US, GB, AU } from "country-flag-icons/react/3x2";
 import { toast } from "react-hot-toast";
 
@@ -27,9 +28,13 @@ const genderOptions = ["Male", "Female", "Other", "Prefer not to say"];
 
 const CreateProfile = () => {
   const { t } = useLanguage();
-  const { isHealthy, isChecking } = useServerHealth();
+  const { user, loading: authLoading, signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [authSubmitting, setAuthSubmitting] = useState(false);
+  const [authMode, setAuthMode] = useState("signin");
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
   const [phoneCode, setPhoneCode] = useState("+91");
   const [emergencyCode, setEmergencyCode] = useState("+91");
 
@@ -136,6 +141,30 @@ const CreateProfile = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAuthSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!authEmail || !authPassword) {
+      toast.error("Email and password are required.");
+      return;
+    }
+
+    try {
+      setAuthSubmitting(true);
+      if (authMode === "signup") {
+        await signUp(authEmail, authPassword);
+        toast.success("Account created successfully.");
+      } else {
+        await signIn(authEmail, authPassword);
+        toast.success("Signed in successfully.");
+      }
+    } catch (error) {
+      toast.error(error.message || "Authentication failed.");
+    } finally {
+      setAuthSubmitting(false);
     }
   };
 
@@ -252,36 +281,6 @@ const CreateProfile = () => {
 
   return (
     <div className="pb-24">
-      {/* Server Health Banner */}
-      {!isHealthy && (
-        <div
-          className="fixed top-0 left-0 right-0 z-50 px-4 py-3 text-center text-sm font-semibold shadow-lg"
-          style={{
-            background: isChecking
-              ? "linear-gradient(90deg, #f59e0b 0%, #f97316 100%)"
-              : "linear-gradient(90deg, #ef4444 0%, #dc2626 100%)",
-            color: "#ffffff",
-          }}
-        >
-          <div className="flex items-center justify-center gap-2">
-            {isChecking ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                <span>Server is starting... Please wait</span>
-              </>
-            ) : (
-              <>
-                <AlertTriangle size={16} />
-                <span>
-                  Server is not responding. Please check your connection or try
-                  again later.
-                </span>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
       <section className="pt-20 sm:pt-28">
         <div className="main-wrap max-w-3xl">
           <div className="text-center mb-8 animate-slide">
@@ -312,261 +311,338 @@ const CreateProfile = () => {
             </div>
           </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className="glass-card p-6 sm:p-8 animate-slide"
-          >
-            <SectionTitle
-              icon={User}
-              title={t.personalInfo}
-              copy="Fill only the information a responder should see immediately."
-            />
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <label style={labelStyle}>
-                  <User size={14} /> {t.fullName}
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="E.g. John Doe"
-                  required
-                  style={fieldStyle}
-                />
-              </div>
-
-              <div>
-                <label style={labelStyle}>
-                  <Droplets size={14} /> {t.bloodGroup}
-                </label>
-                <div className="relative">
-                  <select
-                    name="bloodGroup"
-                    value={formData.bloodGroup}
-                    onChange={handleChange}
-                    required
-                    style={{
-                      ...fieldStyle,
-                      appearance: "none",
-                      paddingRight: "44px",
-                    }}
-                  >
-                    <option value="">{t.selectBloodGroup}</option>
-                    {bloodGroups.map((group) => (
-                      <option key={group} value={group}>
-                        {group}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown
-                    size={16}
-                    className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 opacity-40"
-                  />
+          {!user ? (
+            <div className="glass-card p-6 sm:p-8 animate-slide">
+              <SectionTitle
+                icon={UserCheck}
+                title="Secure Access"
+                copy="Sign in to create and manage your emergency profile."
+              />
+              {authLoading ? (
+                <div className="flex items-center gap-2 text-[var(--muted)]">
+                  <Loader2 size={16} className="animate-spin" />
+                  Checking authentication...
                 </div>
-              </div>
-
-              <div>
-                <label style={labelStyle}>
-                  <UserCheck size={14} /> {t.gender}
-                </label>
-                <div className="relative">
-                  <select
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleChange}
-                    required
-                    style={{
-                      ...fieldStyle,
-                      appearance: "none",
-                      paddingRight: "44px",
-                    }}
-                  >
-                    <option value="">{t.selectGender}</option>
-                    {genderOptions.map((gender) => (
-                      <option key={gender} value={gender}>
-                        {gender}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown
-                    size={16}
-                    className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 opacity-40"
-                  />
-                </div>
-              </div>
-
-              <div className="sm:col-span-2">
-                <label style={labelStyle}>
-                  <Calendar size={14} /> {t.dob}
-                </label>
-                <input
-                  type="date"
-                  name="dateOfBirth"
-                  value={formData.dateOfBirth}
-                  onChange={handleChange}
-                  required
-                  style={fieldStyle}
-                />
-              </div>
+              ) : (
+                <form onSubmit={handleAuthSubmit} className="grid gap-5">
+                  <div>
+                    <label style={labelStyle}>
+                      <Mail size={14} /> Email
+                    </label>
+                    <input
+                      type="email"
+                      value={authEmail}
+                      onChange={(e) => setAuthEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      required
+                      style={fieldStyle}
+                    />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>
+                      <Lock size={14} /> Password
+                    </label>
+                    <input
+                      type="password"
+                      value={authPassword}
+                      onChange={(e) => setAuthPassword(e.target.value)}
+                      placeholder="At least 6 characters"
+                      minLength={6}
+                      required
+                      style={fieldStyle}
+                    />
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      type="submit"
+                      disabled={authSubmitting}
+                      className="stark-btn gap-2 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      {authSubmitting ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" />
+                          Please wait
+                        </>
+                      ) : authMode === "signup" ? (
+                        "Create account"
+                      ) : (
+                        "Sign in"
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setAuthMode((prev) =>
+                          prev === "signin" ? "signup" : "signin",
+                        )
+                      }
+                      className="rounded-xl border border-[var(--line)] px-4 py-2.5 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/50"
+                    >
+                      {authMode === "signin"
+                        ? "Need an account? Sign up"
+                        : "Have an account? Sign in"}
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
-
-            <div className="my-8 h-px bg-[var(--line)]"></div>
-
-            <SectionTitle
-              icon={Phone}
-              title={t.emergencyContacts}
-              copy="These numbers appear high on the emergency profile, so keep them accurate."
-            />
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <label style={labelStyle}>
-                  <Phone size={14} /> {t.yourPhone}
-                </label>
-                <div className="flex w-full gap-3">
-                  <CustomPhoneSelector
-                    value={phoneCode}
-                    onChange={setPhoneCode}
-                  />
+          ) : (
+            <form
+              onSubmit={handleSubmit}
+              className="glass-card p-6 sm:p-8 animate-slide"
+            >
+              <SectionTitle
+                icon={User}
+                title={t.personalInfo}
+                copy="Fill only the information a responder should see immediately."
+              />
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label style={labelStyle}>
+                    <User size={14} /> {t.fullName}
+                  </label>
                   <input
-                    className="min-w-0 flex-1"
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={(e) => handlePhoneChange(e, "phone")}
-                    placeholder="1234567890"
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="E.g. John Doe"
+                    required
+                    style={fieldStyle}
+                  />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>
+                    <Droplets size={14} /> {t.bloodGroup}
+                  </label>
+                  <div className="relative">
+                    <select
+                      name="bloodGroup"
+                      value={formData.bloodGroup}
+                      onChange={handleChange}
+                      required
+                      style={{
+                        ...fieldStyle,
+                        appearance: "none",
+                        paddingRight: "44px",
+                      }}
+                    >
+                      <option value="">{t.selectBloodGroup}</option>
+                      {bloodGroups.map((group) => (
+                        <option key={group} value={group}>
+                          {group}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown
+                      size={16}
+                      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 opacity-40"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={labelStyle}>
+                    <UserCheck size={14} /> {t.gender}
+                  </label>
+                  <div className="relative">
+                    <select
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleChange}
+                      required
+                      style={{
+                        ...fieldStyle,
+                        appearance: "none",
+                        paddingRight: "44px",
+                      }}
+                    >
+                      <option value="">{t.selectGender}</option>
+                      {genderOptions.map((gender) => (
+                        <option key={gender} value={gender}>
+                          {gender}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown
+                      size={16}
+                      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 opacity-40"
+                    />
+                  </div>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label style={labelStyle}>
+                    <Calendar size={14} /> {t.dob}
+                  </label>
+                  <input
+                    type="date"
+                    name="dateOfBirth"
+                    value={formData.dateOfBirth}
+                    onChange={handleChange}
                     required
                     style={fieldStyle}
                   />
                 </div>
               </div>
 
-              <div>
-                <label style={labelStyle}>
-                  <UserCheck size={14} /> {t.contactName}
-                </label>
-                <input
-                  type="text"
-                  name="emergencyContact.name"
-                  value={formData.emergencyContact.name}
-                  onChange={handleChange}
-                  placeholder="Someone you trust"
-                  required
-                  style={fieldStyle}
-                />
-              </div>
+              <div className="my-8 h-px bg-[var(--line)]"></div>
 
-              <div>
-                <label style={labelStyle}>
-                  <Phone size={14} /> {t.emergencyPhone}
-                </label>
-                <div className="flex w-full gap-3">
-                  <CustomPhoneSelector
-                    value={emergencyCode}
-                    onChange={setEmergencyCode}
-                  />
+              <SectionTitle
+                icon={Phone}
+                title={t.emergencyContacts}
+                copy="These numbers appear high on the emergency profile, so keep them accurate."
+              />
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label style={labelStyle}>
+                    <Phone size={14} /> {t.yourPhone}
+                  </label>
+                  <div className="flex w-full gap-3">
+                    <CustomPhoneSelector
+                      value={phoneCode}
+                      onChange={setPhoneCode}
+                    />
+                    <input
+                      className="min-w-0 flex-1"
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={(e) => handlePhoneChange(e, "phone")}
+                      placeholder="1234567890"
+                      required
+                      style={fieldStyle}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={labelStyle}>
+                    <UserCheck size={14} /> {t.contactName}
+                  </label>
                   <input
-                    className="min-w-0 flex-1"
-                    type="tel"
-                    name="emergencyContact.phone"
-                    value={formData.emergencyContact.phone}
-                    onChange={(e) =>
-                      handlePhoneChange(e, "emergencyContact.phone")
-                    }
-                    placeholder="1234567890"
+                    type="text"
+                    name="emergencyContact.name"
+                    value={formData.emergencyContact.name}
+                    onChange={handleChange}
+                    placeholder="Someone you trust"
                     required
                     style={fieldStyle}
                   />
                 </div>
-              </div>
-            </div>
 
-            <div className="my-8 h-px bg-[var(--line)]"></div>
-
-            <SectionTitle
-              icon={HeartPulse}
-              title={t.medicalHistory}
-              copy="Add only the details that are helpful during an emergency."
-            />
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <label style={labelStyle}>
-                  <AlertTriangle size={14} /> {t.chronicConditions}
-                </label>
-                <textarea
-                  name="diseaseDetails"
-                  value={formData.diseaseDetails}
-                  onChange={handleChange}
-                  placeholder="Asthma, diabetes, epilepsy..."
-                  style={{ ...fieldStyle, minHeight: "96px" }}
-                />
-              </div>
-
-              <div>
-                <label style={labelStyle}>
-                  <Droplets size={14} /> {t.knownAllergies}
-                </label>
-                <input
-                  type="text"
-                  name="allergies"
-                  value={formData.allergies}
-                  onChange={handleChange}
-                  placeholder="Penicillin, peanuts..."
-                  style={fieldStyle}
-                />
+                <div>
+                  <label style={labelStyle}>
+                    <Phone size={14} /> {t.emergencyPhone}
+                  </label>
+                  <div className="flex w-full gap-3">
+                    <CustomPhoneSelector
+                      value={emergencyCode}
+                      onChange={setEmergencyCode}
+                    />
+                    <input
+                      className="min-w-0 flex-1"
+                      type="tel"
+                      name="emergencyContact.phone"
+                      value={formData.emergencyContact.phone}
+                      onChange={(e) =>
+                        handlePhoneChange(e, "emergencyContact.phone")
+                      }
+                      placeholder="1234567890"
+                      required
+                      style={fieldStyle}
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label style={labelStyle}>
-                  <Pill size={14} /> {t.medications}
-                </label>
-                <input
-                  type="text"
-                  name="medications"
-                  value={formData.medications}
-                  onChange={handleChange}
-                  placeholder="Current medication..."
-                  style={fieldStyle}
-                />
+              <div className="my-8 h-px bg-[var(--line)]"></div>
+
+              <SectionTitle
+                icon={HeartPulse}
+                title={t.medicalHistory}
+                copy="Add only the details that are helpful during an emergency."
+              />
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label style={labelStyle}>
+                    <AlertTriangle size={14} /> {t.chronicConditions}
+                  </label>
+                  <textarea
+                    name="diseaseDetails"
+                    value={formData.diseaseDetails}
+                    onChange={handleChange}
+                    placeholder="Asthma, diabetes, epilepsy..."
+                    style={{ ...fieldStyle, minHeight: "96px" }}
+                  />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>
+                    <Droplets size={14} /> {t.knownAllergies}
+                  </label>
+                  <input
+                    type="text"
+                    name="allergies"
+                    value={formData.allergies}
+                    onChange={handleChange}
+                    placeholder="Penicillin, peanuts..."
+                    style={fieldStyle}
+                  />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>
+                    <Pill size={14} /> {t.medications}
+                  </label>
+                  <input
+                    type="text"
+                    name="medications"
+                    value={formData.medications}
+                    onChange={handleChange}
+                    placeholder="Current medication..."
+                    style={fieldStyle}
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label style={labelStyle}>
+                    <FileText size={14} /> {t.responderNotes}
+                  </label>
+                  <textarea
+                    name="notes"
+                    value={formData.notes}
+                    onChange={handleChange}
+                    placeholder="Example: carries inhaler in bag pocket."
+                    style={{ ...fieldStyle, minHeight: "88px" }}
+                  />
+                </div>
               </div>
 
-              <div className="sm:col-span-2">
-                <label style={labelStyle}>
-                  <FileText size={14} /> {t.responderNotes}
-                </label>
-                <textarea
-                  name="notes"
-                  value={formData.notes}
-                  onChange={handleChange}
-                  placeholder="Example: carries inhaler in bag pocket."
-                  style={{ ...fieldStyle, minHeight: "88px" }}
-                />
+              <div className="mt-10 flex flex-col gap-5 border-t border-[var(--line)] pt-6 sm:flex-row sm:items-center sm:justify-between">
+                <p className="max-w-md text-base sm:text-lg leading-relaxed text-[var(--muted)]">
+                  {t.disclaimer}
+                </p>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="stark-btn gap-3 shrink-0 whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" /> {t.working}
+                    </>
+                  ) : (
+                    <>
+                      {t.generateQr} <ArrowRight size={16} />
+                    </>
+                  )}
+                </button>
               </div>
-            </div>
-
-            <div className="mt-10 flex flex-col gap-5 border-t border-[var(--line)] pt-6 sm:flex-row sm:items-center sm:justify-between">
-              <p className="max-w-md text-base sm:text-lg leading-relaxed text-[var(--muted)]">
-                {t.disclaimer}
-              </p>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="stark-btn gap-3 shrink-0 whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" /> {t.working}
-                  </>
-                ) : (
-                  <>
-                    {t.generateQr} <ArrowRight size={16} />
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
+            </form>
+          )}
         </div>
       </section>
     </div>
