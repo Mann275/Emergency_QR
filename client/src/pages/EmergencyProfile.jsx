@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   Calendar,
   BadgeAlert,
+  Pencil,
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -138,10 +139,16 @@ const EmergencyProfile = () => {
       <section className="pt-2 sm:pt-8">
         <div className="main-wrap max-w-6xl">
           <div className="mb-3 sm:mb-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3">
-            <Link to="/" className="inline-flex items-center justify-center sm:justify-start gap-2 rounded-full border border-white/70 bg-white/65 px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base font-semibold text-[var(--ink)] shadow-[0_12px_26px_rgba(60,22,34,0.06)] backdrop-blur-xl">
-              <ArrowLeft size={16} />
-              Back
-            </Link>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Link to="/" className="inline-flex items-center justify-center sm:justify-start gap-2 rounded-full border border-white/70 bg-white/65 px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base font-semibold text-[var(--ink)] shadow-[0_12px_26px_rgba(60,22,34,0.06)] backdrop-blur-xl">
+                <ArrowLeft size={16} />
+                Back
+              </Link>
+              <Link to={`/edit/${id}`} className="inline-flex items-center justify-center gap-2 rounded-full border border-white/70 bg-white/65 px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base font-semibold text-[var(--ink)] shadow-[0_12px_26px_rgba(60,22,34,0.06)] backdrop-blur-xl">
+                <Pencil size={14} />
+                {t.editProfile || 'Edit profile'}
+              </Link>
+            </div>
 
             <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2">
               <Pill icon={ShieldCheck} label={t.emergencyProfile} />
