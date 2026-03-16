@@ -5,7 +5,6 @@ import {
   ArrowRight,
   ExternalLink,
   QrCode,
-  Pencil,
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 
@@ -104,29 +103,15 @@ const Success = () => {
                 >
                   {t.viewProfile} <ExternalLink size={16} />
                 </a>
-                <Link
-                  to={`/edit/${id}`}
-                  className="inline-flex items-center gap-2 px-6 py-3.5 text-sm font-bold rounded-xl border border-[var(--line)] bg-white/85 transition-base text-[var(--ink)] hover:border-[var(--ink)]"
-                >
-                  {t.editProfile || "Edit profile"} <Pencil size={16} />
-                </Link>
               </div>
 
-              <p className="mt-4 text-sm font-medium text-[var(--muted)] opacity-90">
-                {t.editProfile
-                  ? `${t.editProfile} anytime from this page.`
-                  : "You can edit your profile anytime."}
-              </p>
             </div>
 
             <div
               className="animate-slide flex flex-col items-center"
               style={{ animationDelay: "0.1s" }}
             >
-              <div
-                className="bg-white p-6 sm:p-8 shadow-2xl rounded-3xl"
-                style={{ border: "1px solid var(--line)" }}
-              >
+              <div className="bg-white p-6 sm:p-8 shadow-2xl rounded-3xl border border-black/20">
                 <div className="flex items-center justify-between w-full mb-6">
                   <div>
                     <div className="text-[10px] font-bold uppercase tracking-widest opacity-50">
@@ -161,18 +146,6 @@ const Success = () => {
                   </p>
                 </div>
 
-                <div className="mt-6 flex justify-center w-full">
-                  <Link
-                    to="/"
-                    className="group inline-flex items-center gap-2 text-sm font-bold text-[var(--ink)] opacity-70 hover:opacity-100 transition-all"
-                  >
-                    {t.backToDashboard}{" "}
-                    <ArrowRight
-                      size={14}
-                      className="group-hover:translate-x-1 transition-transform"
-                    />
-                  </Link>
-                </div>
               </div>
             </div>
           </div>

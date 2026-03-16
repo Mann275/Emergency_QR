@@ -129,7 +129,7 @@ const translations = {
     accessError: "Access Error",
     notFound: "Profile not found.",
     failedLoad: "Failed to load profile.",
-    retrieving: "Retrieving secure profile...",
+    retrieving: "Retrieving profile...",
     notSpecified: "Not specified",
     noneDisclosed: "None disclosed",
 
@@ -288,7 +288,7 @@ const translations = {
     accessError: "एक्सेस त्रुटि",
     notFound: "प्रोफ़ाइल नहीं मिली।",
     failedLoad: "प्रोफ़ाइल लोड करने में विफल।",
-    retrieving: "सुरक्षित प्रोफ़ाइल प्राप्त की जा रही है...",
+    retrieving: "प्रोफ़ाइल प्राप्त की जा रही है...",
     notSpecified: "निर्दिष्ट नहीं",
     noneDisclosed: "कोई खुलासा नहीं",
 
@@ -446,7 +446,7 @@ const translations = {
     accessError: "એક્સેસ ભૂલ",
     notFound: "પ્રોફાઇલ મળી નથી.",
     failedLoad: "પ્રોફાઇલ લોડ કરવામાં નિષ્ફળ.",
-    retrieving: "સુરક્ષિત પ્રોફાઇલ મેળવી રહ્યાં છીએ...",
+    retrieving: "પ્રોફાઇલ મેળવી રહ્યાં છીએ...",
     notSpecified: "ઉલ્લેખ નથી",
     noneDisclosed: "કઈ જણાવેલ નથી",
 

@@ -99,7 +99,7 @@ const EmergencyProfile = () => {
             size={42}
             className="mx-auto text-[var(--accent)] animate-pulse"
           />
-          <p className="mt-4 text-base font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+          <p className="mt-4 text-base font-semibold uppercase tracking-[0.06em] text-[var(--muted)]">
             {t.retrieving}
           </p>
         </GlassCard>
