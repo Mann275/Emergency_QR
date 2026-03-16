@@ -132,7 +132,16 @@ const translations = {
         patientFacts: 'Patient facts',
         recordId: 'Record ID',
         status: 'Status',
-        activeAndVerified: 'Active and verified'
+        activeAndVerified: 'Active and verified',
+
+        // Edit Profile
+        editTitle: 'Edit your profile',
+        editDesc: 'Update your medical details. Changes will reflect on your emergency QR immediately.',
+        updateProfile: 'Update profile',
+        updating: 'Updating...',
+        profileUpdated: 'Profile updated successfully!',
+        cancelEdit: 'Cancel',
+        editProfile: 'Edit profile'
     },
     hi: {
         // Header
@@ -265,7 +274,16 @@ const translations = {
         patientFacts: 'रोगी के तथ्य',
         recordId: 'रिकॉर्ड आईडी',
         status: 'स्थिति',
-        activeAndVerified: 'सक्रिय और सत्यापित'
+        activeAndVerified: 'सक्रिय और सत्यापित',
+
+        // Edit Profile
+        editTitle: 'अपनी प्रोफ़ाइल संपादित करें',
+        editDesc: 'अपने चिकित्सा विवरण अपडेट करें। परिवर्तन आपके आपातकालीन QR पर तुरंत दिखाई देंगे।',
+        updateProfile: 'प्रोफ़ाइल अपडेट करें',
+        updating: 'अपडेट हो रहा है...',
+        profileUpdated: 'प्रोफ़ाइल सफलतापूर्वक अपडेट हो गई!',
+        cancelEdit: 'रद्द करें',
+        editProfile: 'प्रोफ़ाइल संपादित करें'
     },
     gu: {
         // Header
@@ -398,7 +416,16 @@ const translations = {
         patientFacts: 'દર્દીના તથ્યો',
         recordId: 'રેકોર્ડ આઈડી',
         status: 'સ્થિતિ',
-        activeAndVerified: 'સક્રિય અને ચકાસાયેલ'
+        activeAndVerified: 'સક્રિય અને ચકાસાયેલ',
+
+        // Edit Profile
+        editTitle: 'તમારી પ્રોફાઇલ સંપાદિત કરો',
+        editDesc: 'તમારી તબીબી વિગતો અપડેટ કરો. ફેરફારો તમારા ઇમરજન્સી QR પર તરત જ દેખાશે.',
+        updateProfile: 'પ્રોફાઇલ અપડેટ કરો',
+        updating: 'અપડેટ થઈ રહ્યું છે...',
+        profileUpdated: 'પ્રોફાઇલ સફળતાપૂર્વક અપડેટ થઈ!',
+        cancelEdit: 'રદ કરો',
+        editProfile: 'પ્રોફાઇલ સંપાદિત કરો'
     }
 };
 

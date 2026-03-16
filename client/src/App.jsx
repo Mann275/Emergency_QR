@@ -14,6 +14,7 @@ import BottomNav from "./components/BottomNav";
 import Home from "./pages/Home";
 import CreateProfile from "./pages/CreateProfile";
 import EmergencyProfile from "./pages/EmergencyProfile";
+import EditProfile from "./pages/EditProfile";
 import Success from "./pages/Success";
 import { Toaster } from "react-hot-toast";
 
@@ -41,6 +42,7 @@ function AppLayout() {
           <Route path="/" element={<Home />} />
           <Route path="/create" element={<CreateProfile />} />
           <Route path="/emergency/:id" element={<EmergencyProfile />} />
+          <Route path="/edit/:id" element={<EditProfile />} />
           <Route path="/success/:id" element={<Success />} />
         </Routes>
       </main>
