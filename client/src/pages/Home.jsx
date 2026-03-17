@@ -63,9 +63,12 @@ const Home = () => {
                   {t.heroCta}
                   <ArrowRight size={18} />
                 </Link>
-                <a href="#preview" className="ghost-btn py-4 px-8 text-base bg-white/50 hover:bg-white text-[var(--ink)] border border-[var(--line)] justify-center">
+                <Link
+                  to="/preview"
+                  className="ghost-btn py-4 px-8 text-base bg-white/50 hover:bg-white text-[var(--ink)] border border-[var(--line)] justify-center"
+                >
                   {t.seePreview}
-                </a>
+                </Link>
               </div>
 
               <div className="grid grid-cols-3 gap-3 pt-8 border-t border-[var(--line)]/60 text-center w-full">
@@ -101,7 +104,7 @@ const Home = () => {
               <div className="relative w-full max-w-[420px] sm:max-w-[520px] lg:max-w-[585px]">
                 <div className="absolute inset-0 bg-white/60 blur-3xl rounded-full scale-110 -z-10"></div>
                 <img
-                  src="/images/img.png"
+                  src="https://ik.imagekit.io/shubhampathak/emergency-qr/img.png"
                   alt="Medical ID Concept"
                   className="relative z-10 w-full object-contain mix-blend-multiply"
                 />
@@ -116,8 +119,12 @@ const Home = () => {
         <div className="main-wrap">
 
           <div className="mb-14 sm:mb-20 text-center max-w-2xl mx-auto">
-            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black text-[var(--ink)] tracking-tight" style={{ fontFamily: "var(--font-heading)" }}>
-              A clinical approach to emergency data.
+            <h2
+              className="text-3xl sm:text-5xl lg:text-6xl font-black text-[var(--ink)] tracking-tight"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              {t.previewSectionTitle ||
+                "A clinical approach to emergency data."}
             </h2>
           </div>
 
@@ -146,7 +153,7 @@ const Home = () => {
             <div className="flex items-center justify-center relative animate-slide" style={{ animationDelay: '0.15s' }}>
               <div className="absolute inset-0 bg-[var(--accent)]/5 blur-[100px] rounded-full -z-10"></div>
               <img
-                src="/images/illustration2.png"
+                src="https://ik.imagekit.io/shubhampathak/emergency-qr/illustration2.png"
                 alt="Emergency Network Illustration"
                 className="w-full max-w-[500px] mix-blend-multiply drop-shadow-sm"
               />
@@ -160,7 +167,7 @@ const Home = () => {
               <div className="order-2 lg:order-1 flex justify-center relative">
                 <div className="absolute inset-0 bg-[#06b6d4]/5 blur-[100px] rounded-full -z-10"></div>
                 <img
-                  src="/images/illustration1.png"
+                  src="https://ik.imagekit.io/shubhampathak/emergency-qr/illustration1.png"
                   alt="Fast workflow"
                   className="w-full max-w-[550px] mix-blend-multiply"
                 />

@@ -5,6 +5,18 @@ const translations = {
     // Header
     createProfile: "Create Profile",
     home: "Home",
+    logout: "Logout",
+    logoutConfirm: "Are you sure you want to logout?",
+    logoutSuccess: "Logged out successfully.",
+    logoutFailed: "Failed to logout.",
+    profileFirstDownload: "Create your profile first to download QR.",
+    qrDownloaded: "QR downloaded.",
+    qrGenerateFailed: "Could not generate QR right now.",
+    accountGreeting: "Hi, {name}!",
+    greetingFallback: "there",
+    userFallback: "User",
+    callLabel: "Call",
+    back: "Back",
 
     // Home
     heroTitle: "Critical details. Before you can explain them.",
@@ -16,6 +28,7 @@ const translations = {
     seePreview: "See preview",
     readyTitle: "Ready in under two minutes.",
     getStarted: "Get started",
+    previewSectionTitle: "A clinical approach to emergency data.",
 
     stat1Val: "10 sec",
     stat1Lbl: "scan to action",
@@ -62,6 +75,25 @@ const translations = {
     createTitle: "Create your profile",
     createDesc:
       "Fill in your medical details. This data will be instantly accessible via QR in case of an emergency.",
+    personalInfoCopy:
+      "Fill only the information a responder should see immediately.",
+    emergencyContactsCopy:
+      "These numbers appear high on the emergency profile, so keep them accurate.",
+    medicalHistoryCopy:
+      "Add only the details that are helpful during an emergency.",
+    placeholderFullName: "E.g. John Doe",
+    placeholderPhone: "1234567890",
+    placeholderContactName: "Someone you trust",
+    placeholderCondition: "Asthma, diabetes, epilepsy...",
+    placeholderAllergies: "Penicillin, peanuts...",
+    placeholderMedications: "Current medication...",
+    placeholderNotes: "Example: carries inhaler in bag pocket.",
+    savedDetailsLoading: "Loading your saved details",
+    existingProfileDetected: "Existing profile detected. Updating keeps the same QR.",
+    requiredFieldsError: "Please fill in all required fields.",
+    profileSavedToast: "Changes saved. Your same QR remains active.",
+    profileCreatedToast: "Profile created successfully!",
+    genericError: "Something went wrong.",
     personalInfo: "Personal Info",
     fullName: "Full name",
     bloodGroup: "Blood group",
@@ -87,6 +119,35 @@ const translations = {
     disclaimer:
       "By generating this QR, you authorize the public display of this data for emergency retrieval.",
     working: "Working...",
+
+    // Auth
+    authChecking: "Checking authentication...",
+    authTitleSignUp: "Create your account",
+    authTitleSignIn: "Welcome back",
+    authSubtitleSignUp:
+      "Sign up to save your emergency profile securely.",
+    authSubtitleSignIn: "Sign in to finish your emergency profile.",
+    authPreviewLink: "Preview a sample profile first",
+    authEmailLabel: "Email",
+    authPasswordLabel: "Password",
+    authEmailPlaceholderSignUp: "Enter a new email address",
+    authEmailPlaceholderSignIn: "Enter your account email",
+    authPasswordPlaceholderSignUp: "Create password (min 6 characters)",
+    authPasswordPlaceholderSignIn: "Enter your password",
+    authPleaseWait: "Please wait",
+    authCreateAccount: "Create account",
+    authSignIn: "Sign in",
+    authSignUp: "Sign up",
+    authOr: "OR",
+    authContinueGoogle: "Continue with Google",
+    authHaveAccount: "Already have an account?",
+    authNeedAccount: "New here?",
+    emailPasswordRequired: "Email and password are required.",
+    authAccountCreated: "Account created successfully :)",
+    authSignedIn: "Signed in successfully :)",
+    authFailed: "Authentication failed.",
+    authGoogleSignedIn: "Signed in with Google :)",
+    googleAuthFailed: "Google sign-in failed.",
 
     // Success
     profileActive: "Profile Active.",
@@ -136,6 +197,7 @@ const translations = {
     yourNumber: "Your Number",
     callEmergencyContact: "Call Emergency Contact",
     callYourNumber: "Call Your Number",
+    callUser: "Call {name}",
     age: "Age",
     bloodGroupLabel: "Blood group",
     scannerFirstView: "Scanner-first view",
@@ -158,6 +220,17 @@ const translations = {
     profileUpdated: "Profile updated successfully!",
     cancelEdit: "Cancel",
     editProfile: "Edit profile",
+
+    // Preview
+    previewLabel: "Preview",
+    previewSample: "Sample data",
+    previewNote:
+      "Preview only - real profiles will show your submitted details.",
+    previewBanner: "Preview emergency view",
+    previewCallSelf: "Call personal number",
+    previewCTA: "Ready to create your own?",
+    previewCTACopy:
+      "Sign in to save your emergency QR and share it with responders.",
   },
   hi: {
     // Header
@@ -497,3 +570,4 @@ export const LanguageProvider = ({ children }) => {
 };
 
 export const useLanguage = () => useContext(LanguageContext);
+

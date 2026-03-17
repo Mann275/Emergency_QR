@@ -17,6 +17,8 @@ import Footer from "./components/Footer";
 import BottomNav from "./components/BottomNav";
 import Home from "./pages/Home";
 import CreateProfile from "./pages/CreateProfile";
+import Auth from "./pages/Auth";
+import PreviewProfile from "./pages/PreviewProfile";
 import EmergencyProfile from "./pages/EmergencyProfile";
 import EditProfile from "./pages/EditProfile";
 import Success from "./pages/Success";
@@ -25,6 +27,7 @@ import { Toaster, toast } from "react-hot-toast";
 function AppLayout() {
   const location = useLocation();
   const isEmergencyRoute = location.pathname.startsWith("/emergency/");
+  const isPreviewRoute = location.pathname === "/preview";
   const { isHealthy, isChecking } = useServerHealth();
   const [isMobile, setIsMobile] = useState(false);
 
@@ -56,15 +59,16 @@ function AppLayout() {
   }, [isHealthy, isChecking]);
 
   const glassBaseStyle = {
-    borderRadius: "14px",
-    padding: isMobile ? "12px 14px" : "10px 12px",
+    borderRadius: "16px",
+    padding: isMobile ? "12px 16px" : "10px 14px",
     fontWeight: "600",
     fontSize: isMobile ? "14px" : "13px",
-    boxShadow: isMobile
-      ? "0 12px 28px rgba(15, 23, 42, 0.12)"
-      : "0 10px 22px rgba(15, 23, 42, 0.1)",
-    backdropFilter: "blur(14px) saturate(160%)",
-    WebkitBackdropFilter: "blur(14px) saturate(160%)",
+    boxShadow: "0 16px 36px rgba(35, 19, 26, 0.14)",
+    backdropFilter: "blur(16px) saturate(160%)",
+    WebkitBackdropFilter: "blur(16px) saturate(160%)",
+    background: "rgba(255, 255, 255, 0.88)",
+    color: "var(--ink)",
+    border: "1px solid rgba(35, 19, 26, 0.12)",
   };
 
   return (
@@ -80,17 +84,12 @@ function AppLayout() {
           duration: 4000,
           style: {
             ...glassBaseStyle,
-            background: "rgba(255, 255, 255, 0.62)",
-            color: "var(--ink)",
-            border: "1px solid rgba(255, 255, 255, 0.6)",
           },
           success: {
             style: {
               ...glassBaseStyle,
-              background: "rgba(255, 255, 255, 0.9)",
-              color: "var(--ink)",
+              background: "rgba(255, 255, 255, 0.92)",
               border: "1px solid rgba(200, 30, 75, 0.22)",
-              boxShadow: "0 14px 32px rgba(60, 22, 34, 0.16)",
             },
             iconTheme: {
               primary: "var(--accent)",
@@ -100,15 +99,13 @@ function AppLayout() {
           error: {
             style: {
               ...glassBaseStyle,
-              background: isMobile
-                ? "#b91c1c"
-                : "linear-gradient(135deg, rgba(127, 29, 29, 0.9), rgba(185, 28, 28, 0.76))",
-              color: "#fff1f2",
-              border: "1px solid rgba(254, 202, 202, 0.34)",
+              background: "rgba(255, 255, 255, 0.92)",
+              color: "var(--ink)",
+              border: "1px solid rgba(220, 38, 38, 0.28)",
             },
             iconTheme: {
-              primary: "#fff1f2",
-              secondary: "#b91c1c",
+              primary: "#dc2626",
+              secondary: "#ffffff",
             },
           },
         }}
@@ -117,6 +114,8 @@ function AppLayout() {
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/preview" element={<PreviewProfile />} />
           <Route path="/create" element={<CreateProfile />} />
           <Route path="/emergency/:id" element={<EmergencyProfile />} />
           <Route path="/edit/:id" element={<EditProfile />} />
@@ -124,7 +123,7 @@ function AppLayout() {
         </Routes>
       </main>
       {!isEmergencyRoute && <Footer />}
-      {!isEmergencyRoute && <BottomNav />}
+      {!isEmergencyRoute && !isPreviewRoute && <BottomNav />}
     </div>
   );
 }
