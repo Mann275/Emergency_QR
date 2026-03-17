@@ -15,18 +15,20 @@ import {
   ChevronDown,
   HeartPulse,
   Info,
-  Eye,
-  EyeOff,
-  Mail,
-  Lock,
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
 import { IN, US, GB, AU } from "country-flag-icons/react/3x2";
 import { toast } from "react-hot-toast";
+import { showToast } from "../utils/toast.jsx";
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-const genderOptions = ["Male", "Female", "Other", "Prefer not to say"];
+const defaultGenderOptions = [
+  "Male",
+  "Female",
+  "Other",
+  "Prefer not to say",
+];
 const PHONE_CODES = ["+91", "+1", "+44", "+61"];
 const USER_PROFILE_KEY_PREFIX = "emergency_user_profile:";
 
@@ -45,21 +47,10 @@ const parsePhone = (raw) => {
 
 const CreateProfile = () => {
   const { t } = useLanguage();
-  const {
-    user,
-    loading: authLoading,
-    signIn,
-    signUp,
-    signInWithGoogle,
-  } = useAuth();
+  const genderOptions = t.genderOptions || defaultGenderOptions;
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [authSubmitting, setAuthSubmitting] = useState(false);
-  const [authMode, setAuthMode] = useState("signin");
-  const [authEmail, setAuthEmail] = useState("");
-  const [authPassword, setAuthPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [isProfilePrefilling, setIsProfilePrefilling] = useState(false);
   const [existingProfileId, setExistingProfileId] = useState("");
   const [phoneCode, setPhoneCode] = useState("+91");
@@ -80,6 +71,22 @@ const CreateProfile = () => {
     address: "",
     notes: "",
   });
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      navigate("/auth", {
+        replace: true,
+        state: { redirectTo: "/create" },
+      });
+      return;
+    }
+    const storedId = localStorage.getItem(getUserProfileKey(user.uid));
+    if (storedId) {
+      navigate(`/emergency/${storedId}`, { replace: true });
+      return;
+    }
+  }, [user, authLoading, navigate]);
 
   const handleChange = (e) => {
     if (!user) return;
@@ -116,12 +123,10 @@ const CreateProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user) {
-      setShowAuthPrompt(true);
-      setTimeout(() => {
-        document
-          .getElementById("auth-panel")
-          ?.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 0);
+      navigate("/auth", {
+        replace: true,
+        state: { redirectTo: "/create" },
+      });
       return;
     }
     setLoading(true);
@@ -136,7 +141,9 @@ const CreateProfile = () => {
         !formData.emergencyContact.name ||
         !formData.emergencyContact.phone
       ) {
-        throw new Error("Please fill in all required fields.");
+        throw new Error(
+          t.requiredFieldsError || "Please fill in all required fields.",
+        );
       }
 
       const payload = {
@@ -159,11 +166,12 @@ const CreateProfile = () => {
           setExistingProfileId(response.data.uniqueId);
         }
 
-        toast.success(
-          existingProfileId
-            ? "Changes saved. Your same QR remains active."
-            : "Profile created successfully!",
-        );
+        showToast({
+          message: existingProfileId
+            ? t.profileSavedToast ||
+              "Changes saved. Your same QR remains active."
+            : t.profileCreatedToast || "Profile created successfully!",
+        });
 
         navigate(`/success/${response.data.uniqueId}`, {
           state: {
@@ -173,16 +181,13 @@ const CreateProfile = () => {
         });
       }
     } catch (err) {
-      toast.error(err.message || "Something went wrong.");
+      toast.error(err.message || t.genericError || "Something went wrong.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user) {
-      setShowAuthPrompt(false);
-    }
     const prefillExistingProfile = async () => {
       if (!user?.uid) {
         setExistingProfileId("");
@@ -245,42 +250,6 @@ const CreateProfile = () => {
 
     prefillExistingProfile();
   }, [user?.uid]);
-
-  const handleAuthSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!authEmail || !authPassword) {
-      toast.error("Email and password are required.");
-      return;
-    }
-
-    try {
-      setAuthSubmitting(true);
-      if (authMode === "signup") {
-        await signUp(authEmail, authPassword);
-        toast.success("Account created successfully :)");
-      } else {
-        await signIn(authEmail, authPassword);
-        toast.success("Signed in successfully :)");
-      }
-    } catch (error) {
-      toast.error(error.message || "Authentication failed.");
-    } finally {
-      setAuthSubmitting(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    try {
-      setAuthSubmitting(true);
-      await signInWithGoogle();
-      toast.success("Signed in with Google :)");
-    } catch (error) {
-      toast.error(error.message || "Google sign-in failed.");
-    } finally {
-      setAuthSubmitting(false);
-    }
-  };
 
   const fieldStyle = {
     width: "100%",
@@ -397,7 +366,23 @@ const CreateProfile = () => {
     );
   };
 
-  const isSignUp = authMode === "signup";
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="glass-card p-6 sm:p-8 text-center">
+          <Loader2 size={24} className="mx-auto animate-spin text-[var(--accent)]" />
+          <p className="mt-3 text-sm font-semibold text-[var(--muted)]">
+            {t.authChecking || "Checking authentication..."}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
   const isReadOnly = !user;
   const fieldStylePreview = isReadOnly
     ? { ...fieldStyle, opacity: 0.75, cursor: "not-allowed" }
@@ -413,7 +398,7 @@ const CreateProfile = () => {
           <div className="mb-3 animate-slide relative z-30">
             <div className="mx-auto flex max-w-lg items-center justify-center gap-3 text-center">
               <img
-                src="/images/illustration3.png"
+                src="https://ik.imagekit.io/shubhampathak/emergency-qr/illustration3.png"
                 alt=""
                 className="w-12 sm:w-16 h-auto mix-blend-multiply shrink-0"
               />
@@ -447,20 +432,24 @@ const CreateProfile = () => {
           >
             {user && isProfilePrefilling ? (
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
-                <Loader2 size={14} className="animate-spin" /> Loading your
-                saved details
+                <Loader2 size={14} className="animate-spin" />{" "}
+                {t.savedDetailsLoading || "Loading your saved details"}
               </div>
             ) : user && existingProfileId ? (
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
                 <HeartPulse size={14} className="text-[var(--accent)]" />{" "}
-                Existing profile detected. Updating keeps the same QR.
+                {t.existingProfileDetected ||
+                  "Existing profile detected. Updating keeps the same QR."}
               </div>
             ) : null}
 
               <SectionTitle
                 icon={User}
                 title={t.personalInfo}
-                copy="Fill only the information a responder should see immediately."
+                copy={
+                  t.personalInfoCopy ||
+                  "Fill only the information a responder should see immediately."
+                }
               />
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="sm:col-span-2">
@@ -472,7 +461,7 @@ const CreateProfile = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    placeholder="E.g. John Doe"
+                    placeholder={t.placeholderFullName || "E.g. John Doe"}
                     required
                     readOnly={isReadOnly}
                     style={fieldStylePreview}
@@ -562,7 +551,10 @@ const CreateProfile = () => {
               <SectionTitle
                 icon={Phone}
                 title={t.emergencyContacts}
-                copy="These numbers appear high on the emergency profile, so keep them accurate."
+                copy={
+                  t.emergencyContactsCopy ||
+                  "These numbers appear high on the emergency profile, so keep them accurate."
+                }
               />
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="sm:col-span-2">
@@ -581,7 +573,7 @@ const CreateProfile = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={(e) => handlePhoneChange(e, "phone")}
-                      placeholder="1234567890"
+                      placeholder={t.placeholderPhone || "1234567890"}
                       required
                       readOnly={isReadOnly}
                       style={fieldStylePreview}
@@ -598,7 +590,9 @@ const CreateProfile = () => {
                     name="emergencyContact.name"
                     value={formData.emergencyContact.name}
                     onChange={handleChange}
-                    placeholder="Someone you trust"
+                    placeholder={
+                      t.placeholderContactName || "Someone you trust"
+                    }
                     required
                     readOnly={isReadOnly}
                     style={fieldStylePreview}
@@ -623,7 +617,7 @@ const CreateProfile = () => {
                       onChange={(e) =>
                         handlePhoneChange(e, "emergencyContact.phone")
                       }
-                      placeholder="1234567890"
+                      placeholder={t.placeholderPhone || "1234567890"}
                       required
                       readOnly={isReadOnly}
                       style={fieldStylePreview}
@@ -637,7 +631,10 @@ const CreateProfile = () => {
               <SectionTitle
                 icon={HeartPulse}
                 title={t.medicalHistory}
-                copy="Add only the details that are helpful during an emergency."
+                copy={
+                  t.medicalHistoryCopy ||
+                  "Add only the details that are helpful during an emergency."
+                }
               />
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="sm:col-span-2">
@@ -648,7 +645,9 @@ const CreateProfile = () => {
                     name="diseaseDetails"
                     value={formData.diseaseDetails}
                     onChange={handleChange}
-                    placeholder="Asthma, diabetes, epilepsy..."
+                    placeholder={
+                      t.placeholderCondition || "Asthma, diabetes, epilepsy..."
+                    }
                     readOnly={isReadOnly}
                     style={{ ...fieldStylePreview, minHeight: "96px" }}
                   />
@@ -663,7 +662,9 @@ const CreateProfile = () => {
                     name="allergies"
                     value={formData.allergies}
                     onChange={handleChange}
-                    placeholder="Penicillin, peanuts..."
+                    placeholder={
+                      t.placeholderAllergies || "Penicillin, peanuts..."
+                    }
                     readOnly={isReadOnly}
                     style={fieldStylePreview}
                   />
@@ -678,7 +679,9 @@ const CreateProfile = () => {
                     name="medications"
                     value={formData.medications}
                     onChange={handleChange}
-                    placeholder="Current medication..."
+                    placeholder={
+                      t.placeholderMedications || "Current medication..."
+                    }
                     readOnly={isReadOnly}
                     style={fieldStylePreview}
                   />
@@ -692,7 +695,10 @@ const CreateProfile = () => {
                     name="notes"
                     value={formData.notes}
                     onChange={handleChange}
-                    placeholder="Example: carries inhaler in bag pocket."
+                    placeholder={
+                      t.placeholderNotes ||
+                      "Example: carries inhaler in bag pocket."
+                    }
                     readOnly={isReadOnly}
                     style={{ ...fieldStylePreview, minHeight: "88px" }}
                   />
@@ -725,129 +731,6 @@ const CreateProfile = () => {
               </div>
           </form>
 
-          {!user && showAuthPrompt && (
-            <div
-              id="auth-panel"
-              className="glass-card border-[rgba(35,19,26,0.25)] p-6 sm:p-8 animate-slide relative z-0 max-w-lg w-full mx-auto mt-6"
-            >
-              {authLoading ? (
-                <div className="flex items-center gap-2 text-[var(--muted)]">
-                  <Loader2 size={16} className="animate-spin" />
-                  Checking authentication...
-                </div>
-              ) : (
-                <form onSubmit={handleAuthSubmit} className="grid gap-5">
-                  <div className="grid gap-2">
-                    <label style={labelStyle}>
-                      <Mail size={14} /> Email
-                    </label>
-                    <input
-                      type="email"
-                      value={authEmail}
-                      onChange={(e) => setAuthEmail(e.target.value)}
-                      placeholder={
-                        isSignUp
-                          ? "Enter a new email address"
-                          : "Enter your account email"
-                      }
-                      required
-                      style={fieldStyle}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <label style={labelStyle}>
-                      <Lock size={14} /> Password
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        value={authPassword}
-                        onChange={(e) => setAuthPassword(e.target.value)}
-                        placeholder={
-                          isSignUp
-                            ? "Create password (min 6 characters)"
-                            : "Enter your password"
-                        }
-                        minLength={6}
-                        required
-                        style={{ ...fieldStyle, paddingRight: "46px" }}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword((prev) => !prev)}
-                        aria-label={
-                          showPassword ? "Hide password" : "Show password"
-                        }
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] transition hover:text-[var(--ink)]"
-                      >
-                        {showPassword ? (
-                          <EyeOff size={18} />
-                        ) : (
-                          <Eye size={18} />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
-                    <button
-                      type="submit"
-                      disabled={authSubmitting}
-                      className="stark-btn gap-2 disabled:cursor-not-allowed disabled:opacity-70 w-full sm:w-fit justify-center"
-                    >
-                      {authSubmitting ? (
-                        <>
-                          <Loader2 size={16} className="animate-spin" />
-                          Please wait
-                        </>
-                      ) : isSignUp ? (
-                        "Create account"
-                      ) : (
-                        "Sign in"
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setAuthMode(isSignUp ? "signin" : "signup")
-                      }
-                      className="rounded-full border border-[var(--line)] bg-white/45 px-3.5 py-2 text-sm font-semibold text-[var(--muted)] transition hover:bg-white/70 w-full sm:w-fit"
-                    >
-                      {isSignUp
-                        ? "Use your existing account"
-                        : "Create a new account"}
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                    <span className="h-px flex-1 bg-[var(--line)]" />
-                    OR
-                    <span className="h-px flex-1 bg-[var(--line)]" />
-                  </div>
-
-                  <div>
-                    <button
-                      type="button"
-                      onClick={handleGoogleSignIn}
-                      disabled={authSubmitting}
-                      className="flex w-fit mx-auto items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-white/60 px-4 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/80 disabled:cursor-not-allowed disabled:opacity-70"
-                    >
-                      <span className="flex h-5 w-5 items-center justify-center">
-                        <svg viewBox="0 0 48 48" className="h-5 w-5">
-                          <path fill="#EA4335" d="M24 9.5c3.4 0 6.5 1.2 8.9 3.2l6.6-6.6C35.7 2.4 30.2 0 24 0 14.6 0 6.4 5.4 2.6 13.2l7.8 6.1C12.1 13.2 17.6 9.5 24 9.5z" />
-                          <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-2.8-.4-4.1H24v7.8h12.7c-.6 3-2.3 5.5-4.9 7.2l7.6 5.8c4.5-4.2 7.1-10.4 7.1-16.7z" />
-                          <path fill="#FBBC05" d="M10.4 28.7c-1-3-1-6.4 0-9.4l-7.8-6.1C-.7 18.7-.7 29.3 2.6 35.8l7.8-7.1z" />
-                          <path fill="#34A853" d="M24 48c6.2 0 11.4-2.1 15.2-5.7l-7.6-5.8c-2.1 1.4-4.8 2.2-7.6 2.2-6.4 0-11.9-3.7-14.6-9l-7.8 7.1C6.4 42.6 14.6 48 24 48z" />
-                        </svg>
-                      </span>
-                      {isSignUp
-                        ? "Continue with Google (Sign up)"
-                        : "Continue with Google"}
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
-          )}
         </div>
       </section>
     </div>

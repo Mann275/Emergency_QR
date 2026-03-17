@@ -16,6 +16,7 @@ import {
   BadgeAlert,
   Pencil,
   QrCode,
+  Cake,
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { toast } from "react-hot-toast";
@@ -75,7 +76,7 @@ const EmergencyProfile = () => {
 
   const Pill = ({ icon: Icon, label, tone = "default" }) => (
     <div
-      className="inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs sm:text-[11px] font-bold uppercase tracking-[0.18em] sm:tracking-[0.22em]"
+      className="inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs sm:text-[11px] font-semibold tracking-normal"
       style={{
         borderColor:
           tone === "danger" ? "rgba(225, 29, 72, 0.16)" : "var(--glass-border)",
@@ -160,12 +161,14 @@ const EmergencyProfile = () => {
     { label: t.fullName, value: user.name || t.notSpecified, icon: User },
     { label: t.gender, value: gender, icon: BadgeAlert },
     { label: t.dob, value: dob, icon: Calendar },
-    { label: t.age, value: age, icon: Activity },
+    { label: t.age, value: age, icon: Cake },
   ];
 
   const personalNumberLabel = t.yourNumber;
   const callEmergencyContactLabel = t.callEmergencyContact;
-  const callPersonalNumberLabel = `Call ${user.name || "User"}`;
+  const callPersonalNumberLabel =
+    t.callUser?.replace("{name}", user.name || t.userFallback || "User") ||
+    `${t.callLabel || "Call"} ${user.name || "User"}`;
 
   return (
     <div className="min-h-screen pb-10 sm:pb-16">
@@ -178,7 +181,7 @@ const EmergencyProfile = () => {
                 className="inline-flex items-center justify-center sm:justify-start gap-2 rounded-full border border-white/70 bg-white/65 px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base font-semibold text-[var(--ink)] shadow-[0_12px_26px_rgba(60,22,34,0.06)] backdrop-blur-xl"
               >
                 <ArrowLeft size={16} />
-                Back
+                {t.back || "Back"}
               </Link>
               {canEdit && (
                 <>
@@ -195,7 +198,7 @@ const EmergencyProfile = () => {
                     className="inline-flex items-center justify-center gap-2 rounded-full border border-white/70 bg-white/65 px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base font-semibold text-[var(--ink)] shadow-[0_12px_26px_rgba(60,22,34,0.06)] backdrop-blur-xl"
                   >
                     <QrCode size={14} />
-                    Download QR
+                    {t.downloadQr || "Download QR"}
                   </button>
                 </>
               )}

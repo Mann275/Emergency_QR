@@ -21,6 +21,7 @@ import {
 import { useLanguage } from "../context/LanguageContext";
 import { IN, US, GB, AU } from "country-flag-icons/react/3x2";
 import { toast } from "react-hot-toast";
+import { showToast } from "../utils/toast.jsx";
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const genderOptions = ["Male", "Female", "Other", "Prefer not to say"];
@@ -180,7 +181,9 @@ const EditProfile = () => {
 
       const response = await ApiService.updateUser(id, payload);
       if (response.success) {
-        toast.success(t.profileUpdated || "Profile updated successfully!");
+        showToast({
+          message: t.profileUpdated || "Profile updated successfully!",
+        });
 
         navigate(`/emergency/${id}`);
       }
@@ -364,7 +367,7 @@ const EditProfile = () => {
           <div className="text-center mb-8 animate-slide">
             <div className="flex flex-row items-center justify-center gap-4 sm:gap-6 mb-4">
               <img
-                src="/images/illustration2.png"
+                src="https://ik.imagekit.io/shubhampathak/emergency-qr/illustration2.png"
                 alt=""
                 className="w-14 sm:w-28 h-auto mix-blend-multiply shrink-0"
               />

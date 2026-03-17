@@ -13,6 +13,7 @@ import {
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-hot-toast";
+import { showToast } from "../utils/toast.jsx";
 
 const USER_PROFILE_KEY_PREFIX = "emergency_user_profile:";
 const getUserProfileKey = (authUid) => `${USER_PROFILE_KEY_PREFIX}${authUid}`;
@@ -23,6 +24,7 @@ const Header = () => {
   const location = useLocation();
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [profileId, setProfileId] = useState("");
   const langDropdownRef = useRef(null);
   const accountDropdownRef = useRef(null);
@@ -37,24 +39,29 @@ const Header = () => {
     setProfileId(stored);
   }, [user?.uid, location.pathname]);
 
-  const handleLogout = async () => {
-    const shouldLogout = window.confirm("Are you sure you want to logout?");
-    if (!shouldLogout) {
-      return;
-    }
+  const handleLogout = () => {
+    setShowLogoutConfirm(true);
+  };
 
+  const confirmLogout = async () => {
     try {
       await logout();
       setIsAccountOpen(false);
-      toast.success("Logged out successfully.");
+      setShowLogoutConfirm(false);
+      showToast({
+        message: t.logoutSuccess || "Logged out successfully.",
+      });
     } catch (error) {
-      toast.error(error.message || "Failed to logout.");
+      toast.error(error.message || t.logoutFailed || "Failed to logout.");
     }
   };
 
   const handleDownloadQr = async () => {
     if (!profileId) {
-      toast.error("Create your profile first to download QR.");
+      toast.error(
+        t.profileFirstDownload ||
+          "Create your profile first to download QR.",
+      );
       return;
     }
 
@@ -71,9 +78,11 @@ const Header = () => {
       link.click();
       document.body.removeChild(link);
       setIsAccountOpen(false);
-      toast.success("QR downloaded.");
+      toast.success(t.qrDownloaded || "QR downloaded.");
     } catch (error) {
-      toast.error("Could not generate QR right now.");
+      toast.error(
+        t.qrGenerateFailed || "Could not generate QR right now.",
+      );
     }
   };
 
@@ -106,8 +115,9 @@ const Header = () => {
   const currentLang = languages.find((l) => l.code === lang) || languages[0];
 
   return (
-    <header className="glass-nav px-4 py-3 sm:px-6 sm:py-4">
-      <nav className="flex items-center justify-between gap-3">
+    <>
+      <header className="glass-nav px-4 py-3 sm:px-6 sm:py-4">
+        <nav className="flex items-center justify-between gap-3">
         <Link
           to="/"
           className="flex items-center gap-3 text-slate-900 transition-base min-w-0"
@@ -197,7 +207,12 @@ const Header = () => {
                 >
                   <UserCircle2 size={16} />
                   <span className="hidden sm:inline">
-                    {`Hi, ${user?.displayName || "there"}!`}
+                    {t.accountGreeting
+                      ? t.accountGreeting.replace(
+                          "{name}",
+                          user?.displayName || t.userFallback || "there",
+                        )
+                      : `Hi, ${user?.displayName || "there"}!`}
                   </span>
                   <ChevronDown
                     size={12}
@@ -222,14 +237,16 @@ const Header = () => {
                           onClick={() => setIsAccountOpen(false)}
                           className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-[var(--ink)] hover:bg-white/75"
                         >
-                          <PencilLine size={15} /> Edit Profile
+                          <PencilLine size={15} />{" "}
+                          {t.editProfile || "Edit Profile"}
                         </Link>
                         <button
                           type="button"
                           onClick={handleDownloadQr}
                           className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-semibold text-[var(--ink)] hover:bg-white/75"
                         >
-                          <QrCode size={15} /> Download QR
+                          <QrCode size={15} />{" "}
+                          {t.downloadQr || "Download QR"}
                         </button>
                       </>
                     ) : (
@@ -238,7 +255,7 @@ const Header = () => {
                         onClick={() => setIsAccountOpen(false)}
                         className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-[var(--ink)] hover:bg-white/75"
                       >
-                        <User size={15} /> Create Profile
+                        <User size={15} /> {t.createProfile || "Create Profile"}
                       </Link>
                     )}
                     <button
@@ -246,7 +263,7 @@ const Header = () => {
                       onClick={handleLogout}
                       className="flex w-full items-center gap-2 border-t border-white/70 px-4 py-3 text-left text-sm font-semibold text-[var(--muted)] hover:bg-white/75"
                     >
-                      <LogOut size={15} /> Logout
+                      <LogOut size={15} /> {t.logout || "Logout"}
                     </button>
                   </div>
                 )}
@@ -254,8 +271,46 @@ const Header = () => {
             )}
           </div>
         </div>
-      </nav>
-    </header>
+        </nav>
+      </header>
+      {showLogoutConfirm && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 px-4"
+          onClick={() => setShowLogoutConfirm(false)}
+        >
+          <div
+            className="glass-card w-full max-w-sm p-5"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h3
+              className="text-lg font-semibold text-[var(--ink)]"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              {t.logout || "Logout"}
+            </h3>
+            <p className="mt-2 text-sm text-[var(--muted)]">
+              {t.logoutConfirm || "Are you sure you want to logout?"}
+            </p>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={confirmLogout}
+                className="stark-btn w-full justify-center"
+              >
+                {t.logout || "Logout"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowLogoutConfirm(false)}
+                className="ghost-btn w-full justify-center"
+              >
+                {t.cancelEdit || "Cancel"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
