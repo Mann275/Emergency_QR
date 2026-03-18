@@ -220,18 +220,22 @@ class ApiService {
   async updateUser(id, userData) {
     try {
       const editToken = this.getEditToken(id);
-      if (!editToken) {
+      
+      // If we don't have an edit token AND we aren't sending owner fallback auth, block it
+      if (!editToken && !userData.ownerAuthUid) {
         throw new Error(
           "Edit authorization missing. Please use the same device/browser used to create this profile.",
         );
       }
 
+      const headers = { "Content-Type": "application/json" };
+      if (editToken) {
+        headers.Authorization = `Bearer ${editToken}`;
+      }
+
       const response = await fetch(`${API_BASE_URL}/users/update/${id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${editToken}`,
-        },
+        headers,
         body: JSON.stringify(userData),
       });
 

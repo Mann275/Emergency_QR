@@ -64,7 +64,7 @@ const EditProfile = () => {
   const { t } = useLanguage();
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -91,6 +91,8 @@ const EditProfile = () => {
 
   // Fetch existing profile on mount
   useEffect(() => {
+    if (authLoading) return;
+
     const fetchProfile = async () => {
       try {
         let isOwner = false;
@@ -164,7 +166,7 @@ const EditProfile = () => {
     };
 
     fetchProfile();
-  }, [id, user?.uid]);
+  }, [id, user?.uid, authLoading]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -371,7 +373,7 @@ const EditProfile = () => {
   }, [formData, phoneCode, emergencyCode, initialSnapshot]);
 
   // Loading skeleton
-  if (fetching) {
+  if (fetching || authLoading) {
     return (
       <div className="pb-24">
         <section className="pt-20 sm:pt-28">

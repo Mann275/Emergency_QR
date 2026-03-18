@@ -47,6 +47,10 @@ const BottomNav = () => {
             label: "My Profile",
             dataKey: "myProfile",
           },
+        ]
+      : []),
+    ...(user
+      ? [
           {
             to: "/contact",
             icon: <MessageSquare size={18} />,
