@@ -1,127 +1,87 @@
-# Emergency QR
+#Emergency QR
+<div align="center">
 
-Emergency QR is a full-stack emergency profile system.
-A user creates one profile and gets one QR that can be scanned instantly in emergencies.
+[Live Demo](https://emergencyqr-gen.vercel.app/) • [Report Bug](https://github.com/Mann275/Emergency_QR/issues)
 
-## Why This Project
+</div>
+Emergency QR is a full-stack emergency profile system. Users create a single profile that generates one stable QR code for instant, read-only access during emergencies.
 
-- Fast emergency access without app install
-- Public emergency view with only critical information
-- Owner-only editing on the original device/session
-- Mobile-first UI with multilingual support (English, Hindi, Gujarati)
+## Key Capabilities
 
-## Core Rule
-
-`1 user = 1 QR`
-
-Once a logged-in user creates a profile:
-
-- revisiting create form pre-fills old details
-- saving updates keeps the same profile ID
-- QR remains the same
+- One user = one QR (updates keep the same QR)
+- Public emergency view shows only critical data
+- Owner-only edits via per-profile edit token
+- Mobile-first UI with multilingual support (EN/HI/GU)
+- Auth via Firebase (email/password + Google)
+- Email OTP via Brevo for password reset
 
 ## Stack
 
-- Frontend: React 18, React Router 6, Tailwind CSS 3, Vite 4
+- Frontend: React 18, React Router 6, Vite 4, Tailwind CSS 3
 - Backend: Node.js, Express 4, Mongoose 8
 - Database: MongoDB
-- Auth: Firebase Auth (email/password + Google)
-- Security: JWT edit tokens, bcrypt hashing, helmet, rate limiting, NoSQL sanitization
+- Auth: Firebase Auth
+- Security: JWT edit tokens, bcrypt, helmet, rate limiting, mongo-sanitize
 
-## Local Setup
+## Local Development
 
-### 1) Clone
-
-```bash
-git clone https://github.com/Mann275/Emergency_QR.git
-cd Emergency_QR
-```
-
-### 2) Server
+### Server
 
 ```bash
 cd server
 npm install
-cp .env.example .env
 npm run dev
 ```
 
-Server runs on `http://localhost:5000`.
+Server: `http://localhost:5000`
 
-For production platforms (Render/Railway/etc.), use `npm start` instead of `npm run dev`.
-If Atlas SRV DNS fails (e.g. `querySrv ESERVFAIL _mongodb._tcp...`), use a non-SRV Mongo URI (`mongodb://...`) or fix DNS/network settings.
-
-### 3) Client
+### Client
 
 ```bash
 cd client
 npm install
-cp .env.example .env
 npm run dev
 ```
 
-Client runs on `http://localhost:5173`.
+Client: `http://localhost:5173`
 
-## Environment Files
 
-Use these templates:
+## Core Flows
 
-- [server/.env.example](server/.env.example)
-- [client/.env.example](client/.env.example)
-
-## Important Flows
-
-### Profile create/update
-
-- Create API returns profile ID + edit token
-- Edit token is stored per profile in browser storage
-- Update API requires this token in Bearer auth
-- Unauthorized users cannot edit by guessing ID
-
-### Emergency profile page
-
-- Publicly readable by QR/URL
-- Edit button appears only for the owner session/device
-
-### Account actions
-
-- Logged-in users get account dropdown actions:
-  - Edit Profile
-  - Download QR
-  - Logout
+- **Create/Update Profile**: `POST /api/users/create` creates or updates while keeping the same QR.
+- **Public Emergency View**: `GET /api/users/:id` returns read-only emergency data.
+- **Edit Profile**: `PUT /api/users/update/:id` requires edit token (Bearer).
+- **Password Reset**: OTP via Brevo email.
 
 ## API Endpoints
 
-- `POST /api/users/create` create or update owner profile while keeping same QR
-- `GET /api/users/:id` fetch public emergency profile
-- `PUT /api/users/update/:id` owner-authorized profile update
-- `POST /api/users/auth/forgot-password/request` send OTP email for reset
-- `POST /api/users/auth/forgot-password/reset` verify OTP and reset password
-- `GET /api/health` backend health check
-
-## Security Notes
-
-- Helmet secure headers
-- Rate limiting on API and write routes
-- Request sanitization against NoSQL operator injection
-- JWT + bcrypt protected edit authorization
+- `POST /api/users/create`
+- `GET /api/users/:id`
+- `GET /api/users/owner/:ownerAuthUid`
+- `PUT /api/users/update/:id`
+- `POST /api/users/auth/forgot-password/request`
+- `POST /api/users/auth/forgot-password/verify`
+- `POST /api/users/auth/forgot-password/reset`
+- `GET /api/health`
 
 ## Project Structure
 
 ```text
 Emergency_QR/
-	client/
-		src/
-			components/
-			context/
-			pages/
-			utils/
-	server/
-		models/
-		routes/
-		server.js
+  client/
+    src/
+      components/
+      context/
+      pages/
+      utils/
+  server/
+    models/
+    routes/
+    utils/
+    server.js
 ```
 
-## License
+## Preview
+![alt text](https://ik.imagekit.io/shubhampathak/emergency-qr/1.jpeg)
 
-MIT
+![alt text](https://ik.imagekit.io/shubhampathak/emergency-qr/2.jpeg)
