@@ -131,7 +131,7 @@ const Success = () => {
 
   return (
     <div>
-      <section className="pt-30 pb-20 md:pt-36 md:pb-28">
+      <section className="pt-24 pb-20 md:pt-36 md:pb-28">
         <div className="main-wrap max-w-4xl">
           <div className="grid md:grid-cols-2 gap-24 items-center">
             <div className="animate-slide">

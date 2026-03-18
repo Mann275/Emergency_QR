@@ -430,8 +430,8 @@ const CreateProfile = () => {
                   >
                     <Info size={14} />
                   </button>
-                  <div className="absolute left-1/2 top-full z-[400] mt-4 w-64 -translate-x-1/2 rounded-2xl border border-white/70 bg-white/95 p-3 text-left text-[12px] font-medium tracking-normal text-[var(--muted)] shadow-[0_28px_60px_rgba(20,10,18,0.25)] backdrop-blur-xl opacity-0 invisible transition-all duration-300 -translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 pointer-events-none">
-                    <div className="absolute -top-1 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border border-white/70 bg-white/95"></div>
+                  <div className="absolute right-0 sm:left-1/2 top-full z-[400] mt-4 w-56 sm:w-64 sm:-translate-x-1/2 rounded-2xl border border-white/70 bg-white/95 p-3 text-left text-[12px] font-medium tracking-normal text-[var(--muted)] shadow-[0_28px_60px_rgba(20,10,18,0.25)] backdrop-blur-xl opacity-0 invisible transition-all duration-300 -translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 pointer-events-none">
+                    <div className="absolute -top-1 right-3 sm:left-1/2 h-2.5 w-2.5 sm:-translate-x-1/2 rotate-45 border border-white/70 bg-white/95"></div>
                     {t.createDesc}
                   </div>
                 </div>

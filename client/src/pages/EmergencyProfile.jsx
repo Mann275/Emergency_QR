@@ -16,12 +16,14 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
+import { useAuth } from "../context/AuthContext";
 import ApiService from "../utils/api";
 import { showToast } from "../utils/toast.jsx";
 
 const EmergencyProfile = () => {
   const { id } = useParams();
   const { t } = useLanguage();
+  const { user: authUser } = useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -33,6 +35,22 @@ const EmergencyProfile = () => {
         const response = await ApiService.getUserById(id);
         if (response.success) {
           setUser(response.data);
+          
+          let isOwner = false;
+          if (ApiService.hasEditToken(id)) {
+            isOwner = true;
+          } else if (authUser?.uid) {
+            try {
+              const ownerResp = await ApiService.getUserByOwnerAuthUid(authUser.uid);
+              if (ownerResp?.data?.uniqueId === id) {
+                isOwner = true;
+              }
+            } catch (e) {
+              // ignore
+            }
+          }
+          setCanEdit(isOwner);
+
         } else {
           setError(t.notFound || "Profile not found.");
         }
@@ -44,8 +62,7 @@ const EmergencyProfile = () => {
     };
 
     fetchUser();
-    setCanEdit(ApiService.hasEditToken(id));
-  }, [id, t.failedLoad, t.notFound]);
+  }, [id, t.failedLoad, t.notFound, authUser?.uid]);
 
   const handleDownloadQr = async () => {
     try {
@@ -213,22 +230,24 @@ const EmergencyProfile = () => {
 
             <div className="flex flex-wrap gap-2">
               {canEdit && (
-                <Link
-                  to={`/edit/${id}`}
-                  className="ghost-btn gap-2 px-4 py-2 text-[15px] sm:text-[16px]"
-                  data-t="editProfile"
-                >
-                  <Pencil size={14} /> {t.editProfile || "Edit profile"}
-                </Link>
+                <>
+                  <Link
+                    to={`/edit/${id}`}
+                    className="ghost-btn gap-2 px-4 py-2 text-[15px] sm:text-[16px]"
+                    data-t="editProfile"
+                  >
+                    <Pencil size={14} /> {t.editProfile || "Edit profile"}
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleDownloadQr}
+                    className="ghost-btn gap-2 px-4 py-2 text-[15px] sm:text-[16px]"
+                    data-t="downloadQr"
+                  >
+                    <QrCode size={14} /> {t.downloadQr || "Download QR"}
+                  </button>
+                </>
               )}
-              <button
-                type="button"
-                onClick={handleDownloadQr}
-                className="ghost-btn gap-2 px-4 py-2 text-[15px] sm:text-[16px]"
-                data-t="downloadQr"
-              >
-                <QrCode size={14} /> {t.downloadQr || "Download QR"}
-              </button>
             </div>
           </div>
 

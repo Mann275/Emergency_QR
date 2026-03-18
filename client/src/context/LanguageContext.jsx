@@ -89,7 +89,8 @@ const translations = {
     placeholderMedications: "Current medication...",
     placeholderNotes: "Example: carries inhaler in bag pocket.",
     savedDetailsLoading: "Loading your saved details",
-    existingProfileDetected: "Existing profile detected. Updating keeps the same QR.",
+    existingProfileDetected:
+      "Existing profile detected. Updating keeps the same QR.",
     requiredFieldsError: "Please fill in all required fields.",
     profileSavedToast: "Changes saved. Your same QR remains active.",
     profileCreatedToast: "Profile created successfully!",
@@ -124,8 +125,7 @@ const translations = {
     authChecking: "Checking authentication...",
     authTitleSignUp: "Create your account",
     authTitleSignIn: "Welcome back",
-    authSubtitleSignUp:
-      "Sign up to save your emergency profile securely.",
+    authSubtitleSignUp: "Sign up to save your emergency profile securely.",
     authSubtitleSignIn: "Sign in to finish your emergency profile.",
     authPreviewLink: "Preview a sample profile first",
     authEmailLabel: "Email",
@@ -210,6 +210,38 @@ const translations = {
     recordId: "Record ID",
     status: "Status",
     activeAndVerified: "Active and verified",
+
+    // Contact
+    contactBadge: "Contact & Feedback",
+    contactTitle: "Tell us what we can improve",
+    contactDescription:
+      "Send bug reports, suggestions, or appreciation from here. Your message will be delivered directly to the team email.",
+    contactCategoryAppreciation: "Appreciation",
+    contactCategoryAppreciationDesc: "Share what you loved about the app",
+    contactCategorySuggestion: "Suggestion",
+    contactCategorySuggestionDesc: "Share an idea or improvement",
+    contactCategoryBug: "Bug Report",
+    contactCategoryBugDesc: "Report an issue or unexpected behavior",
+    contactSubjectLabel: "Subject",
+    contactSubjectPlaceholderAppreciation: "Share what you liked the most",
+    contactSubjectPlaceholderSuggestion:
+      "Share your suggestion in a short title",
+    contactSubjectPlaceholderBug: "Describe the bug in a short title",
+    contactMessageLabel: "Message",
+    contactMessagePlaceholder:
+      "Share details so we can use this in upcoming updates.",
+    contactSignedInAs: "Signed in as",
+    contactUnknownUser: "Unknown user",
+    contactSendButton: "Send Message",
+    contactSending: "Sending...",
+    contactValidationRequired: "Subject and message are required.",
+    contactValidationMessageRequired: "Message is required.",
+    contactValidationMessageLength: "Message should be at least 10 characters.",
+    contactSubmitSuccess: "Message sent successfully. Thank you!",
+    contactSubmitError: "Message could not be sent. Please try again.",
+    contactDefaultSubjectAppreciation: "Appreciation from app user",
+    contactDefaultSubjectSuggestion: "Suggestion from app user",
+    contactDefaultSubjectBug: "Bug report from app user",
 
     // Edit Profile
     editTitle: "Edit your profile",
@@ -381,6 +413,37 @@ const translations = {
     status: "स्थिति",
     activeAndVerified: "सक्रिय और सत्यापित",
 
+    // Contact
+    contactBadge: "संपर्क और प्रतिक्रिया",
+    contactTitle: "हमें बताएं हम क्या बेहतर कर सकते हैं",
+    contactDescription:
+      "यहां से बग रिपोर्ट, सुझाव या प्रशंसा भेजें। आपका संदेश सीधे टीम ईमेल पर भेजा जाएगा।",
+    contactCategoryAppreciation: "प्रशंसा",
+    contactCategoryAppreciationDesc: "ऐप में जो अच्छा लगा वह साझा करें",
+    contactCategorySuggestion: "सुझाव",
+    contactCategorySuggestionDesc: "कोई नया विचार या सुधार साझा करें",
+    contactCategoryBug: "बग रिपोर्ट",
+    contactCategoryBugDesc: "समस्या या अनपेक्षित व्यवहार की रिपोर्ट करें",
+    contactSubjectLabel: "विषय",
+    contactSubjectPlaceholderAppreciation: "आपको सबसे अच्छा क्या लगा, बताएं",
+    contactSubjectPlaceholderSuggestion: "अपने सुझाव का छोटा शीर्षक लिखें",
+    contactSubjectPlaceholderBug: "बग का छोटा शीर्षक लिखें",
+    contactMessageLabel: "संदेश",
+    contactMessagePlaceholder:
+      "विस्तार से लिखें ताकि हम इसे अगले अपडेट में उपयोग कर सकें।",
+    contactSignedInAs: "लॉगिन किया है",
+    contactUnknownUser: "अज्ञात उपयोगकर्ता",
+    contactSendButton: "संदेश भेजें",
+    contactSending: "भेजा जा रहा है...",
+    contactValidationRequired: "विषय और संदेश दोनों आवश्यक हैं।",
+    contactValidationMessageRequired: "संदेश आवश्यक है।",
+    contactValidationMessageLength: "संदेश कम से कम 10 अक्षरों का होना चाहिए।",
+    contactSubmitSuccess: "संदेश सफलतापूर्वक भेजा गया। धन्यवाद!",
+    contactSubmitError: "संदेश नहीं भेजा जा सका। कृपया फिर कोशिश करें।",
+    contactDefaultSubjectAppreciation: "ऐप उपयोगकर्ता की प्रशंसा",
+    contactDefaultSubjectSuggestion: "ऐप उपयोगकर्ता का सुझाव",
+    contactDefaultSubjectBug: "ऐप उपयोगकर्ता की बग रिपोर्ट",
+
     // Edit Profile
     editTitle: "अपनी प्रोफ़ाइल संपादित करें",
     editDesc:
@@ -539,6 +602,37 @@ const translations = {
     status: "સ્થિતિ",
     activeAndVerified: "સક્રિય અને ચકાસાયેલ",
 
+    // Contact
+    contactBadge: "સંપર્ક અને પ્રતિસાદ",
+    contactTitle: "અમને કહો કે અમે શું સુધારી શકીએ",
+    contactDescription:
+      "અહીંથી બગ રિપોર્ટ, સૂચન અથવા પ્રશંસા મોકલો. તમારો સંદેશ સીધો ટીમ ઇમેઇલ પર જશે.",
+    contactCategoryAppreciation: "પ્રશંસા",
+    contactCategoryAppreciationDesc: "એપમાં શું ગમ્યું તે શેર કરો",
+    contactCategorySuggestion: "સૂચન",
+    contactCategorySuggestionDesc: "નવો વિચાર અથવા સુધારો શેર કરો",
+    contactCategoryBug: "બગ રિપોર્ટ",
+    contactCategoryBugDesc: "સમસા અથવા અનિચ્છનીય વર્તન રિપોર્ટ કરો",
+    contactSubjectLabel: "વિષય",
+    contactSubjectPlaceholderAppreciation: "તમને શું સૌથી વધુ ગમ્યું તે લખો",
+    contactSubjectPlaceholderSuggestion: "તમારા સૂચન માટે નાનું શીર્ષક લખો",
+    contactSubjectPlaceholderBug: "બગ માટે નાનું શીર્ષક લખો",
+    contactMessageLabel: "સંદેશ",
+    contactMessagePlaceholder:
+      "વિગતો લખો જેથી અમે તેને આગામી અપડેટમાં ઉપયોગ કરી શકીએ.",
+    contactSignedInAs: "લોગિન તરીકે",
+    contactUnknownUser: "અજ્ઞાત વપરાશકર્તા",
+    contactSendButton: "સંદેશ મોકલો",
+    contactSending: "મોકલાઈ રહ્યું છે...",
+    contactValidationRequired: "વિષય અને સંદેશ બંને જરૂરી છે.",
+    contactValidationMessageRequired: "સંદેશ જરૂરી છે.",
+    contactValidationMessageLength: "સંદેશ ઓછામાં ઓછો 10 અક્ષરનો હોવો જોઈએ.",
+    contactSubmitSuccess: "સંદેશ સફળતાપૂર્વક મોકલાયો. આભાર!",
+    contactSubmitError: "સંદેશ મોકલી શકાયો નથી. કૃપા કરીને ફરી પ્રયત્ન કરો.",
+    contactDefaultSubjectAppreciation: "એપ વપરાશકર્તાની પ્રશંસા",
+    contactDefaultSubjectSuggestion: "એપ વપરાશકર્તાનું સૂચન",
+    contactDefaultSubjectBug: "એપ વપરાશકર્તાની બગ રિપોર્ટ",
+
     // Edit Profile
     editTitle: "તમારી પ્રોફાઇલ સંપાદિત કરો",
     editDesc:
@@ -570,4 +664,3 @@ export const LanguageProvider = ({ children }) => {
 };
 
 export const useLanguage = () => useContext(LanguageContext);
-

@@ -9,6 +9,7 @@ import {
   UserCircle2,
   PencilLine,
   QrCode,
+  MessageSquare,
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
@@ -254,6 +255,14 @@ const Header = () => {
                               {t.downloadQr || "Download QR"}
                             </span>
                           </button>
+                          <Link
+                            to="/contact"
+                            onClick={() => setIsAccountOpen(false)}
+                            className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-[var(--ink)] hover:bg-white/75"
+                          >
+                            <MessageSquare size={15} />
+                            <span>Contact Us</span>
+                          </Link>
                         </>
                       ) : (
                         <Link

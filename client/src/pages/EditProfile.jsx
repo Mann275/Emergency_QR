@@ -21,6 +21,7 @@ import {
 import { useLanguage } from "../context/LanguageContext";
 import { IN, US, GB, AU } from "country-flag-icons/react/3x2";
 import { toast } from "react-hot-toast";
+import { useAuth } from "../context/AuthContext";
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const genderOptions = ["Male", "Female", "Other"];
@@ -63,6 +64,7 @@ const EditProfile = () => {
   const { t } = useLanguage();
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -90,13 +92,25 @@ const EditProfile = () => {
   // Fetch existing profile on mount
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!ApiService.hasEditToken(id)) {
-        setAccessDenied(true);
-        setFetching(false);
-        return;
-      }
-
       try {
+        let isOwner = false;
+        if (!ApiService.hasEditToken(id) && user?.uid) {
+          try {
+            const ownerResp = await ApiService.getUserByOwnerAuthUid(user.uid);
+            if (ownerResp?.data?.uniqueId === id) {
+              isOwner = true;
+            }
+          } catch (e) {
+            // ignore
+          }
+        }
+
+        if (!ApiService.hasEditToken(id) && !isOwner) {
+          setAccessDenied(true);
+          setFetching(false);
+          return;
+        }
+
         const response = await ApiService.getUserById(id);
         if (response.success) {
           const d = response.data;
@@ -150,7 +164,7 @@ const EditProfile = () => {
     };
 
     fetchProfile();
-  }, [id]);
+  }, [id, user?.uid]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -206,6 +220,7 @@ const EditProfile = () => {
 
       const payload = {
         ...formData,
+        ownerAuthUid: user?.uid,
         phone: `${phoneCode} ${formData.phone}`,
         emergencyContact: {
           ...formData.emergencyContact,
@@ -444,8 +459,8 @@ const EditProfile = () => {
                   >
                     <Info size={14} />
                   </button>
-                  <div className="absolute left-1/2 top-full z-30 mt-2 w-64 -translate-x-1/2 rounded-2xl border border-white/70 bg-white/95 p-3 text-left text-[12px] font-medium tracking-normal text-[var(--muted)] shadow-[0_28px_60px_rgba(20,10,18,0.25)] backdrop-blur-xl opacity-0 invisible transition-all duration-300 -translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 pointer-events-none origin-top">
-                    <div className="absolute -top-1 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border border-white/70 bg-white/95"></div>
+                  <div className="absolute right-0 sm:left-1/2 top-full z-30 mt-2 w-56 sm:w-64 sm:-translate-x-1/2 rounded-2xl border border-white/70 bg-white/95 p-3 text-left text-[12px] font-medium tracking-normal text-[var(--muted)] shadow-[0_28px_60px_rgba(20,10,18,0.25)] backdrop-blur-xl opacity-0 invisible transition-all duration-300 -translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 pointer-events-none origin-top">
+                    <div className="absolute -top-1 right-3 sm:left-1/2 h-2.5 w-2.5 sm:-translate-x-1/2 rotate-45 border border-white/70 bg-white/95"></div>
                     <span data-t="editDesc">
                       Update your medical details. Changes will reflect on your
                       emergency QR immediately.

@@ -8,7 +8,7 @@ const rateLimit = require("express-rate-limit");
 const validator = require("validator");
 const User = require("../models/User");
 const PasswordResetOtp = require("../models/PasswordResetOtp");
-const { sendOtpMail } = require("../utils/mail");
+const { sendOtpMail, sendFeedbackMail } = require("../utils/mail");
 const { resetFirebasePasswordByEmail } = require("../utils/firebaseAdmin");
 
 const router = express.Router();
@@ -45,6 +45,16 @@ const forgotPasswordResetLimiter = rateLimit({
   legacyHeaders: false,
   message: {
     error: "Too many reset attempts. Please try again later.",
+  },
+});
+
+const contactLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: "Too many contact submissions. Please try again later.",
   },
 });
 
@@ -233,7 +243,6 @@ router.post("/create", writeLimiter, async (req, res) => {
         profileUrl,
         qrCode: user.qrCodeUrl,
         editToken,
-        createdAt: user.createdAt,
       },
     });
   } catch (error) {
@@ -359,52 +368,54 @@ router.put("/update/:id", writeLimiter, async (req, res) => {
     const { id } = req.params;
     const updates = sanitizePayload(req.body);
     const token = extractBearerToken(req.headers.authorization);
+    const ownerAuthUid = String(updates.ownerAuthUid || "").trim();
 
-    if (!token) {
+    // Remove token requirement for initial fast failure if ownerAuthUid is provided
+    if (!token && !ownerAuthUid) {
       return res.status(401).json({
         error: "Authorization required",
-        message: "Missing or invalid bearer token for profile edit.",
-      });
-    }
-
-    let decoded;
-    try {
-      decoded = jwt.verify(token, getJwtSecret());
-    } catch (error) {
-      return res.status(401).json({
-        error: "Invalid token",
-        message: "Edit session has expired or is invalid.",
-      });
-    }
-
-    if (decoded.typ !== "edit" || decoded.uid !== id || !decoded.sec) {
-      return res.status(403).json({
-        error: "Forbidden",
-        message: "Token does not match this profile.",
+        message: "Missing or invalid bearer token or owner credential for profile edit.",
       });
     }
 
     const user = await User.findOne({
       uniqueId: id,
       isActive: true,
-    }).select("+editTokenHash");
+    }).select("+editTokenHash ownerAuthUid");
 
     if (!user) {
       return res.status(404).json({
         error: "Emergency profile not found",
-        message:
-          "The requested emergency profile does not exist or has been deactivated",
+        message: "The requested emergency profile does not exist or has been deactivated",
       });
     }
 
-    const tokenMatches = user.editTokenHash
-      ? await bcrypt.compare(decoded.sec, user.editTokenHash)
-      : false;
+    let isAuthorized = false;
 
-    if (!tokenMatches) {
+    // Check Token Auth
+    if (token && user.editTokenHash) {
+      try {
+        const decoded = jwt.verify(token, getJwtSecret());
+        if (decoded.typ === "edit" && decoded.uid === id && decoded.sec) {
+          const tokenMatches = await bcrypt.compare(decoded.sec, user.editTokenHash);
+          if (tokenMatches) isAuthorized = true;
+        }
+      } catch (error) {
+        // Token verification failed, fallback to ownerAuthUid if provided
+      }
+    }
+
+    // Fallback: Check Owner Auth UID
+    if (!isAuthorized && ownerAuthUid) {
+      if (user.ownerAuthUid === ownerAuthUid) {
+        isAuthorized = true;
+      }
+    }
+
+    if (!isAuthorized) {
       return res.status(403).json({
         error: "Forbidden",
-        message: "Profile edit token is not valid for this record.",
+        message: "Profile edit token is not valid or owner identity mismatch.",
       });
     }
 
@@ -696,6 +707,87 @@ router.post(
     }
   },
 );
+
+// @route   POST /api/users/contact
+// @desc    Send user feedback/contact message to support email via Brevo
+// @access  Public (client restricts this to logged-in users)
+router.post("/contact", contactLimiter, async (req, res) => {
+  try {
+    const payload = sanitizePayload(req.body || {});
+    const category = String(payload.category || "")
+      .trim()
+      .toLowerCase();
+    const rawSubject = String(payload.subject || "").trim();
+    const subjectByCategory = {
+      appreciation: "Appreciation from app user",
+      suggestion: "Suggestion from app user",
+      bug: "Bug report from app user",
+    };
+    const subject =
+      rawSubject.length >= 3
+        ? rawSubject
+        : subjectByCategory[category] || "Feedback from app user";
+    const message = String(payload.message || "").trim();
+    const userName = String(payload.userName || "").trim();
+    const userEmail = normalizeEmail(payload.userEmail || "");
+    const ownerAuthUid = String(payload.ownerAuthUid || "").trim();
+
+    const allowedCategories = ["bug", "suggestion", "appreciation"];
+
+    if (!allowedCategories.includes(category)) {
+      return res.status(400).json({
+        error: "Invalid category",
+        message: "Category must be bug, suggestion, or appreciation.",
+      });
+    }
+
+    if (subject.length > 140) {
+      return res.status(400).json({
+        error: "Invalid subject",
+        message: "Subject must be at most 140 characters.",
+      });
+    }
+
+    if (!message || message.length < 10 || message.length > 3000) {
+      return res.status(400).json({
+        error: "Invalid message",
+        message: "Message must be between 10 and 3000 characters.",
+      });
+    }
+
+    if (!ownerAuthUid) {
+      return res.status(400).json({
+        error: "ownerAuthUid is required",
+      });
+    }
+
+    if (userEmail && !validator.isEmail(userEmail)) {
+      return res.status(400).json({
+        error: "Invalid user email",
+      });
+    }
+
+    await sendFeedbackMail({
+      category,
+      subject,
+      message,
+      userName,
+      userEmail,
+      ownerAuthUid,
+    });
+
+    return res.json({
+      success: true,
+      message: "Feedback sent successfully.",
+    });
+  } catch (error) {
+    console.error("Error sending feedback message:", error);
+    return res.status(500).json({
+      error: "Failed to send feedback",
+      message: "Please try again later.",
+    });
+  }
+});
 
 // @route   GET /api/users
 // @desc    Get all users (for admin purposes - remove in production)

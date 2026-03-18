@@ -287,6 +287,31 @@ class ApiService {
     }
   }
 
+  async submitContactFeedback(payload) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/contact`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || data.error || "Failed to send message.",
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("API Error:", error);
+      throw error;
+    }
+  }
+
   // Utility method to validate phone number
   validatePhone(phone) {
     const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;

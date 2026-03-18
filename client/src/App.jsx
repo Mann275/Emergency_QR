@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
+  Navigate,
   Routes,
   Route,
   useLocation,
@@ -12,6 +13,7 @@ import {
   useServerHealth,
 } from "./context/ServerHealthContext";
 import { AuthProvider } from "./context/AuthContext";
+import { useAuth } from "./context/AuthContext";
 import { Toaster, toast } from "react-hot-toast";
 
 const Header = lazy(() => import("./components/Header"));
@@ -24,6 +26,28 @@ const PreviewProfile = lazy(() => import("./pages/PreviewProfile"));
 const EmergencyProfile = lazy(() => import("./pages/EmergencyProfile"));
 const EditProfile = lazy(() => import("./pages/EditProfile"));
 const Success = lazy(() => import("./pages/Success"));
+const ContactSupport = lazy(() => import("./pages/ContactSupport"));
+
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return <AppFallback />;
+  }
+
+  if (!user) {
+    return (
+      <Navigate
+        to="/auth"
+        replace
+        state={{ redirectTo: location.pathname || "/contact" }}
+      />
+    );
+  }
+
+  return children;
+};
 
 const AppFallback = () => (
   <div className="min-h-[60vh] grid place-items-center px-4" aria-live="polite">
@@ -38,6 +62,7 @@ const AppFallback = () => (
 
 function AppLayout() {
   const location = useLocation();
+  const { user } = useAuth();
   const isEmergencyRoute = location.pathname.startsWith("/emergency/");
   const isPreviewRoute = location.pathname === "/preview";
   const { isHealthy, isChecking } = useServerHealth();
@@ -89,12 +114,14 @@ function AppLayout() {
     textOverflow: "ellipsis",
   };
 
+  const showBottomNav = !isPreviewRoute && (!isEmergencyRoute || !!user);
+
   return (
-    <div className={`app-shell ${isEmergencyRoute ? "" : "pb-24 md:pb-0"}`}>
+    <div className={`app-shell ${showBottomNav ? "pb-24 md:pb-0" : ""}`}>
       <Toaster
         position={isMobile ? "bottom-center" : "bottom-right"}
         containerStyle={{
-          bottom: isMobile ? (isEmergencyRoute ? 12 : 82) : 8,
+          bottom: isMobile ? (showBottomNav ? 82 : 12) : 8,
           right: isMobile ? undefined : 10,
           left: isMobile ? 0 : undefined,
           width: isMobile ? "100%" : undefined,
@@ -140,10 +167,18 @@ function AppLayout() {
             <Route path="/emergency/:id" element={<EmergencyProfile />} />
             <Route path="/edit/:id" element={<EditProfile />} />
             <Route path="/success/:id" element={<Success />} />
+            <Route
+              path="/contact"
+              element={
+                <ProtectedRoute>
+                  <ContactSupport />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </main>
         {!isEmergencyRoute && <Footer />}
-        {!isEmergencyRoute && !isPreviewRoute && <BottomNav />}
+        {showBottomNav && <BottomNav />}
       </Suspense>
     </div>
   );
