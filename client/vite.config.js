@@ -8,10 +8,7 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5173,
     strictPort: true,
-    headers: {
-      "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
-      "Cross-Origin-Embedder-Policy": "unsafe-none",
-    },
+    headers: {},
     proxy: {
       "/api": {
         target: "http://localhost:5000",
@@ -24,10 +21,7 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 4173,
     strictPort: true,
-    headers: {
-      "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
-      "Cross-Origin-Embedder-Policy": "unsafe-none",
-    },
+    headers: {},
   },
   build: {
     outDir: "dist",

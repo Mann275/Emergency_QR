@@ -47,8 +47,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(
   helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+    crossOriginResourcePolicy: false,
+    crossOriginOpenerPolicy: false,
   }),
 );
 app.use(express.json({ limit: "100kb" }));

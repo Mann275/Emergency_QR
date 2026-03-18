@@ -42,9 +42,12 @@ const EmergencyProfile = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success("QR downloaded.");
+      showToast({ message: "QR downloaded." });
     } catch (downloadError) {
-      toast.error("Could not generate QR right now.");
+      showToast({
+        message: "Could not generate QR right now.",
+        variant: "error",
+      });
     }
   };
 

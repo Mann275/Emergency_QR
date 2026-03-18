@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
-import { toast } from "react-hot-toast";
 import { showToast } from "../utils/toast.jsx";
 
 const Auth = () => {
@@ -11,16 +10,21 @@ const Auth = () => {
   const { user, loading, signIn, signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const redirectTo = useMemo(
-    () => location.state?.redirectTo || "/create",
-    [location.state],
-  );
+  const redirectTo = useMemo(() => {
+    if (location.state?.redirectTo) return location.state.redirectTo;
+    if (user?.uid) {
+      const storedId = localStorage.getItem(`emergency_user_profile:${user.uid}`);
+      if (storedId) return `/success/${storedId}`;
+    }
+    return "/create";
+  }, [location.state, user?.uid]);
 
   const [mode, setMode] = useState("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [authError, setAuthError] = useState("");
 
   useEffect(() => {
     if (loading) return;
@@ -32,9 +36,10 @@ const Auth = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!email || !password) {
-      toast.error(t.emailPasswordRequired || "Email and password are required.");
+      setAuthError(t.emailPasswordRequired || "Email and password are required.");
       return;
     }
+    setAuthError("");
 
     try {
       setSubmitting(true);
@@ -49,7 +54,7 @@ const Auth = () => {
       }
       navigate(redirectTo, { replace: true });
     } catch (error) {
-      toast.error(error.message || t.authFailed || "Authentication failed.");
+      setAuthError(error.message || t.authFailed || "Authentication failed.");
     } finally {
       setSubmitting(false);
     }
@@ -57,16 +62,14 @@ const Auth = () => {
 
   const handleGoogle = async () => {
     try {
-      setSubmitting(true);
+      setAuthError("");
       await signInWithGoogle();
       showToast({
         message: t.authGoogleSignedIn || "Signed in with Google :)",
       });
       navigate(redirectTo, { replace: true });
     } catch (error) {
-      toast.error(
-        error.message || t.googleAuthFailed || "Google sign-in failed.",
-      );
+      setAuthError(error.message || t.googleAuthFailed || "Google sign-in failed.");
     } finally {
       setSubmitting(false);
     }
@@ -86,39 +89,53 @@ const Auth = () => {
   }
 
   return (
-    <div className="pb-16 sm:pb-24">
-      <section className="pt-20 sm:pt-28">
-        <div className="main-wrap max-w-lg">
-          <div className="mb-6 text-center">
+    <div className="pb-20 sm:pb-32">
+      <section className="pt-32 sm:pt-44">
+        <div className="main-wrap max-w-md px-4">
+          <div className="mb-5 text-center px-2">
             <h1
-              className="text-3xl sm:text-4xl font-bold text-[var(--ink)]"
+              className="text-2xl sm:text-4xl font-bold text-[var(--ink)]"
               style={{ fontFamily: "var(--font-heading)" }}
+              data-t={mode === "signup" ? "authTitleSignUp" : "authTitleSignIn"}
             >
               {mode === "signup"
                 ? t.authTitleSignUp || "Create your account"
                 : t.authTitleSignIn || "Welcome back"}
             </h1>
-            <p className="mt-2 text-base text-[var(--muted)]">
+            <p
+              className="mt-1 text-sm text-[var(--muted)]"
+              data-t={mode === "signup" ? "authSubtitleSignUp" : "authSubtitleSignIn"}
+            >
               {mode === "signup"
                 ? t.authSubtitleSignUp ||
-                  "Sign up to save your emergency profile securely."
+                  "Sign up to save your profile."
                 : t.authSubtitleSignIn ||
-                  "Sign in to finish your emergency profile."}
+                  "Sign in to finish your profile."}
             </p>
             <Link
               to="/preview"
-              className="mt-3 inline-flex items-center text-sm font-semibold text-[var(--accent)]"
+              className="mt-2.5 inline-flex items-center text-xs font-semibold text-[var(--accent)]"
+              data-t="authPreviewLink"
             >
               {t.authPreviewLink || "Preview a sample profile first"}
             </Link>
           </div>
 
-          <div className="glass-card border-[rgba(35,19,26,0.25)] p-6 sm:p-8">
+          <div className="glass-card border-[rgba(35,19,26,0.25)] p-5 sm:p-8">
+            {authError && (
+              <div className="mb-4 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50/50 p-4 text-sm font-semibold text-red-600 animate-slide-up">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-100">
+                  <span className="mb-0.5">!</span>
+                </span>
+                {authError}
+              </div>
+            )}
 
-            <form onSubmit={handleSubmit} className="mt-6 grid gap-5">
+            <form onSubmit={handleSubmit} className="mt-4 grid gap-4">
               <div className="grid gap-2">
                 <label className="text-sm font-semibold text-[var(--muted)] flex items-center gap-2">
-                  <Mail size={14} /> {t.authEmailLabel || "Email"}
+                  <Mail size={14} />{" "}
+                  <span data-t="authEmailLabel">{t.authEmailLabel || "Email"}</span>
                 </label>
                 <input
                   type="email"
@@ -132,13 +149,14 @@ const Auth = () => {
                         "Enter your account email"
                   }
                   required
-                  className="w-full rounded-2xl border border-[var(--line)] bg-white/55 px-4 py-3 text-base font-medium text-[var(--ink)] outline-none backdrop-blur-xl"
+                  className="w-full rounded-xl border border-[var(--line)] bg-white/55 px-4 py-2.5 text-[15px] font-medium text-[var(--ink)] outline-none backdrop-blur-xl"
                 />
               </div>
 
               <div className="grid gap-2">
                 <label className="text-sm font-semibold text-[var(--muted)] flex items-center gap-2">
-                  <Lock size={14} /> {t.authPasswordLabel || "Password"}
+                  <Lock size={14} />{" "}
+                  <span data-t="authPasswordLabel">{t.authPasswordLabel || "Password"}</span>
                 </label>
                 <div className="relative">
                   <input
@@ -154,7 +172,7 @@ const Auth = () => {
                     }
                     minLength={6}
                     required
-                    className="w-full rounded-2xl border border-[var(--line)] bg-white/55 px-4 py-3 pr-12 text-base font-medium text-[var(--ink)] outline-none backdrop-blur-xl"
+                    className="w-full rounded-xl border border-[var(--line)] bg-white/55 px-4 py-2.5 pr-12 text-[15px] font-medium text-[var(--ink)] outline-none backdrop-blur-xl"
                   />
                   <button
                     type="button"
@@ -173,6 +191,7 @@ const Auth = () => {
                 type="submit"
                 disabled={submitting}
                 className="stark-btn gap-2 justify-center disabled:cursor-not-allowed disabled:opacity-70"
+                data-t={submitting ? "authPleaseWait" : mode === "signup" ? "authCreateAccount" : "authSignIn"}
               >
                 {submitting
                   ? t.authPleaseWait || "Please wait"
@@ -183,7 +202,7 @@ const Auth = () => {
 
               <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
                 <span className="h-px flex-1 bg-[var(--line)]" />
-                {t.authOr || "OR"}
+                <span data-t="authOr">{t.authOr || "OR"}</span>
                 <span className="h-px flex-1 bg-[var(--line)]" />
               </div>
 
@@ -191,7 +210,7 @@ const Auth = () => {
                 type="button"
                 onClick={handleGoogle}
                 disabled={submitting}
-                className="flex w-fit mx-auto items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-white/60 px-4 py-3 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/80 disabled:cursor-not-allowed disabled:opacity-70"
+                className="flex w-fit mx-auto items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-white/60 px-4 py-2.5 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/80 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 <span className="flex h-5 w-5 items-center justify-center">
                   <svg viewBox="0 0 48 48" className="h-5 w-5">
@@ -217,15 +236,19 @@ const Auth = () => {
               </button>
 
               <div className="text-center text-sm text-[var(--muted)]">
-                {mode === "signup"
-                  ? t.authHaveAccount || "Already have an account?"
-                  : t.authNeedAccount || "New here?"}{" "}
+                <span data-t={mode === "signup" ? "authHaveAccount" : "authNeedAccount"}>
+                  {mode === "signup"
+                    ? t.authHaveAccount || "Already have an account?"
+                    : t.authNeedAccount || "New here?"}
+                </span>{" "}
                 <button
                   type="button"
-                  onClick={() =>
-                    setMode((prev) => (prev === "signup" ? "signin" : "signup"))
-                  }
+                  onClick={() => {
+                    setMode((prev) => (prev === "signup" ? "signin" : "signup"));
+                    setAuthError("");
+                  }}
                   className="font-semibold text-[var(--accent)]"
+                  data-t={mode === "signup" ? "authSignIn" : "authSignUp"}
                 >
                   {mode === "signup"
                     ? t.authSignIn || "Sign in"

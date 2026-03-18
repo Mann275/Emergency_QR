@@ -5,10 +5,11 @@ const getVariantStyles = (variant) => {
   if (variant === "error") {
     return {
       icon: XCircle,
-      iconBg: "rgba(220, 38, 38, 0.12)",
-      iconColor: "#dc2626",
-      border: "rgba(220, 38, 38, 0.2)",
-      background: "rgba(255, 255, 255, 0.95)",
+      iconBg: "rgba(239, 68, 68, 0.12)",
+      iconColor: "#ef4444",
+      border: "rgba(239, 68, 68, 0.28)",
+      background: "rgba(254, 242, 242, 0.94)",
+      textColor: "#991b1b",
     };
   }
 
@@ -17,54 +18,73 @@ const getVariantStyles = (variant) => {
       icon: Info,
       iconBg: "rgba(59, 130, 246, 0.12)",
       iconColor: "#2563eb",
-      border: "rgba(59, 130, 246, 0.18)",
-      background: "rgba(255, 255, 255, 0.95)",
+      border: "rgba(59, 130, 246, 0.22)",
+      background: "rgba(239, 246, 255, 0.94)",
+      textColor: "#1d4ed8",
     };
   }
 
   return {
     icon: CheckCircle2,
-    iconBg: "rgba(200, 30, 75, 0.12)",
-    iconColor: "var(--accent)",
-    border: "rgba(200, 30, 75, 0.2)",
-    background: "rgba(255, 255, 255, 0.95)",
+    iconBg: "rgba(34, 197, 94, 0.12)",
+    iconColor: "#22c55e",
+    border: "rgba(34, 197, 94, 0.28)",
+    background: "rgba(240, 253, 244, 0.94)",
+    textColor: "#166534",
   };
 };
 
-export const showToast = ({ title, message, variant = "success", duration }) => {
-  const { icon: Icon, iconBg, iconColor, border, background } =
+export const showToast = ({ title, message, variant = "success", duration, id }) => {
+  const { icon: Icon, iconBg, iconColor, border, background, textColor } =
     getVariantStyles(variant);
   const hasTitle = Boolean(title && message);
-  const headline = hasTitle ? title : message || title;
-  const body = hasTitle ? message : null;
+  const isMultiLine = hasTitle || (message && message.length > 40);
 
   toast.custom(
     (t) => (
       <div
-        className={`pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-[18px] border px-4 py-3 shadow-[0_18px_40px_rgba(35,19,26,0.12)] transition-all ${
-          t.visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+        className={`pointer-events-auto flex w-fit max-w-[min(400px,94vw)] ${
+          isMultiLine ? "items-start" : "items-center"
+        } gap-4 rounded-[24px] border px-5 py-4 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] backdrop-blur-2xl transition-all duration-500 ease-out ${
+          t.visible
+            ? "opacity-100 translate-y-0 scale-100"
+            : "opacity-0 translate-y-6 scale-90"
         }`}
-        style={{ borderColor: border, background }}
+        style={{
+          borderColor: border,
+          background: background,
+          boxShadow: `0 15px 40px -10px ${border.replace("0.28", "0.15")}, 0 10px 20px -5px rgba(0,0,0,0.04)`,
+        }}
       >
         <div
-          className="flex h-9 w-9 items-center justify-center rounded-full"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full shadow-inner"
           style={{ background: iconBg, color: iconColor }}
         >
-          <Icon size={18} />
+          <Icon size={22} strokeWidth={2.8} />
         </div>
-        <div className="flex-1">
-          {headline && (
-            <p className="text-sm font-semibold text-[var(--ink)]">
-              {headline}
-            </p>
+        <div className="flex-1 min-w-0 flex flex-col justify-center">
+          {title && (
+            <h4
+              className="text-[14px] sm:text-[15.5px] font-extrabold leading-[1.2] tracking-tight"
+              style={{ color: textColor }}
+            >
+              {title}
+            </h4>
           )}
-          {body && (
-            <p className="mt-0.5 text-sm text-[var(--muted)]">{body}</p>
+          {message && (
+            <p
+              className={`${
+                title ? "mt-1.5" : ""
+              } text-[13.5px] font-semibold leading-[1.4] opacity-90`}
+              style={{ color: textColor }}
+            >
+              {message}
+            </p>
           )}
         </div>
       </div>
     ),
-    { duration: duration ?? 3200 },
+    { duration: duration ?? 3500, id },
   );
 };
 
