@@ -477,6 +477,74 @@ router.post(
 // @desc    Verify OTP and reset Firebase password
 // @access  Public
 router.post(
+  "/auth/forgot-password/verify",
+  forgotPasswordResetLimiter,
+  async (req, res) => {
+    try {
+      const email = normalizeEmail(req.body?.email);
+      const otp = String(req.body?.otp || "").trim();
+
+      if (!validator.isEmail(email)) {
+        return res.status(400).json({
+          error: "Valid email is required",
+        });
+      }
+
+      if (!/^\d{6}$/.test(otp)) {
+        return res.status(400).json({
+          error: "Invalid OTP format",
+          message: "OTP must be a 6-digit number.",
+        });
+      }
+
+      const otpRecord = await PasswordResetOtp.findOne({ email });
+      if (!otpRecord) {
+        return res.status(400).json({
+          error: "OTP expired or not found",
+        });
+      }
+
+      if (otpRecord.expiresAt.getTime() < Date.now()) {
+        await PasswordResetOtp.deleteOne({ email });
+        return res.status(400).json({
+          error: "OTP expired",
+          message: "Please request a new OTP.",
+        });
+      }
+
+      if (otpRecord.attempts >= OTP_MAX_ATTEMPTS) {
+        await PasswordResetOtp.deleteOne({ email });
+        return res.status(429).json({
+          error: "Too many invalid OTP attempts",
+          message: "Please request a new OTP.",
+        });
+      }
+
+      const otpMatches = await bcrypt.compare(otp, otpRecord.otpHash);
+      if (!otpMatches) {
+        otpRecord.attempts += 1;
+        await otpRecord.save();
+        return res.status(400).json({
+          error: "Invalid OTP",
+          message: "OTP does not match.",
+        });
+      }
+
+      return res.json({
+        success: true,
+        message: "OTP verified successfully.",
+      });
+    } catch (error) {
+      console.error("Error verifying password reset OTP:", error);
+      return res.status(500).json({
+        error: "Failed to verify OTP",
+        message: "Please try again later.",
+      });
+    }
+  },
+);
+
+router.post(
   "/auth/forgot-password/reset",
   forgotPasswordResetLimiter,
   async (req, res) => {

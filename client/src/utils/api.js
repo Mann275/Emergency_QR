@@ -1,12 +1,19 @@
 const getApiBaseUrl = () => {
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
+  if (typeof window !== "undefined") {
+    const hostname = window.location.hostname || "localhost";
+    const isLocalHost =
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname === "0.0.0.0";
+
+    // While developing locally, always hit local backend by default.
+    if (isLocalHost) {
+      return "http://localhost:5000/api";
+    }
   }
 
-  if (typeof window !== "undefined") {
-    const protocol = window.location.protocol || "http:";
-    const hostname = window.location.hostname || "localhost";
-    return `${protocol}//${hostname}:5000/api`;
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
   }
 
   return "http://localhost:5000/api";
@@ -40,6 +47,16 @@ const buildForgotPasswordResetUrls = () =>
     `${API_BASE_NO_API_SUFFIX}/auth/forgot-password/reset`,
   ]);
 
+const buildForgotPasswordVerifyUrls = () =>
+  unique([
+    `${API_BASE_URL}/users/auth/forgot-password/verify`,
+    `${API_BASE_URL}/auth/forgot-password/verify`,
+    `${API_BASE_NO_API_SUFFIX}/api/users/auth/forgot-password/verify`,
+    `${API_BASE_NO_API_SUFFIX}/api/auth/forgot-password/verify`,
+    `${API_BASE_NO_API_SUFFIX}/users/auth/forgot-password/verify`,
+    `${API_BASE_NO_API_SUFFIX}/auth/forgot-password/verify`,
+  ]);
+
 const readJsonSafe = async (response) => {
   try {
     return await response.json();
@@ -50,35 +67,38 @@ const readJsonSafe = async (response) => {
 
 const postWithFallbackUrls = async ({ urls, body, fallbackErrorMessage }) => {
   let sawNotFound = false;
-  let lastError = null;
+  let lastNetworkError = null;
 
   for (const url of urls) {
+    let response;
+
     try {
-      const response = await fetch(url, {
+      response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
       });
-
-      const data = await readJsonSafe(response);
-
-      if (response.ok) {
-        return data || { success: true };
-      }
-
-      if (response.status === 404) {
-        sawNotFound = true;
-        continue;
-      }
-
-      throw new Error(
-        data?.message || data?.error || fallbackErrorMessage || "Request failed.",
-      );
     } catch (error) {
-      lastError = error;
+      lastNetworkError = error;
+      continue;
     }
+
+    const data = await readJsonSafe(response);
+
+    if (response.ok) {
+      return data || { success: true };
+    }
+
+    if (response.status === 404) {
+      sawNotFound = true;
+      continue;
+    }
+
+    throw new Error(
+      data?.message || data?.error || fallbackErrorMessage || "Request failed.",
+    );
   }
 
   if (sawNotFound) {
@@ -87,7 +107,7 @@ const postWithFallbackUrls = async ({ urls, body, fallbackErrorMessage }) => {
     );
   }
 
-  throw lastError || new Error(fallbackErrorMessage || "Request failed.");
+  throw lastNetworkError || new Error(fallbackErrorMessage || "Request failed.");
 };
 
 class ApiService {
@@ -227,6 +247,19 @@ class ApiService {
         urls: buildForgotPasswordResetUrls(),
         body: { email, otp, newPassword },
         fallbackErrorMessage: "Failed to reset password.",
+      });
+    } catch (error) {
+      console.error("API Error:", error);
+      throw error;
+    }
+  }
+
+  async verifyPasswordResetOtp({ email, otp }) {
+    try {
+      return await postWithFallbackUrls({
+        urls: buildForgotPasswordVerifyUrls(),
+        body: { email, otp },
+        fallbackErrorMessage: "Failed to verify OTP.",
       });
     } catch (error) {
       console.error("API Error:", error);

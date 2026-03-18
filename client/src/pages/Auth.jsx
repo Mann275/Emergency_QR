@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
@@ -34,8 +34,12 @@ const Auth = () => {
   const [resetPassword, setResetPassword] = useState("");
   const [confirmResetPassword, setConfirmResetPassword] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
+  const [resendIn, setResendIn] = useState(0);
   const [resetSubmitting, setResetSubmitting] = useState(false);
   const [resetError, setResetError] = useState("");
+  const otpInputRefs = useRef([]);
   const forgotPasswordLabel =
     (typeof t.authForgotPassword === "string"
       ? t.authForgotPassword.trim()
@@ -101,6 +105,9 @@ const Auth = () => {
     setResetPassword("");
     setConfirmResetPassword("");
     setOtpSent(false);
+    setOtpVerified(false);
+    setOtpDigits(["", "", "", "", "", ""]);
+    setResendIn(0);
     setAuthError("");
     setResetError("");
   };
@@ -111,8 +118,23 @@ const Auth = () => {
     setResetPassword("");
     setConfirmResetPassword("");
     setOtpSent(false);
+    setOtpVerified(false);
+    setOtpDigits(["", "", "", "", "", ""]);
+    setResendIn(0);
     setResetError("");
   };
+
+  useEffect(() => {
+    if (!showForgotModal || !otpSent || otpVerified || resendIn <= 0) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setResendIn((prev) => Math.max(prev - 1, 0));
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [showForgotModal, otpSent, otpVerified, resendIn]);
 
   const handleRequestOtp = async () => {
     const normalizedEmail = resetEmail.trim();
@@ -126,11 +148,81 @@ const Auth = () => {
       setResetSubmitting(true);
       await ApiService.requestPasswordResetOtp(normalizedEmail);
       setOtpSent(true);
+      setOtpVerified(false);
+      setOtpDigits(["", "", "", "", "", ""]);
+      setResetOtp("");
+      setResendIn(30);
       showToast({
         message: "OTP sent. Please check your email inbox.",
       });
+      setTimeout(() => otpInputRefs.current[0]?.focus(), 0);
     } catch (error) {
       setResetError(error.message || "Failed to send OTP.");
+    } finally {
+      setResetSubmitting(false);
+    }
+  };
+
+  const handleOtpDigitChange = (index, value) => {
+    const digit = value.replace(/\D/g, "").slice(-1);
+    setOtpDigits((prev) => {
+      const next = [...prev];
+      next[index] = digit;
+      return next;
+    });
+
+    if (digit && index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, event) => {
+    if (event.key === "Backspace" && !otpDigits[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (event) => {
+    event.preventDefault();
+    const pasted = (event.clipboardData.getData("text") || "")
+      .replace(/\D/g, "")
+      .slice(0, 6);
+
+    if (!pasted) return;
+
+    const next = ["", "", "", "", "", ""];
+    pasted.split("").forEach((char, idx) => {
+      next[idx] = char;
+    });
+    setOtpDigits(next);
+    const focusIndex = Math.min(pasted.length, 6) - 1;
+    if (focusIndex >= 0) {
+      otpInputRefs.current[focusIndex]?.focus();
+    }
+  };
+
+  const handleVerifyOtp = async (event) => {
+    event.preventDefault();
+    const normalizedEmail = resetEmail.trim();
+    const otpValue = otpDigits.join("");
+
+    if (!normalizedEmail || otpValue.length !== 6) {
+      setResetError("Enter email and complete 6-digit OTP.");
+      return;
+    }
+
+    try {
+      setResetError("");
+      setResetSubmitting(true);
+      await ApiService.verifyPasswordResetOtp({
+        email: normalizedEmail,
+        otp: otpValue,
+      });
+      setOtpVerified(true);
+      setResetOtp(otpValue);
+      showToast({ message: "OTP verified. Set your new password." });
+    } catch (error) {
+      setResetError(error.message || "Failed to verify OTP.");
     } finally {
       setResetSubmitting(false);
     }
@@ -424,44 +516,79 @@ const Auth = () => {
                 value={resetEmail}
                 onChange={(event) => setResetEmail(event.target.value)}
                 placeholder="Enter your account email"
+                disabled={otpSent}
                 className="w-full rounded-xl border border-[var(--line)] bg-white/55 px-4 py-2.5 text-[15px] font-medium text-[var(--ink)] outline-none backdrop-blur-xl"
               />
             </div>
 
-            <div className="mt-4">
-              <button
-                type="button"
-                onClick={handleRequestOtp}
-                disabled={resetSubmitting}
-                className="stark-btn w-full justify-center disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {resetSubmitting
-                  ? "Sending..."
-                  : otpSent
-                    ? "Resend OTP"
-                    : "Send OTP"}
-              </button>
-            </div>
+            {!otpSent && (
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={handleRequestOtp}
+                  disabled={resetSubmitting}
+                  className="stark-btn w-full justify-center disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {resetSubmitting ? "Sending..." : "Send OTP"}
+                </button>
+              </div>
+            )}
 
-            {otpSent && (
-              <form onSubmit={handleResetWithOtp} className="mt-4 grid gap-3">
+            {otpSent && !otpVerified && (
+              <form onSubmit={handleVerifyOtp} className="mt-4 grid gap-3">
                 <div className="grid gap-2">
                   <label className="text-sm font-semibold text-[var(--muted)]">
                     OTP
                   </label>
-                  <input
-                    type="text"
-                    value={resetOtp}
-                    onChange={(event) =>
-                      setResetOtp(
-                        event.target.value.replace(/\D/g, "").slice(0, 6),
-                      )
-                    }
-                    placeholder="Enter 6-digit OTP"
-                    className="w-full rounded-xl border border-[var(--line)] bg-white/55 px-4 py-2.5 text-[15px] font-medium text-[var(--ink)] outline-none backdrop-blur-xl"
-                  />
+                  <div className="grid grid-cols-6 gap-2">
+                    {otpDigits.map((digit, idx) => (
+                      <input
+                        key={idx}
+                        ref={(element) => {
+                          otpInputRefs.current[idx] = element;
+                        }}
+                        type="text"
+                        value={digit}
+                        onChange={(event) =>
+                          handleOtpDigitChange(idx, event.target.value)
+                        }
+                        onKeyDown={(event) => handleOtpKeyDown(idx, event)}
+                        onPaste={handleOtpPaste}
+                        inputMode="numeric"
+                        maxLength={1}
+                        className="h-11 rounded-lg border border-[var(--line)] bg-white/55 text-center text-lg font-bold text-[var(--ink)] outline-none"
+                      />
+                    ))}
+                  </div>
                 </div>
 
+                <button
+                  type="submit"
+                  disabled={resetSubmitting}
+                  className="stark-btn w-full justify-center disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {resetSubmitting ? "Verifying..." : "Verify OTP"}
+                </button>
+
+                {resendIn > 0 ? (
+                  <p className="text-center text-xs font-semibold text-[var(--muted)]">
+                    Resend OTP in {resendIn}s
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleRequestOtp}
+                    disabled={resetSubmitting}
+                    className="mx-auto text-xs font-semibold text-[var(--accent)] underline underline-offset-2"
+                  >
+                    Resend OTP
+                  </button>
+                )}
+              </form>
+            )}
+
+            {otpVerified && (
+              <form onSubmit={handleResetWithOtp} className="mt-4 grid gap-3">
                 <div className="grid gap-2">
                   <label className="text-sm font-semibold text-[var(--muted)]">
                     New password
