@@ -23,7 +23,7 @@ import { IN, US, GB, AU } from "country-flag-icons/react/3x2";
 import { toast } from "react-hot-toast";
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-const genderOptions = ["Male", "Female", "Other", "Prefer not to say"];
+const genderOptions = ["Male", "Female", "Other"];
 
 const phoneCodes = ["+91", "+1", "+44", "+61"];
 

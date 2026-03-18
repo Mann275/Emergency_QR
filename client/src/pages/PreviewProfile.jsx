@@ -18,10 +18,10 @@ const PreviewProfile = () => {
   const { t } = useLanguage();
 
   const previewUser = {
-    name: "Ananya Sharma",
-    bloodGroup: "O+",
-    gender: "Female",
-    dateOfBirth: new Date("1995-07-12"),
+    name: "John Wick",
+    bloodGroup: "O-",
+    gender: "Male",
+    dateOfBirth: new Date("1969-01-1"),
     phone: "+91 98765 43210",
     emergencyContact: {
       name: "Rohan Sharma",
@@ -62,7 +62,7 @@ const PreviewProfile = () => {
 
   return (
     <div className="min-h-screen pb-[calc(10rem+env(safe-area-inset-bottom))] sm:pb-16">
-      <section className="pt-24 sm:pt-32">
+      <section className="pt-10 sm:pt-14">
         <div className="main-wrap max-w-5xl">
           <div className="mb-6 px-4 sm:px-6">
             <Link

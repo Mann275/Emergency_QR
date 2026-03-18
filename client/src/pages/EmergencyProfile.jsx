@@ -168,8 +168,8 @@ const EmergencyProfile = () => {
   const emergencyPhone = String(contact.phone || personalPhone);
 
   return (
-    <div className="min-h-screen pb-[calc(10rem+env(safe-area-inset-bottom))] sm:pb-16">
-      <section className="pt-24 sm:pt-32">
+    <div className="min-h-screen pb-[calc(9rem+env(safe-area-inset-bottom))] sm:pb-14">
+      <section className="pt-5 sm:pt-8 lg:pt-10">
         <div className="main-wrap max-w-5xl">
           <div className="mb-6 px-3 sm:px-6">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -186,7 +186,7 @@ const EmergencyProfile = () => {
                 </span>
                 <span className="min-w-0">
                   <span
-                    className="block text-xl font-bold tracking-tight"
+                    className="block text-[1.35rem] sm:text-[1.55rem] font-bold tracking-tight"
                     style={{ fontFamily: "var(--font-heading)" }}
                     data-t="brandTitle"
                   >
@@ -197,13 +197,13 @@ const EmergencyProfile = () => {
 
               <div className="flex items-center gap-2">
                 <span
-                  className="inline-flex items-center gap-1 rounded-full border border-white/70 bg-white/70 px-3 py-1.5 text-[12px] sm:text-[13px] font-semibold text-[var(--muted)]"
+                  className="inline-flex items-center gap-1 rounded-full border border-white/70 bg-white/70 px-3 py-1.5 text-[13px] sm:text-[14px] font-semibold text-[var(--muted)]"
                   data-t="emergencyProfile"
                 >
                   <ShieldCheck size={12} /> {t.emergencyProfile}
                 </span>
                 <span
-                  className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-[12px] sm:text-[13px] font-semibold text-rose-600"
+                  className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-[13px] sm:text-[14px] font-semibold text-rose-600"
                   data-t="active"
                 >
                   <HeartPulse size={12} /> {t.active}
@@ -215,7 +215,7 @@ const EmergencyProfile = () => {
               {canEdit && (
                 <Link
                   to={`/edit/${id}`}
-                  className="ghost-btn gap-2 px-4 py-2 text-[14px] sm:text-[15px]"
+                  className="ghost-btn gap-2 px-4 py-2 text-[15px] sm:text-[16px]"
                   data-t="editProfile"
                 >
                   <Pencil size={14} /> {t.editProfile || "Edit profile"}
@@ -224,7 +224,7 @@ const EmergencyProfile = () => {
               <button
                 type="button"
                 onClick={handleDownloadQr}
-                className="ghost-btn gap-2 px-4 py-2 text-[14px] sm:text-[15px]"
+                className="ghost-btn gap-2 px-4 py-2 text-[15px] sm:text-[16px]"
                 data-t="downloadQr"
               >
                 <QrCode size={14} /> {t.downloadQr || "Download QR"}
@@ -236,7 +236,7 @@ const EmergencyProfile = () => {
             <GlassCard className="p-4 sm:p-7">
               <div className="flex flex-col h-full justify-between">
                 <div>
-                  <div className="flex items-center gap-2 text-[13px] sm:text-[14px] font-semibold text-[var(--muted)]">
+                  <div className="flex items-center gap-2 text-[14px] sm:text-[15px] font-semibold text-[var(--muted)]">
                     <User size={14} className="text-[var(--accent)]" />
                     <span data-t="patientFacts">
                       {t.patientFacts || "User details"}
@@ -252,13 +252,13 @@ const EmergencyProfile = () => {
                       }}
                     >
                       <div
-                        className="text-[12px] sm:text-[13px] font-semibold text-[var(--muted)]"
+                        className="text-[13px] sm:text-[14px] font-semibold text-[var(--muted)]"
                         data-t="bloodGroupLabel"
                       >
                         {t.bloodGroupLabel}
                       </div>
                       <div
-                        className="mt-1 text-2xl font-black text-rose-600"
+                        className="mt-1 text-[2rem] sm:text-[2.25rem] font-black text-rose-600"
                         style={{ fontFamily: "var(--font-heading)" }}
                       >
                         {bloodGroup}
@@ -274,11 +274,11 @@ const EmergencyProfile = () => {
                           background: "rgba(255,255,255,0.7)",
                         }}
                       >
-                        <div className="flex items-center gap-2 text-[12px] sm:text-[13px] font-semibold text-[var(--muted)]">
+                        <div className="flex items-center gap-2 text-[13px] sm:text-[14px] font-semibold text-[var(--muted)]">
                           {Icon && <Icon size={14} className="opacity-80" />}
                           <span data-t={key}>{label}</span>
                         </div>
-                        <div className="text-[15px] sm:text-[16px] font-semibold text-[var(--ink)] text-right">
+                        <div className="text-[16px] sm:text-[18px] font-semibold text-[var(--ink)] text-right">
                           {value}
                         </div>
                       </div>
@@ -290,14 +290,14 @@ const EmergencyProfile = () => {
                   <div className="rounded-[16px] border border-[var(--glass-border)] bg-white/55 p-2.5">
                     <a
                       href={`tel:${emergencyPhone.replace(/\s+/g, "")}`}
-                      className="stark-btn w-full min-w-0 gap-2 justify-center px-3 py-3 text-[14px] sm:text-[15px] font-semibold whitespace-normal"
+                      className="stark-btn w-full min-w-0 gap-2 justify-center px-3 py-3 text-[15px] sm:text-[16px] font-semibold whitespace-normal"
                     >
                       <Phone size={15} className="flex-shrink-0" />
                       <span data-t="callEmergencyContact">
                         {t.callEmergencyContact}
                       </span>
                     </a>
-                    <p className="mt-2 text-center text-[13px] sm:text-[14px] font-semibold text-[var(--muted)] break-all">
+                    <p className="mt-2 text-center text-[14px] sm:text-[15px] font-semibold text-[var(--muted)] break-all">
                       {emergencyPhone}
                     </p>
                   </div>
@@ -306,14 +306,14 @@ const EmergencyProfile = () => {
                     <div className="rounded-[16px] border border-[var(--glass-border)] bg-white/55 p-2.5">
                       <a
                         href={`tel:${personalPhone.replace(/\s+/g, "")}`}
-                        className="ghost-btn w-full min-w-0 gap-2 justify-center px-3 py-3 text-[14px] sm:text-[15px] font-semibold whitespace-normal"
+                        className="ghost-btn w-full min-w-0 gap-2 justify-center px-3 py-3 text-[15px] sm:text-[16px] font-semibold whitespace-normal"
                       >
                         <User size={15} className="flex-shrink-0" />
                         <span data-t="callYourNumber">
                           {t.callYourNumber || "Call Your Number"}
                         </span>
                       </a>
-                      <p className="mt-2 text-center text-[13px] sm:text-[14px] font-semibold text-[var(--muted)] break-all">
+                      <p className="mt-2 text-center text-[14px] sm:text-[15px] font-semibold text-[var(--muted)] break-all">
                         {personalPhone}
                       </p>
                     </div>
@@ -323,7 +323,7 @@ const EmergencyProfile = () => {
             </GlassCard>
 
             <GlassCard className="p-4 sm:p-7">
-              <div className="flex items-center gap-2 text-[13px] sm:text-[14px] font-semibold text-[var(--muted)]">
+              <div className="flex items-center gap-2 text-[14px] sm:text-[15px] font-semibold text-[var(--muted)]">
                 <Stethoscope size={14} className="text-[var(--accent)]" />
                 <span data-t="medicalDetails">{t.medicalDetails}</span>
               </div>
@@ -342,10 +342,10 @@ const EmergencyProfile = () => {
                         : "rgba(255,255,255,0.7)",
                     }}
                   >
-                    <div className="text-[12px] sm:text-[13px] font-semibold text-[var(--muted)]">
+                    <div className="text-[13px] sm:text-[14px] font-semibold text-[var(--muted)]">
                       <span data-t={item.key}>{item.label}</span>
                     </div>
-                    <div className="mt-1 text-[15px] sm:text-[16px] font-semibold text-[var(--ink)] break-words">
+                    <div className="mt-1 text-[16px] sm:text-[18px] font-semibold text-[var(--ink)] break-words">
                       {item.value}
                     </div>
                   </div>
@@ -354,11 +354,11 @@ const EmergencyProfile = () => {
 
               {user.notes && (
                 <div className="mt-3 rounded-[14px] border border-dashed border-[var(--line)] bg-white/60 p-3">
-                  <div className="flex items-center gap-2 text-[13px] sm:text-[14px] font-semibold text-[var(--muted)]">
+                  <div className="flex items-center gap-2 text-[14px] sm:text-[15px] font-semibold text-[var(--muted)]">
                     <FileText size={14} />
                     <span data-t="instructions">{t.instructions}</span>
                   </div>
-                  <p className="mt-2 text-[15px] sm:text-[16px] text-[var(--ink)] leading-relaxed break-words">
+                  <p className="mt-2 text-[16px] sm:text-[18px] text-[var(--ink)] leading-relaxed break-words">
                     {user.notes}
                   </p>
                 </div>

@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { useLocation, Link, useParams } from "react-router-dom";
+import { Navigate, useLocation, Link, useParams } from "react-router-dom";
 import QRCode from "qrcode";
 import { Download, Smartphone, ExternalLink, QrCode } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
+import { useAuth } from "../context/AuthContext";
 
 const Success = () => {
   const { id } = useParams();
   const { t } = useLanguage();
+  const { user, loading } = useAuth();
   const location = useLocation();
   const { qrCode, profileUrl } = location.state || {};
   const defaultProfileUrl = id
@@ -62,6 +64,29 @@ const Success = () => {
       active = false;
     };
   }, [id, qrCode, profileUrl, defaultProfileUrl]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="glass-card p-6 sm:p-8 text-center">
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-[var(--accent)] border-t-transparent" />
+          <p className="mt-3 text-sm font-semibold text-[var(--muted)]">
+            {t.authChecking || "Checking authentication..."}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Navigate
+        to="/auth"
+        replace
+        state={{ redirectTo: id ? `/success/${id}` : "/create" }}
+      />
+    );
+  }
 
   if (isPreparingQr) {
     return (

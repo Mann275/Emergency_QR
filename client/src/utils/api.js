@@ -199,6 +199,24 @@ class ApiService {
     }
   }
 
+  async getUserByOwnerAuthUid(ownerAuthUid) {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/users/owner/${encodeURIComponent(ownerAuthUid)}`,
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to fetch emergency profile");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("API Error:", error);
+      throw error;
+    }
+  }
+
   async updateUser(id, userData) {
     try {
       const editToken = this.getEditToken(id);

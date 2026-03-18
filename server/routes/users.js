@@ -269,6 +269,49 @@ router.post("/create", writeLimiter, async (req, res) => {
   }
 });
 
+// @route   GET /api/users/owner/:ownerAuthUid
+// @desc    Get emergency profile by Firebase owner UID (mapping recovery)
+// @access  Public
+router.get("/owner/:ownerAuthUid", async (req, res) => {
+  try {
+    const ownerAuthUid = String(req.params.ownerAuthUid || "").trim();
+
+    if (!ownerAuthUid) {
+      return res.status(400).json({
+        error: "ownerAuthUid is required",
+      });
+    }
+
+    const user = await User.findOne({
+      ownerAuthUid,
+      isActive: true,
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        error: "Emergency profile not found",
+        message: "No active profile found for this account.",
+      });
+    }
+
+    const emergencyData = user.getEmergencyData();
+
+    return res.json({
+      success: true,
+      data: {
+        ...emergencyData,
+        lastUpdated: user.updatedAt,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching user by owner UID:", error);
+    return res.status(500).json({
+      error: "Failed to fetch emergency profile",
+      message: "Please try again later",
+    });
+  }
+});
+
 // @route   GET /api/users/:id
 // @desc    Get public emergency information by unique ID
 // @access  Public
@@ -615,6 +658,22 @@ router.post(
       });
     } catch (error) {
       console.error("Error resetting password with OTP:", error);
+
+      if (error?.code === "firebase-admin/not-configured") {
+        return res.status(503).json({
+          error: "Password reset unavailable",
+          message:
+            "Server is missing Firebase Admin credentials. Configure FIREBASE_SERVICE_ACCOUNT_JSON and restart backend.",
+        });
+      }
+
+      if (error?.code === "firebase-admin/invalid-config") {
+        return res.status(500).json({
+          error: "Password reset unavailable",
+          message:
+            "Server Firebase Admin config is invalid. Fix FIREBASE_SERVICE_ACCOUNT_JSON format and restart backend.",
+        });
+      }
 
       if (error?.code === "auth/user-not-found") {
         return res.status(404).json({

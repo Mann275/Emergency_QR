@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -12,17 +12,29 @@ import {
   useServerHealth,
 } from "./context/ServerHealthContext";
 import { AuthProvider } from "./context/AuthContext";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import BottomNav from "./components/BottomNav";
-import Home from "./pages/Home";
-import CreateProfile from "./pages/CreateProfile";
-import Auth from "./pages/Auth";
-import PreviewProfile from "./pages/PreviewProfile";
-import EmergencyProfile from "./pages/EmergencyProfile";
-import EditProfile from "./pages/EditProfile";
-import Success from "./pages/Success";
 import { Toaster, toast } from "react-hot-toast";
+
+const Header = lazy(() => import("./components/Header"));
+const Footer = lazy(() => import("./components/Footer"));
+const BottomNav = lazy(() => import("./components/BottomNav"));
+const Home = lazy(() => import("./pages/Home"));
+const CreateProfile = lazy(() => import("./pages/CreateProfile"));
+const Auth = lazy(() => import("./pages/Auth"));
+const PreviewProfile = lazy(() => import("./pages/PreviewProfile"));
+const EmergencyProfile = lazy(() => import("./pages/EmergencyProfile"));
+const EditProfile = lazy(() => import("./pages/EditProfile"));
+const Success = lazy(() => import("./pages/Success"));
+
+const AppFallback = () => (
+  <div className="min-h-[60vh] grid place-items-center px-4" aria-live="polite">
+    <div className="flex items-center gap-3 rounded-2xl border border-rose-100 bg-white/80 px-4 py-3 shadow-sm backdrop-blur">
+      <span className="h-5 w-5 animate-spin rounded-full border-2 border-rose-600 border-t-transparent" />
+      <span className="text-sm font-medium text-slate-700">
+        Loading page...
+      </span>
+    </div>
+  </div>
+);
 
 function AppLayout() {
   const location = useLocation();
@@ -117,20 +129,22 @@ function AppLayout() {
           },
         }}
       />
-      {!isEmergencyRoute && <Header />}
-      <main className="flex-1">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/preview" element={<PreviewProfile />} />
-          <Route path="/create" element={<CreateProfile />} />
-          <Route path="/emergency/:id" element={<EmergencyProfile />} />
-          <Route path="/edit/:id" element={<EditProfile />} />
-          <Route path="/success/:id" element={<Success />} />
-        </Routes>
-      </main>
-      {!isEmergencyRoute && <Footer />}
-      {!isEmergencyRoute && !isPreviewRoute && <BottomNav />}
+      <Suspense fallback={<AppFallback />}>
+        {!isEmergencyRoute && <Header />}
+        <main className="flex-1">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/preview" element={<PreviewProfile />} />
+            <Route path="/create" element={<CreateProfile />} />
+            <Route path="/emergency/:id" element={<EmergencyProfile />} />
+            <Route path="/edit/:id" element={<EditProfile />} />
+            <Route path="/success/:id" element={<Success />} />
+          </Routes>
+        </main>
+        {!isEmergencyRoute && <Footer />}
+        {!isEmergencyRoute && !isPreviewRoute && <BottomNav />}
+      </Suspense>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import QRCode from "qrcode";
 import {
   User,
@@ -21,6 +21,7 @@ const getUserProfileKey = (authUid) => `${USER_PROFILE_KEY_PREFIX}${authUid}`;
 const Header = () => {
   const { lang, setLang, t } = useLanguage();
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const location = useLocation();
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
@@ -48,6 +49,7 @@ const Header = () => {
       await logout();
       setIsAccountOpen(false);
       setShowLogoutConfirm(false);
+      navigate("/", { replace: true });
       showToast({
         message: t.logoutSuccess || "Logged out successfully.",
       });

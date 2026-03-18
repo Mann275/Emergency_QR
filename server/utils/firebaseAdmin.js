@@ -2,16 +2,30 @@ const admin = require("firebase-admin");
 
 let initialized = false;
 
+const parseServiceAccount = () => {
+  const rawConfig = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+  if (!rawConfig) {
+    const error = new Error(
+      "Firebase Admin is not configured. Set FIREBASE_SERVICE_ACCOUNT_JSON in server .env",
+    );
+    error.code = "firebase-admin/not-configured";
+    throw error;
+  }
+
+  try {
+    return JSON.parse(rawConfig);
+  } catch (parseError) {
+    const error = new Error(
+      "FIREBASE_SERVICE_ACCOUNT_JSON is not valid JSON. Store it as a single-line JSON string in server .env.",
+    );
+    error.code = "firebase-admin/invalid-config";
+    throw error;
+  }
+};
+
 const getAuth = () => {
   if (!initialized) {
-    const rawConfig = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-    const serviceAccount = rawConfig ? JSON.parse(rawConfig) : null;
-
-    if (!serviceAccount) {
-      throw new Error(
-        "Firebase Admin is not configured. Set FIREBASE_SERVICE_ACCOUNT_JSON in server .env",
-      );
-    }
+    const serviceAccount = parseServiceAccount();
 
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),

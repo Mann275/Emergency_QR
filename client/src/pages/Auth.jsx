@@ -54,7 +54,10 @@ const Auth = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!email || !password) {
+    if (submitting) return;
+
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail || !password) {
       setAuthError(
         t.emailPasswordRequired || "Email and password are required.",
       );
@@ -64,17 +67,25 @@ const Auth = () => {
 
     try {
       setSubmitting(true);
+      setEmail(normalizedEmail);
       if (mode === "signup") {
-        await signUp(email, password);
+        await signUp(normalizedEmail, password);
         showToast({
           message: t.authAccountCreated || "Account created successfully :)",
         });
       } else {
-        await signIn(email, password);
+        await signIn(normalizedEmail, password);
         showToast({ message: t.authSignedIn || "Signed in successfully :)" });
       }
       navigate(redirectTo, { replace: true });
     } catch (error) {
+      if (mode === "signup" && error?.code === "auth/email-already-in-use") {
+        setMode("signin");
+        setAuthError(
+          "This email already has an account. We switched you to Sign in mode.",
+        );
+        return;
+      }
       setAuthError(error.message || t.authFailed || "Authentication failed.");
     } finally {
       setSubmitting(false);
@@ -385,16 +396,18 @@ const Auth = () => {
                 </div>
               </div>
 
-              <div className="-mt-1 flex justify-end">
-                <button
-                  type="button"
-                  onClick={openForgotModal}
-                  className="rounded-md px-1 py-1 text-xs font-bold tracking-[0.01em] text-[var(--accent)] underline underline-offset-2"
-                  data-t="authForgotPassword"
-                >
-                  {forgotPasswordLabel}
-                </button>
-              </div>
+              {mode === "signin" && (
+                <div className="-mt-1 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={openForgotModal}
+                    className="rounded-md px-1 py-1 text-xs font-bold tracking-[0.01em] text-[var(--accent)] underline underline-offset-2"
+                    data-t="authForgotPassword"
+                  >
+                    {forgotPasswordLabel}
+                  </button>
+                </div>
+              )}
 
               <button
                 type="submit"

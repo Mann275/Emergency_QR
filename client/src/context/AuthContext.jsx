@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import {
   createUserWithEmailAndPassword,
-  fetchSignInMethodsForEmail,
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -17,24 +16,11 @@ import {
 import { auth } from "../firebase";
 
 const AuthContext = createContext(null);
-const USER_PROFILE_KEY_PREFIX = "emergency_user_profile:";
-const EDIT_TOKEN_KEY_PREFIX = "emergency_edit_token:";
 
 const clearLocalSessionState = () => {
-  const keysToRemove = [];
-  for (let index = 0; index < localStorage.length; index += 1) {
-    const key = localStorage.key(index);
-    if (!key) continue;
-
-    if (
-      key.startsWith(USER_PROFILE_KEY_PREFIX) ||
-      key.startsWith(EDIT_TOKEN_KEY_PREFIX)
-    ) {
-      keysToRemove.push(key);
-    }
-  }
-
-  keysToRemove.forEach((key) => localStorage.removeItem(key));
+  // Intentionally left blank.
+  // Keep local profile/edit linkage on logout so users can re-login and continue
+  // editing their own profile from the same browser.
 };
 
 const mapFirebaseAuthError = (error) => {
@@ -61,9 +47,20 @@ const mapFirebaseAuthError = (error) => {
       return "Google sign-in popup was closed before completing sign-in.";
     case "auth/popup-blocked":
       return "Popup was blocked by browser. Allow popups and try again.";
+    case "auth/network-request-failed":
+      return "Network error while contacting Firebase. Check your internet and try again.";
+    case "auth/invalid-api-key":
+      return "Firebase API key is invalid. Check your VITE_FIREBASE_API_KEY in environment config.";
     default:
       return error?.message || "Authentication failed.";
   }
+};
+
+const buildMappedAuthError = (error) => {
+  const mappedError = new Error(mapFirebaseAuthError(error));
+  mappedError.code = error?.code || "auth/unknown";
+  mappedError.originalMessage = error?.message || "";
+  return mappedError;
 };
 
 export const AuthProvider = ({ children }) => {
@@ -101,29 +98,17 @@ export const AuthProvider = ({ children }) => {
 
   const signIn = async (email, password) => {
     try {
-      const methods = await fetchSignInMethodsForEmail(auth, email);
-      if (!methods.length) {
-        throw new Error(
-          "No account found for this email. Please sign up first.",
-        );
-      }
       return await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
-      throw new Error(mapFirebaseAuthError(error));
+      throw buildMappedAuthError(error);
     }
   };
 
   const signUp = async (email, password) => {
     try {
-      const methods = await fetchSignInMethodsForEmail(auth, email);
-      if (methods.length) {
-        throw new Error(
-          "This email is already in use. Try signing in instead.",
-        );
-      }
       return await createUserWithEmailAndPassword(auth, email, password);
     } catch (error) {
-      throw new Error(mapFirebaseAuthError(error));
+      throw buildMappedAuthError(error);
     }
   };
 
@@ -132,7 +117,7 @@ export const AuthProvider = ({ children }) => {
       const provider = new GoogleAuthProvider();
       return await signInWithPopup(auth, provider);
     } catch (error) {
-      throw new Error(mapFirebaseAuthError(error));
+      throw buildMappedAuthError(error);
     }
   };
 

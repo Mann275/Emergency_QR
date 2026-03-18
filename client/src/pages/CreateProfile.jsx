@@ -23,7 +23,7 @@ import { toast } from "react-hot-toast";
 import { showToast } from "../utils/toast.jsx";
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-const defaultGenderOptions = ["Male", "Female", "Other", "Prefer not to say"];
+const defaultGenderOptions = ["Male", "Female", "Other"];
 const PHONE_CODES = ["+91", "+1", "+44", "+61"];
 const USER_PROFILE_KEY_PREFIX = "emergency_user_profile:";
 
@@ -74,12 +74,6 @@ const CreateProfile = () => {
         replace: true,
         state: { redirectTo: "/create" },
       });
-      return;
-    }
-    const storedId = localStorage.getItem(getUserProfileKey(user.uid));
-    if (storedId) {
-      navigate(`/emergency/${storedId}`, { replace: true });
-      return;
     }
   }, [user, authLoading, navigate]);
 
@@ -189,9 +183,21 @@ const CreateProfile = () => {
         return;
       }
 
-      const knownProfileId = localStorage.getItem(getUserProfileKey(user.uid));
+      let knownProfileId = localStorage.getItem(getUserProfileKey(user.uid));
+
       if (!knownProfileId) {
-        return;
+        try {
+          const recovered = await ApiService.getUserByOwnerAuthUid(user.uid);
+          const recoveredId = recovered?.data?.uniqueId;
+
+          if (recoveredId) {
+            localStorage.setItem(getUserProfileKey(user.uid), recoveredId);
+            knownProfileId = recoveredId;
+          }
+        } catch {
+          // No existing server profile found for this account; user can create one.
+          return;
+        }
       }
 
       try {

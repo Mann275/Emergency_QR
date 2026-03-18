@@ -95,7 +95,7 @@ const translations = {
     profileCreatedToast: "Profile created successfully!",
     genericError: "Something went wrong.",
     personalInfo: "Personal Info",
-    fullName: "Full name",
+    fullName: "Name",
     bloodGroup: "Blood group",
     selectBloodGroup: "Select blood group",
     dob: "Date of birth",
