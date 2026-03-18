@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import ApiService from "../utils/api";
 import {
@@ -21,7 +21,6 @@ import {
 import { useLanguage } from "../context/LanguageContext";
 import { IN, US, GB, AU } from "country-flag-icons/react/3x2";
 import { toast } from "react-hot-toast";
-import { showToast } from "../utils/toast.jsx";
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const genderOptions = ["Male", "Female", "Other", "Prefer not to say"];
@@ -40,6 +39,26 @@ const parsePhone = (raw) => {
   return ["+91", str.replace(/^\+?\d{1,3}\s*/, "")];
 };
 
+const buildComparableSnapshot = ({ formData, phoneCode, emergencyCode }) => ({
+  name: String(formData.name || "").trim(),
+  dateOfBirth: String(formData.dateOfBirth || ""),
+  bloodGroup: String(formData.bloodGroup || ""),
+  gender: String(formData.gender || ""),
+  phone: `${phoneCode} ${String(formData.phone || "").trim()}`.trim(),
+  emergencyContact: {
+    name: String(formData.emergencyContact?.name || "").trim(),
+    phone:
+      `${emergencyCode} ${String(formData.emergencyContact?.phone || "").trim()}`.trim(),
+  },
+  alternatePhone: String(formData.alternatePhone || "").trim(),
+  disease: Boolean(formData.disease),
+  diseaseDetails: String(formData.diseaseDetails || "").trim(),
+  allergies: String(formData.allergies || "").trim(),
+  medications: String(formData.medications || "").trim(),
+  address: String(formData.address || "").trim(),
+  notes: String(formData.notes || "").trim(),
+});
+
 const EditProfile = () => {
   const { t } = useLanguage();
   const { id } = useParams();
@@ -50,6 +69,7 @@ const EditProfile = () => {
   const [accessDenied, setAccessDenied] = useState(false);
   const [phoneCode, setPhoneCode] = useState("+91");
   const [emergencyCode, setEmergencyCode] = useState("+91");
+  const [initialSnapshot, setInitialSnapshot] = useState(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -94,7 +114,7 @@ const EditProfile = () => {
             dob = dt.toISOString().split("T")[0];
           }
 
-          setFormData({
+          const nextFormData = {
             name: d.name || "",
             dateOfBirth: dob,
             bloodGroup: d.bloodGroup || "",
@@ -111,7 +131,16 @@ const EditProfile = () => {
             medications: d.medications || "",
             address: d.address || "",
             notes: d.notes || "",
-          });
+          };
+
+          setFormData(nextFormData);
+          setInitialSnapshot(
+            buildComparableSnapshot({
+              formData: nextFormData,
+              phoneCode: pCode,
+              emergencyCode: eCode,
+            }),
+          );
         }
       } catch (err) {
         toast.error(err.message || "Failed to load profile.");
@@ -155,6 +184,11 @@ const EditProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!hasChanges) {
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -181,11 +215,7 @@ const EditProfile = () => {
 
       const response = await ApiService.updateUser(id, payload);
       if (response.success) {
-        showToast({
-          message: t.profileUpdated || "Profile updated successfully!",
-        });
-
-        navigate(`/emergency/${id}`);
+        navigate(`/success/${id}`, { replace: true });
       }
     } catch (err) {
       toast.error(err.message || "Something went wrong.");
@@ -219,14 +249,20 @@ const EditProfile = () => {
     color: "var(--muted)",
   };
 
-  const SectionTitle = ({ icon: Icon, title, copy }) => (
+  const SectionTitle = ({ icon: Icon, title, copy, titleKey, copyKey }) => (
     <div className="mb-6 sm:mb-8">
-      <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/60 px-3 py-2 text-xs font-semibold text-slate-600 backdrop-blur-xl">
+      <div
+        className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/60 px-3 py-2 text-xs font-semibold text-slate-600 backdrop-blur-xl"
+        data-t={titleKey}
+      >
         <Icon size={14} className="text-[var(--accent)]" />
         {title}
       </div>
       {copy && (
-        <p className="mt-3 max-w-2xl text-base sm:text-lg leading-relaxed text-[var(--muted)]">
+        <p
+          className="mt-3 max-w-2xl text-base sm:text-lg leading-relaxed text-[var(--muted)]"
+          data-t={copyKey}
+        >
           {copy}
         </p>
       )}
@@ -305,6 +341,20 @@ const EditProfile = () => {
     );
   };
 
+  const hasChanges = useMemo(() => {
+    if (!initialSnapshot) {
+      return false;
+    }
+
+    const currentSnapshot = buildComparableSnapshot({
+      formData,
+      phoneCode,
+      emergencyCode,
+    });
+
+    return JSON.stringify(currentSnapshot) !== JSON.stringify(initialSnapshot);
+  }, [formData, phoneCode, emergencyCode, initialSnapshot]);
+
   // Loading skeleton
   if (fetching) {
     return (
@@ -317,7 +367,9 @@ const EditProfile = () => {
                 className="mx-auto text-[var(--accent)] animate-pulse"
               />
               <p className="mt-4 text-base font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
-                {t.retrieving || "Loading profile..."}
+                <span data-t="retrieving">
+                  {t.retrieving || "Loading profile..."}
+                </span>
               </p>
             </div>
           </div>
@@ -339,16 +391,21 @@ const EditProfile = () => {
               <h1
                 className="mt-3 text-2xl sm:text-3xl font-bold text-[var(--ink)]"
                 style={{ fontFamily: "var(--font-heading)" }}
+                data-t="editNotAllowed"
               >
                 Edit not allowed
               </h1>
-              <p className="mt-3 text-[var(--muted)]">
+              <p
+                className="mt-3 text-[var(--muted)]"
+                data-t="editNotAllowedCopy"
+              >
                 Only the original creator can edit this profile from the same
                 device/browser.
               </p>
               <Link
                 to={`/emergency/${id}`}
                 className="stark-btn mt-6 inline-flex gap-2"
+                data-t="backToProfile"
               >
                 <ArrowLeft size={14} /> Back to profile
               </Link>
@@ -375,6 +432,7 @@ const EditProfile = () => {
                 <h1
                   className="text-3xl sm:text-5xl font-bold text-[var(--ink)] tracking-tight leading-tight"
                   style={{ fontFamily: "var(--font-heading)" }}
+                  data-t="editTitle"
                 >
                   {t.editTitle || "Edit your profile"}
                 </h1>
@@ -388,7 +446,10 @@ const EditProfile = () => {
                   </button>
                   <div className="absolute left-1/2 top-full z-30 mt-2 w-64 -translate-x-1/2 rounded-2xl border border-white/70 bg-white/95 p-3 text-left text-[12px] font-medium tracking-normal text-[var(--muted)] shadow-[0_28px_60px_rgba(20,10,18,0.25)] backdrop-blur-xl opacity-0 invisible transition-all duration-300 -translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 pointer-events-none origin-top">
                     <div className="absolute -top-1 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border border-white/70 bg-white/95"></div>
-                    Update your medical details. Changes will reflect on your emergency QR immediately.
+                    <span data-t="editDesc">
+                      Update your medical details. Changes will reflect on your
+                      emergency QR immediately.
+                    </span>
                   </div>
                 </div>
               </div>
@@ -402,7 +463,9 @@ const EditProfile = () => {
             <SectionTitle
               icon={User}
               title={t.personalInfo}
+              titleKey="personalInfo"
               copy="Fill only the information a responder should see immediately."
+              copyKey="personalInfoCopy"
             />
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2">
@@ -500,7 +563,9 @@ const EditProfile = () => {
             <SectionTitle
               icon={Phone}
               title={t.emergencyContacts}
+              titleKey="emergencyContacts"
               copy="These numbers appear high on the emergency profile, so keep them accurate."
+              copyKey="emergencyContactsCopy"
             />
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2">
@@ -570,7 +635,9 @@ const EditProfile = () => {
             <SectionTitle
               icon={HeartPulse}
               title={t.medicalHistory}
+              titleKey="medicalHistory"
               copy="Add only the details that are helpful during an emergency."
+              copyKey="medicalHistoryCopy"
             />
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2">
@@ -630,14 +697,15 @@ const EditProfile = () => {
 
             <div className="mt-10 flex flex-col gap-5 border-t border-[var(--line)] pt-6 sm:flex-row sm:items-center sm:justify-between">
               <p className="max-w-md text-base sm:text-lg leading-relaxed text-[var(--muted)]">
-                {t.disclaimer}
+                <span data-t="disclaimer">{t.disclaimer}</span>
               </p>
 
               <div className="flex items-center gap-3">
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || !hasChanges}
                   className="stark-btn gap-2 shrink-0 whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-70"
+                  data-t="updateProfile"
                 >
                   {loading ? (
                     <>
@@ -651,6 +719,7 @@ const EditProfile = () => {
                 <Link
                   to={`/emergency/${id}`}
                   className="ghost-btn gap-2 px-5 py-3 text-sm shrink-0 border border-[var(--line)] text-[var(--muted)]"
+                  data-t="cancelEdit"
                 >
                   {t.cancelEdit || "Cancel"}
                 </Link>

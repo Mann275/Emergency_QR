@@ -48,6 +48,9 @@ npm run dev
 
 Server runs on `http://localhost:5000`.
 
+For production platforms (Render/Railway/etc.), use `npm start` instead of `npm run dev`.
+If Atlas SRV DNS fails (e.g. `querySrv ESERVFAIL _mongodb._tcp...`), use a non-SRV Mongo URI (`mongodb://...`) or fix DNS/network settings.
+
 ### 3) Client
 
 ```bash
@@ -92,6 +95,8 @@ Use these templates:
 - `POST /api/users/create` create or update owner profile while keeping same QR
 - `GET /api/users/:id` fetch public emergency profile
 - `PUT /api/users/update/:id` owner-authorized profile update
+- `POST /api/users/auth/forgot-password/request` send OTP email for reset
+- `POST /api/users/auth/forgot-password/reset` verify OTP and reset password
 - `GET /api/health` backend health check
 
 ## Security Notes

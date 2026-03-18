@@ -1,12 +1,23 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import ApiService from "../utils/api";
 
-const ServerHealthContext = createContext();
+const fallbackServerHealth = {
+  isHealthy: true,
+  isChecking: false,
+  lastChecked: null,
+  error: null,
+  recheckHealth: async () => {},
+};
+
+const ServerHealthContext = createContext(fallbackServerHealth);
 
 export const useServerHealth = () => {
   const context = useContext(ServerHealthContext);
-  if (!context) {
-    throw new Error("useServerHealth must be used within ServerHealthProvider");
+  if (!context || typeof context !== "object") {
+    console.warn(
+      "ServerHealthContext unavailable, using fallback health state.",
+    );
+    return fallbackServerHealth;
   }
   return context;
 };

@@ -34,57 +34,74 @@ const getVariantStyles = (variant) => {
   };
 };
 
-export const showToast = ({ title, message, variant = "success", duration, id }) => {
-  const { icon: Icon, iconBg, iconColor, border, background, textColor } =
-    getVariantStyles(variant);
-  const hasTitle = Boolean(title && message);
-  const isMultiLine = hasTitle || (message && message.length > 40);
+export const showToast = ({
+  title,
+  message,
+  variant = "success",
+  duration,
+  id,
+}) => {
+  const normalizedTitle = typeof title === "string" ? title.trim() : "";
+  const normalizedMessage = typeof message === "string" ? message.trim() : "";
+
+  if (!normalizedTitle && !normalizedMessage) {
+    return;
+  }
+
+  const {
+    icon: Icon,
+    iconBg,
+    iconColor,
+    border,
+    background,
+    textColor,
+  } = getVariantStyles(variant);
+  const content = [normalizedTitle, normalizedMessage]
+    .filter(Boolean)
+    .join(normalizedTitle && normalizedMessage ? " - " : "");
+  const dynamicWidth = Math.min(
+    420,
+    Math.max(260, Math.round(content.length * 5.8) + 80),
+  );
 
   toast.custom(
     (t) => (
       <div
-        className={`pointer-events-auto flex w-fit max-w-[min(400px,94vw)] ${
-          isMultiLine ? "items-start" : "items-center"
-        } gap-4 rounded-[24px] border px-5 py-4 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] backdrop-blur-2xl transition-all duration-500 ease-out ${
+        className={`pointer-events-auto flex items-center gap-2.5 rounded-[14px] border px-3 py-2 shadow-[0_10px_24px_-12px_rgba(0,0,0,0.24)] backdrop-blur-2xl transition-all duration-500 ease-out ${
           t.visible
             ? "opacity-100 translate-y-0 scale-100"
             : "opacity-0 translate-y-6 scale-90"
         }`}
         style={{
+          width: `min(${dynamicWidth}px, 92vw)`,
+          minHeight: "40px",
+          maxWidth: "92vw",
           borderColor: border,
           background: background,
-          boxShadow: `0 15px 40px -10px ${border.replace("0.28", "0.15")}, 0 10px 20px -5px rgba(0,0,0,0.04)`,
+          boxShadow: `0 10px 28px -14px ${border.replace("0.28", "0.16")}, 0 6px 14px -8px rgba(0,0,0,0.1)`,
         }}
       >
         <div
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full shadow-inner"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
           style={{ background: iconBg, color: iconColor }}
         >
-          <Icon size={22} strokeWidth={2.8} />
+          <Icon size={14} strokeWidth={2.6} />
         </div>
-        <div className="flex-1 min-w-0 flex flex-col justify-center">
-          {title && (
-            <h4
-              className="text-[14px] sm:text-[15.5px] font-extrabold leading-[1.2] tracking-tight"
-              style={{ color: textColor }}
-            >
-              {title}
-            </h4>
-          )}
-          {message && (
-            <p
-              className={`${
-                title ? "mt-1.5" : ""
-              } text-[13.5px] font-semibold leading-[1.4] opacity-90`}
-              style={{ color: textColor }}
-            >
-              {message}
-            </p>
-          )}
+        <div className="min-w-0 flex-1">
+          <p
+            className="text-[12px] font-semibold leading-[1.2]"
+            style={{
+              color: textColor,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {content}
+          </p>
         </div>
       </div>
     ),
     { duration: duration ?? 3500, id },
   );
 };
-

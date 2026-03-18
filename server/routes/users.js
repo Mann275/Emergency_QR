@@ -5,11 +5,18 @@ const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const rateLimit = require("express-rate-limit");
+const validator = require("validator");
 const User = require("../models/User");
+const PasswordResetOtp = require("../models/PasswordResetOtp");
+const { sendOtpMail } = require("../utils/mail");
+const { resetFirebasePasswordByEmail } = require("../utils/firebaseAdmin");
 
 const router = express.Router();
 const WRITE_RATE_LIMIT_MAX = 60;
 const EDIT_TOKEN_EXPIRES_IN = "30d";
+const OTP_DIGITS = 6;
+const OTP_EXPIRES_MS = 10 * 60 * 1000;
+const OTP_MAX_ATTEMPTS = 5;
 
 const writeLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -21,8 +28,36 @@ const writeLimiter = rateLimit({
   },
 });
 
+const forgotPasswordRequestLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: "Too many OTP requests. Please try again later.",
+  },
+});
+
+const forgotPasswordResetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: "Too many reset attempts. Please try again later.",
+  },
+});
+
 const getJwtSecret = () =>
   process.env.JWT_SECRET || "dev-only-change-this-secret";
+
+const normalizeEmail = (value = "") => String(value).trim().toLowerCase();
+
+const generateOtp = () => {
+  const min = 10 ** (OTP_DIGITS - 1);
+  const max = 10 ** OTP_DIGITS;
+  return String(Math.floor(Math.random() * (max - min)) + min);
+};
 
 const sanitizePayload = (value) => {
   if (Array.isArray(value)) {
@@ -386,6 +421,154 @@ router.put("/update/:id", writeLimiter, async (req, res) => {
     });
   }
 });
+
+// @route   POST /api/users/auth/forgot-password/request
+// @desc    Send OTP to email for password reset
+// @access  Public
+router.post(
+  "/auth/forgot-password/request",
+  forgotPasswordRequestLimiter,
+  async (req, res) => {
+    try {
+      const email = normalizeEmail(req.body?.email);
+
+      if (!validator.isEmail(email)) {
+        return res.status(400).json({
+          error: "Valid email is required",
+        });
+      }
+
+      const otp = generateOtp();
+      const otpHash = await bcrypt.hash(otp, 10);
+      const expiresAt = new Date(Date.now() + OTP_EXPIRES_MS);
+
+      await PasswordResetOtp.findOneAndUpdate(
+        { email },
+        {
+          email,
+          otpHash,
+          expiresAt,
+          attempts: 0,
+        },
+        {
+          upsert: true,
+          new: true,
+          setDefaultsOnInsert: true,
+        },
+      );
+
+      await sendOtpMail({ otp, email });
+
+      return res.json({
+        success: true,
+        message: "OTP has been sent to your email.",
+      });
+    } catch (error) {
+      console.error("Error sending password reset OTP:", error);
+      return res.status(500).json({
+        error: "Failed to send OTP email",
+        message: "Please try again later.",
+      });
+    }
+  },
+);
+
+// @route   POST /api/users/auth/forgot-password/reset
+// @desc    Verify OTP and reset Firebase password
+// @access  Public
+router.post(
+  "/auth/forgot-password/reset",
+  forgotPasswordResetLimiter,
+  async (req, res) => {
+    try {
+      const email = normalizeEmail(req.body?.email);
+      const otp = String(req.body?.otp || "").trim();
+      const newPassword = String(req.body?.newPassword || "");
+
+      if (!validator.isEmail(email)) {
+        return res.status(400).json({
+          error: "Valid email is required",
+        });
+      }
+
+      if (!/^\d{6}$/.test(otp)) {
+        return res.status(400).json({
+          error: "Invalid OTP format",
+          message: "OTP must be a 6-digit number.",
+        });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({
+          error: "Invalid password",
+          message: "Password must be at least 6 characters long.",
+        });
+      }
+
+      const otpRecord = await PasswordResetOtp.findOne({ email });
+      if (!otpRecord) {
+        return res.status(400).json({
+          error: "OTP expired or not found",
+        });
+      }
+
+      if (otpRecord.expiresAt.getTime() < Date.now()) {
+        await PasswordResetOtp.deleteOne({ email });
+        return res.status(400).json({
+          error: "OTP expired",
+          message: "Please request a new OTP.",
+        });
+      }
+
+      if (otpRecord.attempts >= OTP_MAX_ATTEMPTS) {
+        await PasswordResetOtp.deleteOne({ email });
+        return res.status(429).json({
+          error: "Too many invalid OTP attempts",
+          message: "Please request a new OTP.",
+        });
+      }
+
+      const otpMatches = await bcrypt.compare(otp, otpRecord.otpHash);
+      if (!otpMatches) {
+        otpRecord.attempts += 1;
+        await otpRecord.save();
+        return res.status(400).json({
+          error: "Invalid OTP",
+          message: "OTP does not match.",
+        });
+      }
+
+      await resetFirebasePasswordByEmail(email, newPassword);
+      await PasswordResetOtp.deleteOne({ email });
+
+      return res.json({
+        success: true,
+        message: "Password reset successful.",
+      });
+    } catch (error) {
+      console.error("Error resetting password with OTP:", error);
+
+      if (error?.code === "auth/user-not-found") {
+        return res.status(404).json({
+          error: "Account not found",
+          message: "No account exists with this email.",
+        });
+      }
+
+      if (error?.code === "auth/invalid-password") {
+        return res.status(400).json({
+          error: "Invalid password",
+          message: "Password does not meet Firebase requirements.",
+        });
+      }
+
+      return res.status(500).json({
+        error: "Failed to reset password",
+        message: "Please try again later.",
+      });
+    }
+  },
+);
 
 // @route   GET /api/users
 // @desc    Get all users (for admin purposes - remove in production)

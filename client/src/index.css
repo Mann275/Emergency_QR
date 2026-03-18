@@ -89,7 +89,7 @@ a {
   }
 
   .glass-nav {
-    @apply fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 w-[calc(100%-3.5rem)] sm:w-[calc(100%-3rem)] max-w-lg sm:max-w-4xl lg:max-w-6xl z-50 rounded-[28px] border transition-base;
+    @apply fixed top-1 sm:top-3 left-1/2 -translate-x-1/2 w-[calc(100%-3.5rem)] sm:w-[calc(100%-3rem)] max-w-lg sm:max-w-4xl lg:max-w-6xl z-50 rounded-[28px] border transition-base;
     background: var(--glass-bg);
     border-color: var(--glass-border);
     backdrop-filter: blur(22px) saturate(180%);

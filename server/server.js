@@ -14,9 +14,11 @@ dns.setServers(["8.8.8.8", "8.8.4.4"]);
 const app = express();
 const PORT = process.env.PORT || 5000;
 const API_RATE_LIMIT_MAX = 200;
+const DB_RETRY_DELAY_MS = 10000;
 const mongoUri =
   (process.env.MONGODB_URI || "").trim() ||
   "mongodb://127.0.0.1:27017/emergencyqr";
+let isDatabaseConnected = false;
 
 // CORS Configuration
 const corsOptions = {
@@ -78,9 +80,12 @@ const connectDB = async () => {
 
     const conn = await mongoose.connect(mongoUri);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
+    isDatabaseConnected = true;
   } catch (error) {
+    isDatabaseConnected = false;
+
     if (
-      error.code === "ECONNREFUSED" &&
+      error.code === "ESERVFAIL" ||
       String(error.hostname || "").includes("_mongodb._tcp")
     ) {
       console.error(
@@ -89,7 +94,10 @@ const connectDB = async () => {
     }
 
     console.error("Database connection error:", error);
-    process.exit(1);
+    console.warn(
+      `Retrying database connection in ${DB_RETRY_DELAY_MS / 1000}s...`,
+    );
+    setTimeout(connectDB, DB_RETRY_DELAY_MS);
   }
 };
 
@@ -101,6 +109,7 @@ app.get("/api/health", (req, res) => {
   res.json({
     message: "Emergency QR API is running!",
     timestamp: new Date().toISOString(),
+    database: isDatabaseConnected ? "connected" : "disconnected",
   });
 });
 
@@ -121,12 +130,12 @@ app.use((error, req, res, next) => {
   });
 });
 
-// Connect to database and start server
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`📱 Emergency QR API ready at http://localhost:${PORT}`);
-  });
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📱 Emergency QR API ready at http://localhost:${PORT}`);
 });
+
+// Connect to database in background with retries.
+connectDB();
 
 module.exports = app;

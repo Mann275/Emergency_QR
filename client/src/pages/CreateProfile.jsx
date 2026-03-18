@@ -23,12 +23,7 @@ import { toast } from "react-hot-toast";
 import { showToast } from "../utils/toast.jsx";
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-const defaultGenderOptions = [
-  "Male",
-  "Female",
-  "Other",
-  "Prefer not to say",
-];
+const defaultGenderOptions = ["Male", "Female", "Other", "Prefer not to say"];
 const PHONE_CODES = ["+91", "+1", "+44", "+61"];
 const USER_PROFILE_KEY_PREFIX = "emergency_user_profile:";
 
@@ -276,14 +271,20 @@ const CreateProfile = () => {
     color: "var(--muted)",
   };
 
-  const SectionTitle = ({ icon: Icon, title, copy }) => (
+  const SectionTitle = ({ icon: Icon, title, copy, titleKey, copyKey }) => (
     <div className="mb-6 sm:mb-8">
-      <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/60 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-slate-600 backdrop-blur-xl">
+      <div
+        className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/60 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-slate-600 backdrop-blur-xl"
+        data-t={titleKey}
+      >
         <Icon size={14} className="text-[var(--accent)]" />
         {title}
       </div>
       {copy && (
-        <p className="mt-3 max-w-2xl text-base sm:text-lg leading-relaxed text-[var(--muted)]">
+        <p
+          className="mt-3 max-w-2xl text-base sm:text-lg leading-relaxed text-[var(--muted)]"
+          data-t={copyKey}
+        >
           {copy}
         </p>
       )}
@@ -370,9 +371,14 @@ const CreateProfile = () => {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="glass-card p-6 sm:p-8 text-center">
-          <Loader2 size={24} className="mx-auto animate-spin text-[var(--accent)]" />
+          <Loader2
+            size={24}
+            className="mx-auto animate-spin text-[var(--accent)]"
+          />
           <p className="mt-3 text-sm font-semibold text-[var(--muted)]">
-            {t.authChecking || "Checking authentication..."}
+            <span data-t="authChecking">
+              {t.authChecking || "Checking authentication..."}
+            </span>
           </p>
         </div>
       </div>
@@ -393,7 +399,7 @@ const CreateProfile = () => {
       className="pb-[calc(8rem+env(safe-area-inset-bottom))] sm:pb-24"
       style={{ "--line": "rgba(35, 19, 26, 0.25)" }}
     >
-      <section className="pt-16 sm:pt-24 lg:pt-28">
+      <section className="pt-24 sm:pt-24 lg:pt-28">
         <div className="main-wrap max-w-3xl">
           <div className="mb-3 animate-slide relative z-30">
             <div className="mx-auto flex max-w-lg items-center justify-center gap-3 text-center">
@@ -406,6 +412,7 @@ const CreateProfile = () => {
                 <h1
                   className="text-2xl sm:text-4xl font-bold text-[var(--ink)] tracking-tight leading-tight"
                   style={{ fontFamily: "var(--font-heading)" }}
+                  data-t="createTitle"
                 >
                   {t.createTitle}
                 </h1>
@@ -433,304 +440,312 @@ const CreateProfile = () => {
             {user && isProfilePrefilling ? (
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
                 <Loader2 size={14} className="animate-spin" />{" "}
-                {t.savedDetailsLoading || "Loading your saved details"}
+                <span data-t="savedDetailsLoading">
+                  {t.savedDetailsLoading || "Loading your saved details"}
+                </span>
               </div>
             ) : user && existingProfileId ? (
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
                 <HeartPulse size={14} className="text-[var(--accent)]" />{" "}
-                {t.existingProfileDetected ||
-                  "Existing profile detected. Updating keeps the same QR."}
+                <span data-t="existingProfileDetected">
+                  {t.existingProfileDetected ||
+                    "Existing profile detected. Updating keeps the same QR."}
+                </span>
               </div>
             ) : null}
 
-              <SectionTitle
-                icon={User}
-                title={t.personalInfo}
-                copy={
-                  t.personalInfoCopy ||
-                  "Fill only the information a responder should see immediately."
-                }
-              />
-              <div className="grid gap-5 sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                  <label style={labelStyle}>
-                    <User size={14} /> {t.fullName}
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
+            <SectionTitle
+              icon={User}
+              title={t.personalInfo}
+              titleKey="personalInfo"
+              copy={
+                t.personalInfoCopy ||
+                "Fill only the information a responder should see immediately."
+              }
+              copyKey="personalInfoCopy"
+            />
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label style={labelStyle}>
+                  <User size={14} /> {t.fullName}
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder={t.placeholderFullName || "E.g. John Doe"}
+                  required
+                  readOnly={isReadOnly}
+                  style={fieldStylePreview}
+                />
+              </div>
+
+              <div>
+                <label style={labelStyle}>
+                  <Droplets size={14} /> {t.bloodGroup}
+                </label>
+                <div className="relative">
+                  <select
+                    name="bloodGroup"
+                    value={formData.bloodGroup}
                     onChange={handleChange}
-                    placeholder={t.placeholderFullName || "E.g. John Doe"}
+                    required
+                    disabled={isReadOnly}
+                    style={{
+                      ...(isReadOnly ? fieldStylePreview : fieldStyle),
+                      appearance: "none",
+                      paddingRight: "44px",
+                    }}
+                  >
+                    <option value="">{t.selectBloodGroup}</option>
+                    {bloodGroups.map((group) => (
+                      <option key={group} value={group}>
+                        {group}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown
+                    size={16}
+                    className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 opacity-40"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={labelStyle}>
+                  <UserCheck size={14} /> {t.gender}
+                </label>
+                <div className="relative">
+                  <select
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleChange}
+                    required
+                    disabled={isReadOnly}
+                    style={{
+                      ...(isReadOnly ? fieldStylePreview : fieldStyle),
+                      appearance: "none",
+                      paddingRight: "44px",
+                    }}
+                  >
+                    <option value="">{t.selectGender}</option>
+                    {genderOptions.map((gender) => (
+                      <option key={gender} value={gender}>
+                        {gender}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown
+                    size={16}
+                    className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 opacity-40"
+                  />
+                </div>
+              </div>
+
+              <div className="sm:col-span-2">
+                <label style={labelStyle}>
+                  <Calendar size={14} /> {t.dob}
+                </label>
+                <input
+                  type="date"
+                  name="dateOfBirth"
+                  value={formData.dateOfBirth}
+                  onChange={handleChange}
+                  required
+                  readOnly={isReadOnly}
+                  style={fieldStylePreview}
+                />
+              </div>
+            </div>
+
+            <div className="my-8 h-px bg-[var(--line)]"></div>
+
+            <SectionTitle
+              icon={Phone}
+              title={t.emergencyContacts}
+              titleKey="emergencyContacts"
+              copy={
+                t.emergencyContactsCopy ||
+                "These numbers appear high on the emergency profile, so keep them accurate."
+              }
+              copyKey="emergencyContactsCopy"
+            />
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label style={labelStyle}>
+                  <Phone size={14} /> {t.yourPhone}
+                </label>
+                <div className="flex w-full gap-3">
+                  <CustomPhoneSelector
+                    value={phoneCode}
+                    onChange={setPhoneCode}
+                    disabled={isReadOnly}
+                  />
+                  <input
+                    className="min-w-0 flex-1"
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={(e) => handlePhoneChange(e, "phone")}
+                    placeholder={t.placeholderPhone || "1234567890"}
                     required
                     readOnly={isReadOnly}
                     style={fieldStylePreview}
                   />
                 </div>
+              </div>
 
-                <div>
-                  <label style={labelStyle}>
-                    <Droplets size={14} /> {t.bloodGroup}
-                  </label>
-                  <div className="relative">
-                    <select
-                      name="bloodGroup"
-                      value={formData.bloodGroup}
-                      onChange={handleChange}
-                      required
-                      disabled={isReadOnly}
-                      style={{
-                        ...(isReadOnly ? fieldStylePreview : fieldStyle),
-                        appearance: "none",
-                        paddingRight: "44px",
-                      }}
-                    >
-                      <option value="">{t.selectBloodGroup}</option>
-                      {bloodGroups.map((group) => (
-                        <option key={group} value={group}>
-                          {group}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown
-                      size={16}
-                      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 opacity-40"
-                    />
-                  </div>
-                </div>
+              <div>
+                <label style={labelStyle}>
+                  <UserCheck size={14} /> {t.contactName}
+                </label>
+                <input
+                  type="text"
+                  name="emergencyContact.name"
+                  value={formData.emergencyContact.name}
+                  onChange={handleChange}
+                  placeholder={t.placeholderContactName || "Someone you trust"}
+                  required
+                  readOnly={isReadOnly}
+                  style={fieldStylePreview}
+                />
+              </div>
 
-                <div>
-                  <label style={labelStyle}>
-                    <UserCheck size={14} /> {t.gender}
-                  </label>
-                  <div className="relative">
-                    <select
-                      name="gender"
-                      value={formData.gender}
-                      onChange={handleChange}
-                      required
-                      disabled={isReadOnly}
-                      style={{
-                        ...(isReadOnly ? fieldStylePreview : fieldStyle),
-                        appearance: "none",
-                        paddingRight: "44px",
-                      }}
-                    >
-                      <option value="">{t.selectGender}</option>
-                      {genderOptions.map((gender) => (
-                        <option key={gender} value={gender}>
-                          {gender}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown
-                      size={16}
-                      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 opacity-40"
-                    />
-                  </div>
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label style={labelStyle}>
-                    <Calendar size={14} /> {t.dob}
-                  </label>
+              <div>
+                <label style={labelStyle}>
+                  <Phone size={14} /> {t.emergencyPhone}
+                </label>
+                <div className="flex w-full gap-3">
+                  <CustomPhoneSelector
+                    value={emergencyCode}
+                    onChange={setEmergencyCode}
+                    disabled={isReadOnly}
+                  />
                   <input
-                    type="date"
-                    name="dateOfBirth"
-                    value={formData.dateOfBirth}
-                    onChange={handleChange}
+                    className="min-w-0 flex-1"
+                    type="tel"
+                    name="emergencyContact.phone"
+                    value={formData.emergencyContact.phone}
+                    onChange={(e) =>
+                      handlePhoneChange(e, "emergencyContact.phone")
+                    }
+                    placeholder={t.placeholderPhone || "1234567890"}
                     required
                     readOnly={isReadOnly}
                     style={fieldStylePreview}
                   />
                 </div>
               </div>
+            </div>
 
-              <div className="my-8 h-px bg-[var(--line)]"></div>
+            <div className="my-8 h-px bg-[var(--line)]"></div>
 
-              <SectionTitle
-                icon={Phone}
-                title={t.emergencyContacts}
-                copy={
-                  t.emergencyContactsCopy ||
-                  "These numbers appear high on the emergency profile, so keep them accurate."
-                }
-              />
-              <div className="grid gap-5 sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                  <label style={labelStyle}>
-                    <Phone size={14} /> {t.yourPhone}
-                  </label>
-                  <div className="flex w-full gap-3">
-                    <CustomPhoneSelector
-                      value={phoneCode}
-                      onChange={setPhoneCode}
-                      disabled={isReadOnly}
-                    />
-                    <input
-                      className="min-w-0 flex-1"
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={(e) => handlePhoneChange(e, "phone")}
-                      placeholder={t.placeholderPhone || "1234567890"}
-                      required
-                      readOnly={isReadOnly}
-                      style={fieldStylePreview}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label style={labelStyle}>
-                    <UserCheck size={14} /> {t.contactName}
-                  </label>
-                  <input
-                    type="text"
-                    name="emergencyContact.name"
-                    value={formData.emergencyContact.name}
-                    onChange={handleChange}
-                    placeholder={
-                      t.placeholderContactName || "Someone you trust"
-                    }
-                    required
-                    readOnly={isReadOnly}
-                    style={fieldStylePreview}
-                  />
-                </div>
-
-                <div>
-                  <label style={labelStyle}>
-                    <Phone size={14} /> {t.emergencyPhone}
-                  </label>
-                  <div className="flex w-full gap-3">
-                    <CustomPhoneSelector
-                      value={emergencyCode}
-                      onChange={setEmergencyCode}
-                      disabled={isReadOnly}
-                    />
-                    <input
-                      className="min-w-0 flex-1"
-                      type="tel"
-                      name="emergencyContact.phone"
-                      value={formData.emergencyContact.phone}
-                      onChange={(e) =>
-                        handlePhoneChange(e, "emergencyContact.phone")
-                      }
-                      placeholder={t.placeholderPhone || "1234567890"}
-                      required
-                      readOnly={isReadOnly}
-                      style={fieldStylePreview}
-                    />
-                  </div>
-                </div>
+            <SectionTitle
+              icon={HeartPulse}
+              title={t.medicalHistory}
+              titleKey="medicalHistory"
+              copy={
+                t.medicalHistoryCopy ||
+                "Add only the details that are helpful during an emergency."
+              }
+              copyKey="medicalHistoryCopy"
+            />
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label style={labelStyle}>
+                  <AlertTriangle size={14} /> {t.chronicConditions}
+                </label>
+                <textarea
+                  name="diseaseDetails"
+                  value={formData.diseaseDetails}
+                  onChange={handleChange}
+                  placeholder={
+                    t.placeholderCondition || "Asthma, diabetes, epilepsy..."
+                  }
+                  readOnly={isReadOnly}
+                  style={{ ...fieldStylePreview, minHeight: "96px" }}
+                />
               </div>
 
-              <div className="my-8 h-px bg-[var(--line)]"></div>
-
-              <SectionTitle
-                icon={HeartPulse}
-                title={t.medicalHistory}
-                copy={
-                  t.medicalHistoryCopy ||
-                  "Add only the details that are helpful during an emergency."
-                }
-              />
-              <div className="grid gap-5 sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                  <label style={labelStyle}>
-                    <AlertTriangle size={14} /> {t.chronicConditions}
-                  </label>
-                  <textarea
-                    name="diseaseDetails"
-                    value={formData.diseaseDetails}
-                    onChange={handleChange}
-                    placeholder={
-                      t.placeholderCondition || "Asthma, diabetes, epilepsy..."
-                    }
-                    readOnly={isReadOnly}
-                    style={{ ...fieldStylePreview, minHeight: "96px" }}
-                  />
-                </div>
-
-                <div>
-                  <label style={labelStyle}>
-                    <Droplets size={14} /> {t.knownAllergies}
-                  </label>
-                  <input
-                    type="text"
-                    name="allergies"
-                    value={formData.allergies}
-                    onChange={handleChange}
-                    placeholder={
-                      t.placeholderAllergies || "Penicillin, peanuts..."
-                    }
-                    readOnly={isReadOnly}
-                    style={fieldStylePreview}
-                  />
-                </div>
-
-                <div>
-                  <label style={labelStyle}>
-                    <Pill size={14} /> {t.medications}
-                  </label>
-                  <input
-                    type="text"
-                    name="medications"
-                    value={formData.medications}
-                    onChange={handleChange}
-                    placeholder={
-                      t.placeholderMedications || "Current medication..."
-                    }
-                    readOnly={isReadOnly}
-                    style={fieldStylePreview}
-                  />
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label style={labelStyle}>
-                    <FileText size={14} /> {t.responderNotes}
-                  </label>
-                  <textarea
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleChange}
-                    placeholder={
-                      t.placeholderNotes ||
-                      "Example: carries inhaler in bag pocket."
-                    }
-                    readOnly={isReadOnly}
-                    style={{ ...fieldStylePreview, minHeight: "88px" }}
-                  />
-                </div>
+              <div>
+                <label style={labelStyle}>
+                  <Droplets size={14} /> {t.knownAllergies}
+                </label>
+                <input
+                  type="text"
+                  name="allergies"
+                  value={formData.allergies}
+                  onChange={handleChange}
+                  placeholder={
+                    t.placeholderAllergies || "Penicillin, peanuts..."
+                  }
+                  readOnly={isReadOnly}
+                  style={fieldStylePreview}
+                />
               </div>
 
-              <div className="mt-10 flex flex-col gap-5 border-t border-[var(--line)] pt-6 sm:flex-row sm:items-center sm:justify-between">
-                <p className="max-w-md text-base sm:text-lg leading-relaxed text-[var(--muted)]">
-                  {t.disclaimer}
-                </p>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="stark-btn gap-3 shrink-0 whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin" /> {t.working}
-                    </>
-                  ) : (
-                    <>
-                      {existingProfileId
-                        ? t.updateProfile || "Save changes"
-                        : t.generateQr}{" "}
-                      <ArrowRight size={16} />
-                    </>
-                  )}
-                </button>
+              <div>
+                <label style={labelStyle}>
+                  <Pill size={14} /> {t.medications}
+                </label>
+                <input
+                  type="text"
+                  name="medications"
+                  value={formData.medications}
+                  onChange={handleChange}
+                  placeholder={
+                    t.placeholderMedications || "Current medication..."
+                  }
+                  readOnly={isReadOnly}
+                  style={fieldStylePreview}
+                />
               </div>
+
+              <div className="sm:col-span-2">
+                <label style={labelStyle}>
+                  <FileText size={14} /> {t.responderNotes}
+                </label>
+                <textarea
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleChange}
+                  placeholder={
+                    t.placeholderNotes ||
+                    "Example: carries inhaler in bag pocket."
+                  }
+                  readOnly={isReadOnly}
+                  style={{ ...fieldStylePreview, minHeight: "88px" }}
+                />
+              </div>
+            </div>
+
+            <div className="mt-10 flex flex-col gap-5 border-t border-[var(--line)] pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <p className="max-w-md text-base sm:text-lg leading-relaxed text-[var(--muted)]">
+                <span data-t="disclaimer">{t.disclaimer}</span>
+              </p>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="stark-btn gap-3 shrink-0 whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-70"
+                data-t={existingProfileId ? "updateProfile" : "generateQr"}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" /> {t.working}
+                  </>
+                ) : (
+                  <>
+                    {existingProfileId
+                      ? t.updateProfile || "Save changes"
+                      : t.generateQr}{" "}
+                    <ArrowRight size={16} />
+                  </>
+                )}
+              </button>
+            </div>
           </form>
-
         </div>
       </section>
     </div>

@@ -27,6 +27,7 @@ const BottomNav = () => {
       to: "/",
       icon: <Home size={18} />,
       label: t.home || "Home",
+      dataKey: "home",
     },
     ...(!user || !profileId
       ? [
@@ -34,6 +35,7 @@ const BottomNav = () => {
             to: "/create",
             icon: <User size={18} />,
             label: t.createProfile || "Create",
+            dataKey: "createProfile",
           },
         ]
       : []),
@@ -43,6 +45,7 @@ const BottomNav = () => {
             to: `/emergency/${profileId}`,
             icon: <User size={18} />,
             label: "My Profile",
+            dataKey: "myProfile",
           },
         ]
       : []),
@@ -63,7 +66,9 @@ const BottomNav = () => {
               className={`flex flex-col items-center justify-center gap-1 rounded-[16px] px-2.5 py-2.5 text-xs font-semibold transition-base ${isActive ? "bg-white text-[var(--accent)] shadow-[0_8px_16px_rgba(60,22,34,0.08)]" : "text-[var(--muted)]"}`}
             >
               {item.icon}
-              <span className="text-[11px] leading-none">{item.label}</span>
+              <span className="text-[11px] leading-none" data-t={item.dataKey}>
+                {item.label}
+              </span>
             </Link>
           );
         })}

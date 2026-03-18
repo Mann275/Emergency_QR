@@ -59,16 +59,22 @@ function AppLayout() {
   }, [isHealthy, isChecking]);
 
   const glassBaseStyle = {
-    borderRadius: "16px",
-    padding: isMobile ? "12px 16px" : "10px 14px",
+    borderRadius: "14px",
+    padding: "6px 10px",
     fontWeight: "600",
-    fontSize: isMobile ? "14px" : "13px",
-    boxShadow: "0 16px 36px rgba(35, 19, 26, 0.14)",
+    fontSize: "12px",
+    lineHeight: "1.2",
+    minWidth: isMobile ? "min(260px, 92vw)" : "240px",
+    maxWidth: isMobile ? "92vw" : "420px",
+    boxShadow: "0 12px 28px rgba(35, 19, 26, 0.12)",
     backdropFilter: "blur(16px) saturate(160%)",
     WebkitBackdropFilter: "blur(16px) saturate(160%)",
     background: "rgba(255, 255, 255, 0.88)",
     color: "var(--ink)",
     border: "1px solid rgba(35, 19, 26, 0.12)",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   };
 
   return (
@@ -76,9 +82,10 @@ function AppLayout() {
       <Toaster
         position={isMobile ? "bottom-center" : "bottom-right"}
         containerStyle={{
-          bottom: isMobile ? (isEmergencyRoute ? 14 : 84) : 10,
+          bottom: isMobile ? (isEmergencyRoute ? 12 : 82) : 8,
           right: isMobile ? undefined : 10,
-          left: isMobile ? 16 : undefined,
+          left: isMobile ? 0 : undefined,
+          width: isMobile ? "100%" : undefined,
         }}
         toastOptions={{
           duration: 4000,

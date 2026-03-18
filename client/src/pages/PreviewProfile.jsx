@@ -91,7 +91,9 @@ const PreviewProfile = () => {
                 <div>
                   <div className="flex items-center gap-2 text-[12px] font-semibold text-[var(--muted)]">
                     <User size={14} className="text-[var(--accent)]" />
-                    <span data-t="patientFacts">{t.patientFacts || "User details"}</span>
+                    <span data-t="patientFacts">
+                      {t.patientFacts || "User details"}
+                    </span>
                   </div>
 
                   <div className="mt-3 grid gap-2">
@@ -102,7 +104,10 @@ const PreviewProfile = () => {
                         background: "rgba(255,255,255,0.7)",
                       }}
                     >
-                      <div className="text-[11px] font-semibold text-[var(--muted)]" data-t="bloodGroupLabel">
+                      <div
+                        className="text-[11px] font-semibold text-[var(--muted)]"
+                        data-t="bloodGroupLabel"
+                      >
                         {t.bloodGroupLabel}
                       </div>
                       <div
@@ -124,7 +129,19 @@ const PreviewProfile = () => {
                       >
                         <div className="flex items-center gap-2 text-[11px] font-semibold text-[var(--muted)]">
                           {Icon && <Icon size={14} className="opacity-80" />}
-                          {label}
+                          <span
+                            data-t={
+                              label === t.fullName
+                                ? "fullName"
+                                : label === t.gender
+                                  ? "gender"
+                                  : label === t.dob
+                                    ? "dob"
+                                    : "age"
+                            }
+                          >
+                            {label}
+                          </span>
                         </div>
                         <div className="text-[13px] font-semibold text-[var(--ink)] text-right">
                           {value}
@@ -140,14 +157,18 @@ const PreviewProfile = () => {
                     className="stark-btn flex-1 min-w-0 gap-2 justify-center px-3 py-3 text-[13px] font-semibold whitespace-normal md:whitespace-nowrap"
                   >
                     <Phone size={14} className="flex-shrink-0" />
-                    <span data-t="callEmergencyContact">{t.callEmergencyContact}</span>
+                    <span data-t="callEmergencyContact">
+                      {t.callEmergencyContact}
+                    </span>
                   </button>
                   <button
                     type="button"
                     className="ghost-btn flex-1 min-w-0 gap-2 justify-center px-3 py-3 text-[13px] font-semibold whitespace-normal md:whitespace-nowrap"
                   >
                     <User size={14} className="flex-shrink-0" />
-                    <span data-t="previewCallSelf">{t.previewCallSelf || "Call personal number"}</span>
+                    <span data-t="previewCallSelf">
+                      {t.previewCallSelf || "Call personal number"}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -175,7 +196,17 @@ const PreviewProfile = () => {
                     }}
                   >
                     <div className="text-[11px] font-semibold text-[var(--muted)]">
-                      {item.label}
+                      <span
+                        data-t={
+                          item.label === t.allergies
+                            ? "allergies"
+                            : item.label === t.medications
+                              ? "medications"
+                              : "condition"
+                        }
+                      >
+                        {item.label}
+                      </span>
                     </div>
                     <div className="mt-1 text-[13px] font-semibold text-[var(--ink)]">
                       {item.value}
@@ -202,5 +233,3 @@ const PreviewProfile = () => {
 };
 
 export default PreviewProfile;
-
-

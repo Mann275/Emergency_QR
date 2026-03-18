@@ -14,8 +14,81 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 const EDIT_TOKEN_KEY_PREFIX = "emergency_edit_token:";
+const API_BASE_NO_API_SUFFIX = API_BASE_URL.replace(/\/api\/?$/, "");
 
 const getEditTokenKey = (id) => `${EDIT_TOKEN_KEY_PREFIX}${id}`;
+
+const unique = (values) => [...new Set(values.filter(Boolean))];
+
+const buildForgotPasswordRequestUrls = () =>
+  unique([
+    `${API_BASE_URL}/users/auth/forgot-password/request`,
+    `${API_BASE_URL}/auth/forgot-password/request`,
+    `${API_BASE_NO_API_SUFFIX}/api/users/auth/forgot-password/request`,
+    `${API_BASE_NO_API_SUFFIX}/api/auth/forgot-password/request`,
+    `${API_BASE_NO_API_SUFFIX}/users/auth/forgot-password/request`,
+    `${API_BASE_NO_API_SUFFIX}/auth/forgot-password/request`,
+  ]);
+
+const buildForgotPasswordResetUrls = () =>
+  unique([
+    `${API_BASE_URL}/users/auth/forgot-password/reset`,
+    `${API_BASE_URL}/auth/forgot-password/reset`,
+    `${API_BASE_NO_API_SUFFIX}/api/users/auth/forgot-password/reset`,
+    `${API_BASE_NO_API_SUFFIX}/api/auth/forgot-password/reset`,
+    `${API_BASE_NO_API_SUFFIX}/users/auth/forgot-password/reset`,
+    `${API_BASE_NO_API_SUFFIX}/auth/forgot-password/reset`,
+  ]);
+
+const readJsonSafe = async (response) => {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+};
+
+const postWithFallbackUrls = async ({ urls, body, fallbackErrorMessage }) => {
+  let sawNotFound = false;
+  let lastError = null;
+
+  for (const url of urls) {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await readJsonSafe(response);
+
+      if (response.ok) {
+        return data || { success: true };
+      }
+
+      if (response.status === 404) {
+        sawNotFound = true;
+        continue;
+      }
+
+      throw new Error(
+        data?.message || data?.error || fallbackErrorMessage || "Request failed.",
+      );
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  if (sawNotFound) {
+    throw new Error(
+      "Forgot-password route not found on server. Please redeploy backend latest code.",
+    );
+  }
+
+  throw lastError || new Error(fallbackErrorMessage || "Request failed.");
+};
 
 class ApiService {
   hasEditToken(id) {
@@ -129,6 +202,32 @@ class ApiService {
       }
 
       return data;
+    } catch (error) {
+      console.error("API Error:", error);
+      throw error;
+    }
+  }
+
+  async requestPasswordResetOtp(email) {
+    try {
+      return await postWithFallbackUrls({
+        urls: buildForgotPasswordRequestUrls(),
+        body: { email },
+        fallbackErrorMessage: "Failed to send OTP.",
+      });
+    } catch (error) {
+      console.error("API Error:", error);
+      throw error;
+    }
+  }
+
+  async resetPasswordWithOtp({ email, otp, newPassword }) {
+    try {
+      return await postWithFallbackUrls({
+        urls: buildForgotPasswordResetUrls(),
+        body: { email, otp, newPassword },
+        fallbackErrorMessage: "Failed to reset password.",
+      });
     } catch (error) {
       console.error("API Error:", error);
       throw error;

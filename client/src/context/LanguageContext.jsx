@@ -146,7 +146,7 @@ const translations = {
     authAccountCreated: "Account created successfully :)",
     authSignedIn: "Signed in successfully :)",
     authFailed: "Authentication failed.",
-    authGoogleSignedIn: "Signed in with Google :)",
+    authGoogleSignedIn: "Signed in with Google",
     googleAuthFailed: "Google sign-in failed.",
 
     // Success

@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import {
   createUserWithEmailAndPassword,
+  fetchSignInMethodsForEmail,
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -16,6 +17,25 @@ import {
 import { auth } from "../firebase";
 
 const AuthContext = createContext(null);
+const USER_PROFILE_KEY_PREFIX = "emergency_user_profile:";
+const EDIT_TOKEN_KEY_PREFIX = "emergency_edit_token:";
+
+const clearLocalSessionState = () => {
+  const keysToRemove = [];
+  for (let index = 0; index < localStorage.length; index += 1) {
+    const key = localStorage.key(index);
+    if (!key) continue;
+
+    if (
+      key.startsWith(USER_PROFILE_KEY_PREFIX) ||
+      key.startsWith(EDIT_TOKEN_KEY_PREFIX)
+    ) {
+      keysToRemove.push(key);
+    }
+  }
+
+  keysToRemove.forEach((key) => localStorage.removeItem(key));
+};
 
 const mapFirebaseAuthError = (error) => {
   const code = error?.code || "";
@@ -51,9 +71,29 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) {
+        clearLocalSessionState();
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Force-refresh auth state so deleted/disabled users do not stay cached.
+        await currentUser.reload();
+        setUser(auth.currentUser);
+      } catch (error) {
+        clearLocalSessionState();
+        try {
+          await signOut(auth);
+        } catch {
+          // Ignore signOut failures while clearing stale UI session.
+        }
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
     });
 
     return () => unsubscribe();
@@ -61,6 +101,12 @@ export const AuthProvider = ({ children }) => {
 
   const signIn = async (email, password) => {
     try {
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      if (!methods.length) {
+        throw new Error(
+          "No account found for this email. Please sign up first.",
+        );
+      }
       return await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
       throw new Error(mapFirebaseAuthError(error));
@@ -69,6 +115,12 @@ export const AuthProvider = ({ children }) => {
 
   const signUp = async (email, password) => {
     try {
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      if (methods.length) {
+        throw new Error(
+          "This email is already in use. Try signing in instead.",
+        );
+      }
       return await createUserWithEmailAndPassword(auth, email, password);
     } catch (error) {
       throw new Error(mapFirebaseAuthError(error));
@@ -84,7 +136,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    clearLocalSessionState();
     return signOut(auth);
   };
 
