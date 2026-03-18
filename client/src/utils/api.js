@@ -107,7 +107,9 @@ const postWithFallbackUrls = async ({ urls, body, fallbackErrorMessage }) => {
     );
   }
 
-  throw lastNetworkError || new Error(fallbackErrorMessage || "Request failed.");
+  throw (
+    lastNetworkError || new Error(fallbackErrorMessage || "Request failed.")
+  );
 };
 
 class ApiService {
