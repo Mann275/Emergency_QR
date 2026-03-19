@@ -1,4 +1,4 @@
-#Emergency QR
+## Emergency QR
 <div align="center">
 
 [Live Demo](https://emergencyqr-gen.vercel.app/) • [Report Bug](https://github.com/Mann275/Emergency_QR/issues)
