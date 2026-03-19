@@ -22,6 +22,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { IN, US, GB, AU } from "country-flag-icons/react/3x2";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
+import SEO from "../components/SEO";
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const genderOptions = ["Male", "Female", "Other"];
@@ -435,6 +436,7 @@ const EditProfile = () => {
 
   return (
     <div className="pb-24">
+      <SEO title="Edit Profile" noindex />
       <section className="pt-20 sm:pt-28">
         <div className="main-wrap max-w-3xl">
           {/* Header */}

@@ -4,6 +4,7 @@ import QRCode from "qrcode";
 import { Download, Smartphone, ExternalLink, QrCode } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
+import SEO from "../components/SEO";
 
 const Success = () => {
   const { id } = useParams();
@@ -131,6 +132,7 @@ const Success = () => {
 
   return (
     <div>
+      <SEO title="Success" noindex />
       <section className="pt-24 pb-20 md:pt-36 md:pb-28">
         <div className="main-wrap max-w-4xl">
           <div className="grid md:grid-cols-2 gap-24 items-center">

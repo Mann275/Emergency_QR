@@ -11,6 +11,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
+import SEO from "../components/SEO";
 
 const Home = () => {
   const { t } = useLanguage();
@@ -59,6 +60,10 @@ const Home = () => {
 
   return (
     <div className="overflow-hidden pb-4 sm:pb-8">
+      <SEO 
+        title="Home" 
+        description={t.heroSubDesc || "Emergency QR - Instant access to medical and contact information in emergencies."} 
+      />
       <section className="relative pt-24 sm:pt-30 pb-10 sm:pb-24">
         {/* Decorative background blur */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-red-100/50 rounded-full blur-[120px] -z-10 pointer-events-none"></div>

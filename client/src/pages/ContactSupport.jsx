@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import ApiService from "../utils/api";
 import { showToast } from "../utils/toast.jsx";
+import SEO from "../components/SEO";
 
 const categoryIcons = {
   appreciation: Heart,
@@ -123,6 +124,10 @@ const ContactSupport = () => {
 
   return (
     <div className="pb-24 sm:pb-28">
+      <SEO 
+        title={t.contactTitle || "Contact Support"} 
+        description={t.contactDescription || "Send bug reports, suggestions, or appreciation from here."} 
+      />
       <section className="pt-24 sm:pt-28">
         <div className="main-wrap max-w-4xl px-3 sm:px-6">
           <div className="relative overflow-hidden rounded-[28px] border border-white/70 bg-white/70 p-6 shadow-[0_25px_80px_rgba(60,22,34,0.14)] backdrop-blur-xl sm:p-9">

@@ -13,6 +13,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
+import SEO from "../components/SEO";
 
 const PreviewProfile = () => {
   const { t } = useLanguage();
@@ -62,6 +63,7 @@ const PreviewProfile = () => {
 
   return (
     <div className="min-h-screen pb-[calc(10rem+env(safe-area-inset-bottom))] sm:pb-16">
+      <SEO title="Preview Profile" noindex />
       <section className="pt-10 sm:pt-14">
         <div className="main-wrap max-w-5xl">
           <div className="mb-6 px-4 sm:px-6">

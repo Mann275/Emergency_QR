@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { showToast } from "../utils/toast.jsx";
 import ApiService from "../utils/api";
+import SEO from "../components/SEO";
 
 const Auth = () => {
   const { t } = useLanguage();
@@ -295,6 +296,7 @@ const Auth = () => {
 
   return (
     <div className="pb-20 sm:pb-32">
+      <SEO title="Authentication" noindex />
       <section className="pt-24 sm:pt-28">
         <div className="main-wrap max-w-md px-4">
           <div className="mb-5 text-center px-2">

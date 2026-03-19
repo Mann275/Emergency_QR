@@ -21,6 +21,7 @@ import { useAuth } from "../context/AuthContext";
 import { IN, US, GB, AU } from "country-flag-icons/react/3x2";
 import { toast } from "react-hot-toast";
 import { showToast } from "../utils/toast.jsx";
+import SEO from "../components/SEO";
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const defaultGenderOptions = ["Male", "Female", "Other"];
@@ -402,9 +403,10 @@ const CreateProfile = () => {
 
   return (
     <div
-      className="pb-[calc(8rem+env(safe-area-inset-bottom))] sm:pb-24"
+      className="pb-[calc(8rem+env(safe-area-bottom))] sm:pb-24"
       style={{ "--line": "rgba(35, 19, 26, 0.25)" }}
     >
+      <SEO title="Create Profile" noindex />
       <section className="pt-24 sm:pt-24 lg:pt-28">
         <div className="main-wrap max-w-3xl">
           <div className="mb-3 animate-slide relative z-30">

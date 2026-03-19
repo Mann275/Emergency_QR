@@ -19,6 +19,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
 import ApiService from "../utils/api";
 import { showToast } from "../utils/toast.jsx";
+import SEO from "../components/SEO";
 
 const EmergencyProfile = () => {
   const { id } = useParams();
@@ -186,6 +187,11 @@ const EmergencyProfile = () => {
 
   return (
     <div className="min-h-screen pb-[calc(9rem+env(safe-area-inset-bottom))] sm:pb-14">
+      <SEO 
+        title={`${user?.name || "User"}'s Emergency Profile`} 
+        description={`Emergency medical profile for ${user?.name || "User"}. Blood Group: ${bloodGroup}.`} 
+        type="profile"
+      />
       <section className="pt-5 sm:pt-8 lg:pt-10">
         <div className="main-wrap max-w-5xl">
           <div className="mb-6 px-3 sm:px-6">

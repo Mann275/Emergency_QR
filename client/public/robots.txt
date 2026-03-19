@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /emergency/
+Disallow: /auth
+Disallow: /preview
+Disallow: /create
+Disallow: /edit/
+Disallow: /success/
+Disallow: /contact
